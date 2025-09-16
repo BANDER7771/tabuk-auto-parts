@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>طلب قطعة – تشاليح تبوك</title>
+  <style>
+    body{font-family:Tahoma,Arial,sans-serif;background:#f7f7f7;margin:0}
+    header{background:#2c3e50;color:#fff;padding:1rem}
+    .container{max-width:900px;margin:1.5rem auto;background:#fff;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,.08);padding:1.5rem}
+    h1{margin:0 0 .5rem}
+    form{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem}
+    label{font-weight:bold;font-size:.9rem;margin-bottom:.25rem;display:block}
+    input,select,textarea{width:100%;padding:.7rem;border:1px solid #ddd;border-radius:8px;font-size:.95rem}
+    textarea{min-height:110px;grid-column:1/-1}
+    .actions{grid-column:1/-1;display:flex;gap:.75rem}
+    button{padding:.9rem 1.4rem;border:0;border-radius:10px;cursor:pointer;font-size:1rem}
+    .primary{background:#27ae60;color:#fff}
+    .secondary{background:#eee}
+    .msg{margin-top:1rem;padding:.75rem;border-radius:8px;display:none}
+    .msg.ok{background:#eafaf1;color:#1e7e34;display:block}
+    .msg.err{background:#fdecea;color:#b71c1c;display:block}
+    .small{color:#777;font-size:.85rem}
+    .back{color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.3);padding:.4rem .7rem;border-radius:8px;margin-left:.5rem}
+    .brand{font-weight:bold}
+  </style>
+</head>
+<body>
+  <header>
+    <a class="back" href="/">⬅ رجوع</a>
+    <span class="brand">تشاليح تبوك</span>
+  </header>
+
+  <div class="container">
+    <h1>طلب قطعة</h1>
+    <p class="small">عبّ البيانات التالية وسيتم التواصل معك لتأكيد الطلب.</p>
+
+    <form id="orderForm">
+      <div>
+        <label>اسمك الكامل *</label>
+        <input type="text" name="name" required />
+      </div>
+      <div>
+        <label>رقم الجوال *</label>
+        <input type="tel" name="phone" required placeholder="05xxxxxxxx" />
+      </div>
+      <div>
+        <label>ماركة السيارة *</label>
+        <input type="text" name="car_make" required placeholder="تويوتا / نيسان ..." />
+      </div>
+      <div>
+        <label>موديل السيارة *</label>
+        <input type="text" name="car_model" required placeholder="كامري / ألتيما ..." />
+      </div>
+      <div>
+        <label>سنة الصنع *</label>
+        <input type="number" name="model_year" required min="1980" max="2099" />
+      </div>
+      <div>
+        <label>رقم الهيكل (اختياري)</label>
+        <input type="text" name="vin" />
+      </div>
+      <div style="grid-column:1/-1">
+        <label>اسم القطعة المطلوبة *</label>
+        <input type="text" name="part_name" required placeholder="مثال: رديتر، كمبرسر مكيف ..." />
+      </div>
+      <div>
+        <label>الأولوية</label>
+        <select name="urgency">
+          <option value="normal">عادي</option>
+          <option value="rush">مستعجل</option>
+        </select>
+      </div>
+      <textarea name="notes" placeholder="ملاحظات إضافية (حالة السيارة، رقم القطعة إن وجد...)"></textarea>
+
+      <div class="actions">
+        <button class="primary" type="submit">إرسال الطلب</button>
+        <button class="secondary" type="reset">مسح الحقول</button>
+      </div>
+      <div id="msg" class="msg"></div>
+    </form>
+  </div>
+
+<script>
+  const API_URL = `${location.origin}/api`;
+
+  document.getElementById('orderForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const msg = document.getElementById('msg');
+    msg.className = 'msg'; msg.style.display = 'none'; msg.textContent = '';
+
+    // اجمع البيانات
+    const fd = new FormData(e.target);
+    const payload = Object.fromEntries(fd.entries());
+
+    // تحققات بسيطة
+    if(!payload.name || !payload.phone || !payload.car_make || !payload.car_model || !payload.model_year || !payload.part_name){
+      msg.className = 'msg err'; msg.textContent = 'رجاءً أكمل الحقول المطلوبة'; msg.style.display = 'block';
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_URL}/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+
+      if(res.ok){
+        msg.className = 'msg ok';
+        msg.textContent = `✅ تم استلام الطلب بنجاح. رقم الطلب: ${data.id || '—'}`;
+        msg.style.display = 'block';
+        e.target.reset();
+      }else{
+        msg.className = 'msg err';
+        msg.textContent = data.error || data.message || 'تعذّر إرسال الطلب.';
+        msg.style.display = 'block';
+      }
+    } catch (err) {
+      msg.className = 'msg err';
+      msg.textContent = 'تعذّر الاتصال بالسيرفر. سنتأكد من مسار /api/orders في الخطوة التالية.';
+      msg.style.display = 'block';
+      console.error(err);
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اطلب قطعتك - تشاليح تبوك</title>
+    <style>
+        /* نفس الستايل من الموقع الرئيسي */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8f9fa;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #666;
+            font-weight: bold;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .back-link a {
+            color: #3498db;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 اطلب قطعتك</h1>
+        <form onsubmit="submitPartRequest(event)">
+            <div class="form-group">
+                <label>نوع السيارة</label>
+                <select id="carMake" required onchange="updateModels()">
+                    <option value="">اختر الماركة</option>
+                    <option value="toyota">تويوتا</option>
+                    <option value="honda">هوندا</option>
+                    <option value="nissan">نيسان</option>
+                    <option value="mazda">مازدا</option>
+                    <option value="hyundai">هيونداي</option>
+                    <option value="kia">كيا</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>الموديل</label>
+                <select id="carModel" required>
+                    <option value="">اختر الموديل</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>السنة</label>
+                <input type="number" id="carYear" min="1990" max="2024" required>
+            </div>
+
+            <div class="form-group">
+                <label>القطعة المطلوبة</label>
+                <input type="text" id="partName" placeholder="مثال: مكيف، محرك، جير..." required>
+            </div>
+
+            <div class="form-group">
+                <label>تفاصيل إضافية</label>
+                <textarea id="details" placeholder="اكتب أي تفاصيل إضافية عن القطعة المطلوبة..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>رقم الجوال</label>
+                <input type="tel" id="phone" pattern="05[0-9]{8}" placeholder="05XXXXXXXX" required>
+            </div>
+
+            <button type="submit" class="btn">إرسال الطلب</button>
+        </form>
+
+        <div class="back-link">
+            <a href="index.html">← العودة للرئيسية</a>
+        </div>
+    </div>
+
+    <script>
+        const models = {
+            toyota: ['كامري', 'كورولا', 'هايلوكس', 'لاندكروزر', 'برادو', 'يارس'],
+            honda: ['أكورد', 'سيفيك', 'بايلوت', 'CR-V'],
+            nissan: ['ألتيما', 'صني', 'باترول', 'ماكسيما'],
+            mazda: ['3', '6', 'CX-5', 'CX-9'],
+            hyundai: ['سوناتا', 'النترا', 'توسان', 'أكسنت'],
+            kia: ['أوبتيما', 'سيراتو', 'سبورتاج', 'كرنفال']
+        };
+
+        function updateModels() {
+            const make = document.getElementById('carMake').value;
+            const modelSelect = document.getElementById('carModel');
+            
+            modelSelect.innerHTML = '<option value="">اختر الموديل</option>';
+            
+            if (make && models[make]) {
+                models[make].forEach(model => {
+                    modelSelect.innerHTML += `<option value="${model}">${model}</option>`;
+                });
+            }
+        }
+
+        async function submitPartRequest(e) {
+            e.preventDefault();
+            
+            const requestData = {
+                carMake: document.getElementById('carMake').value,
+                carModel: document.getElementById('carModel').value,
+                carYear: document.getElementById('carYear').value,
+                partName: document.getElementById('partName').value,
+                details: document.getElementById('details').value,
+                phone: document.getElementById('phone').value,
+                userId: JSON.parse(localStorage.getItem('user') || '{}').id
+            };
+
+            // هنا يتم إرسال الطلب للسيرفر
+            alert('تم استلام طلبك بنجاح! سنتواصل معك قريباً على الرقم المسجل.');
+            
+            // حفظ الطلب محلياً
+            let requests = JSON.parse(localStorage.getItem('partRequests') || '[]');
+            requests.push({
+                ...requestData,
+                id: Date.now(),
+                date: new Date().toISOString(),
+                status: 'pending'
+            });
+            localStorage.setItem('partRequests', JSON.stringify(requests));
+            
+            // العودة للصفحة الرئيسية
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 2000);
+        }
+    </script>
+</body>
+</html>

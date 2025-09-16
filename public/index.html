@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تشاليح تبوك - منصة قطع السيارات الأولى</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #3498db;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --gradient: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8f9fa;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 5px 30px rgba(0,0,0,0.2);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #3498db, #2ecc71);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+        }
+
+        /* Search Box in Header */
+        .search-container {
+            position: relative;
+            flex: 1;
+            max-width: 400px;
+            margin: 0 2rem;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 0.6rem 2.5rem 0.6rem 1rem;
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 50px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+            font-size: 1rem;
+        }
+
+        .search-box::placeholder {
+            color: rgba(255,255,255,0.7);
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: rgba(255,255,255,0.2);
+            box-shadow: 0 0 20px rgba(52, 152, 219, 0.3);
+        }
+
+        .search-btn {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: color 0.3s;
+            padding: 5px;
+        }
+
+        .search-btn:hover {
+            color: var(--accent);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s;
+            position: relative;
+            padding: 0.5rem 1rem;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent);
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* Hero Section */
+        .hero {
+            margin-top: 80px;
+            background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
+            padding: 6rem 2rem 8rem;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 3rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+            margin-bottom: 3rem;
+        }
+
+        .btn {
+            padding: 1rem 2.5rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: var(--success);
+            color: white;
+            box-shadow: 0 10px 30px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(39, 174, 96, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .btn-secondary:hover {
+            background: var(--light);
+            transform: translateY(-3px);
+        }
+
+        /* Hero Search */
+        .hero-search {
+            position: relative;
+            z-index: 1;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .hero-search-container {
+            position: relative;
+            background: white;
+            border-radius: 60px;
+            padding: 0.5rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+        }
+
+        .hero-search-input {
+            flex: 1;
+            padding: 1rem 2rem;
+            border: none;
+            background: transparent;
+            font-size: 1.1rem;
+            color: var(--primary);
+        }
+
+        .hero-search-input::placeholder {
+            color: #999;
+        }
+
+        .hero-search-input:focus {
+            outline: none;
+        }
+
+        .hero-search-btn {
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, var(--accent), var(--primary));
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .hero-search-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(52, 152, 219, 0.4);
+        }
+
+        /* Search Results Dropdown */
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            margin-top: 1rem;
+            max-height: 400px;
+            overflow-y: auto;
+            display: none;
+            z-index: 1000;
+        }
+
+        .search-results.active {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .search-result-item {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--primary);
+        }
+
+        .search-result-item:hover {
+            background: #f8f9fa;
+        }
+
+        /* Features */
+        .features {
+            padding: 5rem 2rem;
+            background: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            color: var(--primary);
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent), var(--success));
+            border-radius: 2px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            background: linear-gradient(145deg, #f8f9fa, #ffffff);
+            padding: 2rem;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        }
+
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            background: linear-gradient(135deg, var(--accent), var(--primary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            box-shadow: 0 10px 30px rgba(52, 152, 219, 0.3);
+        }
+
+        .feature-card h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .feature-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* Products */
+        .products {
+            padding: 5rem 2rem;
+            background: #f8f9fa;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+
+        .product-image {
+            height: 200px;
+            background: linear-gradient(135deg, #3498db, #2c3e50);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+        }
+
+        .product-info {
+            padding: 1.5rem;
+        }
+
+        .product-name {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .product-price {
+            color: var(--accent);
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .product-btn {
+            width: 100%;
+            padding: 0.8rem;
+            background: linear-gradient(135deg, var(--accent), var(--primary));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .product-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(52, 152, 219, 0.3);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--primary);
+            color: white;
+            padding: 3rem 2rem 1rem;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h4 {
+            margin-bottom: 1rem;
+            color: var(--accent);
+        }
+
+        .footer-section p, .footer-section ul {
+            color: #ccc;
+            line-height: 1.8;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav>
+            <div class="logo">تشاليح تبوك</div>
+            <div class="search-container">
+                <input type="text" class="search-box" placeholder="ابحث عن قطعة أو سيارة..." id="headerSearch">
+                <button class="search-btn" onclick="searchParts('header')">🔍</button>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#home">الرئيسية</a></li>
+                <li><a href="#services">خدماتنا</a></li>
+                <li><a href="#products">المنتجات</a></li>
+                <li><a href="#contact">تواصل معنا</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <h1>منصة تشاليح تبوك</h1>
+        <p>نوفر لك جميع قطع السيارات بأفضل الأسعار وأسرع توصيل</p>
+        <div class="cta-buttons">
+            <button class="btn btn-primary" onclick="requestPart()">اطلب قطعتك الآن</button>
+            <a href="request.html" class="btn btn-secondary">اعرض سيارتك</a>
+        </div>
+        
+        <!-- Hero Search Box -->
+        <div class="hero-search">
+            <div class="hero-search-container">
+                <input type="text" class="hero-search-input" placeholder="ابحث عن قطعة غيار، نوع السيارة، أو رقم القطعة..." id="heroSearch">
+                <button class="hero-search-btn" onclick="searchParts('hero')">
+                    <span>بحث</span>
+                    <span>🔍</span>
+                </button>
+            </div>
+            <div class="search-results" id="searchResults">
+                <!-- Search results will appear here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features" id="features">
+        <div class="container">
+            <h2 class="section-title">لماذا تختار تشاليح تبوك؟</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🚚</div>
+                    <h3>توصيل سريع</h3>
+                    <p>نضمن لك أسرع خدمة توصيل في تبوك والمناطق المجاورة خلال 24 ساعة</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <h3>ضمان واسترجاع</h3>
+                    <p>ضمان كامل على جميع القطع مع إمكانية الاسترجاع المجاني خلال 14 يوم</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>طلب مباشر</h3>
+                    <p>طلبك يصل مباشرة للتشاليح دون وسطاء لضمان أفضل الأسعار</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💰</div>
+                    <h3>أفضل الأسعار</h3>
+                    <p>نضمن لك الحصول على أفضل سعر في السوق لجميع القطع</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">✅</div>
+                    <h3>قطع أصلية</h3>
+                    <p>جميع القطع مفحوصة ومضمونة الجودة من أفضل التشاليح</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🛡️</div>
+                    <h3>أمان تام</h3>
+                    <p>معاملاتك آمنة بنسبة 100% مع ضمان حقوقك الكاملة</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products -->
+    <section class="products" id="products">
+        <div class="container">
+            <h2 class="section-title">قطع متوفرة</h2>
+            <div class="products-grid" id="productsGrid">
+                <!-- Products will be loaded here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>عن تشاليح تبوك</h4>
+                <p>منصتك الأولى للحصول على قطع السيارات بأفضل الأسعار وأسرع توصيل في منطقة تبوك</p>
+            </div>
+            <div class="footer-section">
+                <h4>خدماتنا</h4>
+                <ul>
+                    <li>خدمة اطلبها</li>
+                    <li>اعرض سيارتك</li>
+                    <li>قطع أصلية مضمونة</li>
+                    <li>توصيل سريع</li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>تواصل معنا</h4>
+                <ul>
+                    <li>📱 0555123456</li>
+                    <li>📧 info@tabukautoparts.sa</li>
+                    <li>📍 تبوك، المملكة العربية السعودية</li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+<script>
+    // API Configuration
+    const API_URL = `${location.origin}/api`;
+
+    // طلب قطعة
+    function requestPart() {
+        window.location.href = 'request.html';
+    }
+
+    // البحث عن القطع
+    async function searchParts(source) {
+        const searchInput = source === 'header' ? 
+            document.getElementById('headerSearch').value : 
+            document.getElementById('heroSearch').value;
+        
+        if (searchInput.trim() === '') {
+            if (source === 'hero') {
+                hideSearchResults();
+            }
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_URL}/parts/search?q=${searchInput}`);
+            const results = await response.json();
+            
+            if (source === 'hero') {
+                showSearchResults(results);
+            } else {
+                window.location.href = `search.html?q=${searchInput}`;
+            }
+        } catch (error) {
+            // بيانات محلية في حالة عدم توفر السيرفر
+            const partsData = [
+                { _id: '1', nameAr: 'محرك كامري 2020', price: '5000' },
+                { _id: '2', nameAr: 'جير أوتوماتيك أكورد', price: '3500' },
+                { _id: '3', nameAr: 'مكيف سوناتا', price: '1200' }
+            ];
+            
+            const results = partsData.filter(part => 
+                part.nameAr.includes(searchInput)
+            );
+            
+            if (source === 'hero') {
+                showSearchResults(results);
+            }
+        }
+    }
+
+    // عرض نتائج البحث
+    function showSearchResults(results) {
+        const resultsContainer = document.getElementById('searchResults');
+        
+        if (results.length === 0) {
+            resultsContainer.innerHTML = `
+                <div class="search-result-item">
+                    <div>
+                        <h4>لا توجد نتائج</h4>
+                        <p>جرب البحث بكلمات أخرى</p>
+                    </div>
+                </div>
+            `;
+        } else {
+            resultsContainer.innerHTML = results.map(part => `
+                <div class="search-result-item" onclick="goToPart('${part._id}')">
+                    <div>
+                        <h4>${part.nameAr || part.name}</h4>
+                        <p>${part.price} ريال</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        resultsContainer.classList.add('active');
+    }
+
+    // إخفاء نتائج البحث
+    function hideSearchResults() {
+        const resultsContainer = document.getElementById('searchResults');
+        resultsContainer.classList.remove('active');
+    }
+
+    // الذهاب لصفحة القطعة
+    function goToPart(partId) {
+        window.location.href = `part-details.html?id=${partId}`;
+    }
+
+    // عند تحميل الصفحة
+    document.addEventListener('DOMContentLoaded', () => {
+        // جلب القطع من السيرفر
+        fetchParts();
+    });
+
+    // جلب القطع من السيرفر
+    async function fetchParts() {
+        try {
+            const response = await fetch(`${API_URL}/parts`);
+            if (response.ok) {
+                const parts = await response.json();
+                displayParts(parts);
+            }
+        } catch (error) {
+            // استخدم البيانات المحلية إذا لم يعمل السيرفر
+            const localParts = [
+                { _id: '1', nameAr: 'محرك كامري', price: 5000, carMake: 'تويوتا', carModel: 'كامري' },
+                { _id: '2', nameAr: 'جير أكورد', price: 3500, carMake: 'هوندا', carModel: 'أكورد' },
+                { _id: '3', nameAr: 'مكيف سوناتا', price: 1200, carMake: 'هيونداي', carModel: 'سوناتا' }
+            ];
+            displayParts(localParts);
+        }
+    }
+
+    // عرض القطع
+    function displayParts(parts) {
+        const container = document.getElementById('productsGrid');
+        if (!container || parts.length === 0) return;
+        
+        container.innerHTML = parts.map(part => `
+            <div class="product-card">
+                <div class="product-image">
+                    <span style="font-size: 3rem;">🔧</span>
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">${part.nameAr}</h3>
+                    <p style="color: #666; font-size: 0.9rem;">${part.carMake} ${part.carModel}</p>
+                    <p class="product-price">${part.price} ريال</p>
+                    <button class="product-btn" onclick="goToPart('${part._id}')">
+                        عرض التفاصيل
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // البحث الفوري
+    const heroSearchInput = document.getElementById('heroSearch');
+    if (heroSearchInput) {
+        heroSearchInput.addEventListener('input', function() {
+            if (this.value.trim() === '') {
+                hideSearchResults();
+            } else {
+                searchParts('hero');
+            }
+        });
+    }
+
+    // إغلاق نتائج البحث عند النقر خارجها
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.hero-search')) {
+            hideSearchResults();
+        }
+    });
+</script>
+
+</body>
+</html>

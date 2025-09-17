@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بع سيارتك - تشاليح تبوك</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --success: #00c853;
+            --warning: #ff6f00;
+            --danger: #d32f2f;
+            --dark: #1a1a1a;
+            --light: #f5f5f5;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 30px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.2);
+            overflow: hidden;
+            animation: slideUp 0.6s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 3rem 2rem;
+            color: white;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .form-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            animation: move 15s linear infinite;
+        }
+
+        @keyframes move {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(40px, 40px); }
+        }
+
+        .form-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-header p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-content {
+            padding: 3rem 2rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #555;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .required {
+            color: var(--danger);
+            margin-right: 0.25rem;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .custom-select {
+            position: relative;
+        }
+
+        .custom-select::after {
+            content: '▼';
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            pointer-events: none;
+        }
+
+        .upload-area {
+            border: 2px dashed #e0e0e0;
+            border-radius: 12px;
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #fafafa;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .upload-area.active {
+            border-color: var(--primary);
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #999;
+        }
+
+        .upload-text {
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-hint {
+            font-size: 0.9rem;
+            color: #999;
+        }
+
+        .image-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .preview-item {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f5f5f5;
+            height: 100px;
+        }
+
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .remove-image {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            width: 25px;
+            height: 25px;
+            background: rgba(211, 47, 47, 0.9);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 100%;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            text-decoration: none;
+            text-align: center;
+            margin-top: 1rem;
+            display: block;
+        }
+
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .info-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .info-card-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-card-content {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .success-message {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .success-icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #00c853, #00e676);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+            margin: 0 auto 2rem;
+            animation: scaleIn 0.5s ease;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+            }
+            to {
+                transform: scale(1);
+            }
+        }
+
+        .success-title {
+            font-size: 2rem;
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .form-header h1 {
+                font-size: 1.8rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-header">
+            <h1>🚗 بع سيارتك</h1>
+            <p>احصل على أفضل سعر لسيارتك المستعملة من خلال شبكة تشاليح تبوك</p>
+        </div>
+
+        <form id="sellCarForm">
+            <div class="form-content">
+                <div class="info-card">
+                    <div class="info-card-title">
+                        <span>💡</span>
+                        <span>كيف نعمل</span>
+                    </div>
+                    <div class="info-card-content">
+                        نقوم بتقييم سيارتك من خلال المعلومات والصور المرفقة، ثم نعرضها على شبكة التشاليح المتخصصة للحصول على أفضل الأسعار
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>
+                            <span class="required">*</span>
+                            ماركة السيارة
+                        </label>
+                        <div class="custom-select">
+                            <select name="carMake" id="carMake" required>
+                                <option value="">-- اختر الماركة --</option>
+                                <option value="toyota">تويوتا</option>
+                                <option value="honda">هوندا</option>
+                                <option value="nissan">نيسان</option>
+                                <option value="mazda">مازدا</option>
+                                <option value="hyundai">هيونداي</option>
+                                <option value="kia">كيا</option>
+                                <option value="ford">فورد</option>
+                                <option value="chevrolet">شيفروليه</option>
+                                <option value="mercedes">مرسيدس</option>
+                                <option value="bmw">بي إم دبليو</option>
+                                <option value="audi">أودي</option>
+                                <option value="volkswagen">فولكس واجن</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <span class="required">*</span>
+                            موديل السيارة
+                        </label>
+                        <input type="text" name="carModel" id="carModel" required 
+                               placeholder="مثال: كامري، أكورد، ألتيما...">
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <span class="required">*</span>
+                            سنة الصنع
+                        </label>
+                        <input type="number" name="carYear" id="carYear" 
+                               min="1990" max="2025" required 
+                               placeholder="مثال: 2020">
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <span class="required">*</span>
+                            الكيلومترات المقطوعة
+                        </label>
+                        <input type="number" name="mileage" id="mileage" required 
+                               placeholder="مثال: 150000">
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <span class="required">*</span>
+                            حالة السيارة العامة
+                        </label>
+                        <div class="custom-select">
+                            <select name="condition" id="condition" required>
+                                <option value="">-- اختر الحالة --</option>
+                                <option value="excellent">ممتازة</option>
+                                <option value="very-good">جيدة جداً</option>
+                                <option value="good">جيدة</option>
+                                <option value="fair">مقبولة</option>
+                                <option value="poor">تحتاج إصلاحات</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>نوع الجير</label>
+                        <div class="custom-select">
+                            <select name="transmission" id="transmission">
+                                <option value="automatic">أوتوماتيك</option>
+                                <option value="manual">عادي</option>
+                                <option value="cvt">CVT</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>وصف إضافي للسيارة</label>
+                        <textarea name="description" id="description" 
+                                  placeholder="أي تفاصيل إضافية عن السيارة، الأعطال، الإصلاحات، الإضافات..."></textarea>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>
+                            <span class="required">*</span>
+                            صور السيارة
+                        </label>
+                        <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                            <div class="upload-icon">📷</div>
+                            <div class="upload-text">انقر لرفع الصور أو اسحب الملفات هنا</div>
+                            <div class="upload-hint">يرجى رفع صور واضحة للسيارة من الداخل والخارج (حد أقصى 10 صور)</div>
+                        </div>
+                        <input type="file" id="fileInput" accept="image/*" multiple style="display: none;">
+                        <div class="image-preview" id="imagePreview"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <span class="required">*</span>
+                            الاسم الكامل
+                        </label>
+                        <input type="text" name="fullName" id="fullName" required 
+                               placeholder="أدخل اسمك الكامل">
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <span class="required">*</span>
+                            رقم الجوال
+                        </label>
+                        <input type="tel" name="phone" id="phone" required 
+                               placeholder="05XXXXXXXX" pattern="05[0-9]{8}" maxlength="10">
+                    </div>
+
+                    <div class="form-group">
+                        <label>المدينة</label>
+                        <div class="custom-select">
+                            <select name="city" id="city">
+                                <option value="tabuk">تبوك</option>
+                                <option value="riyadh">الرياض</option>
+                                <option value="jeddah">جدة</option>
+                                <option value="dammam">الدمام</option>
+                                <option value="makkah">مكة</option>
+                                <option value="madinah">المدينة</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>السعر المتوقع (ريال)</label>
+                        <input type="number" name="expectedPrice" id="expectedPrice" 
+                               placeholder="اختياري - السعر الذي تتوقعه">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    <span>إرسال طلب التقييم</span>
+                    <span>✓</span>
+                </button>
+
+                <a href="index.html" class="btn btn-secondary">العودة للرئيسية</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const uploadArea = document.getElementById('uploadArea');
+        const imagePreview = document.getElementById('imagePreview');
+        let uploadedFiles = [];
+
+        fileInput.addEventListener('change', handleFileUpload);
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('active');
+        });
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('active');
+        });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('active');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        function handleFileUpload(e) {
+            handleFiles(e.target.files);
+        }
+
+        function handleFiles(files) {
+            Array.from(files).forEach(file => {
+                if (uploadedFiles.length >= 10) {
+                    alert('يمكنك رفع 10 صور كحد أقصى');
+                    return;
+                }
+                
+                if (!file.type.startsWith('image/')) {
+                    alert('يرجى رفع ملفات صور فقط');
+                    return;
+                }
+                
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('حجم الصورة يجب أن يكون أقل من 5MB');
+                    return;
+                }
+                
+                uploadedFiles.push(file);
+                displayImage(file, uploadedFiles.length - 1);
+            });
+        }
+
+        function displayImage(file, index) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const previewItem = document.createElement('div');
+                previewItem.className = 'preview-item';
+                previewItem.dataset.index = index;
+                previewItem.innerHTML = `
+                    <img src="${e.target.result}" alt="Preview">
+                    <span class="remove-image" onclick="removeImage(${index})">×</span>
+                `;
+                imagePreview.appendChild(previewItem);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removeImage(index) {
+            uploadedFiles.splice(index, 1);
+            updateImagePreview();
+        }
+
+        function updateImagePreview() {
+            imagePreview.innerHTML = '';
+            uploadedFiles.forEach((file, index) => {
+                displayImage(file, index);
+            });
+        }
+
+        document.getElementById('sellCarForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (uploadedFiles.length === 0) {
+                alert('يرجى رفع صور للسيارة');
+                return;
+            }
+            
+            document.getElementById('loadingOverlay').classList.add('active');
+            
+            const formData = new FormData(e.target);
+            uploadedFiles.forEach(file => {
+                formData.append('images', file);
+            });
+            
+            try {
+                // Send real API request
+                const response = await fetch('/api/orders/sell-car', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('فشل في إرسال الطلب');
+                }
+
+                const result = await response.json();
+                
+                document.querySelector('.container').innerHTML = `
+                    <div class="success-message">
+                        <div class="success-icon">✓</div>
+                        <h2 class="success-title">تم إرسال طلبك بنجاح! 🎉</h2>
+                        <p style="color: #666; font-size: 1.1rem; margin-bottom: 2rem;">
+                            سيتواصل معك فريق التقييم خلال 24 ساعة لتحديد موعد المعاينة وتقديم العرض
+                        </p>
+                        <div style="background: #f5f5f5; padding: 1.5rem; border-radius: 12px; margin: 2rem 0;">
+                            <p><strong>رقم الطلب:</strong> ${result.orderNumber || 'CAR-' + Date.now()}</p>
+                            <p><strong>التاريخ:</strong> ${new Date().toLocaleDateString('ar-SA')}</p>
+                        </div>
+                        <p style="color: #999; margin-top: 2rem;">
+                            يمكنك تتبع حالة طلبك من خلال رقم الجوال المسجل
+                        </p>
+                        <div style="margin-top: 3rem;">
+                            <a href="index.html" class="btn btn-primary" style="text-decoration: none;">
+                                العودة للرئيسية
+                            </a>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('loadingOverlay').classList.remove('active');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+            } catch (error) {
+                console.error('Error submitting car sale:', error);
+                document.getElementById('loadingOverlay').classList.remove('active');
+                
+                const errorMessage = error.message || 'حدث خطأ في إرسال الطلب';
+                const shouldRetry = confirm(`${errorMessage}\n\nهل تريد المحاولة مرة أخرى؟`);
+                
+                if (shouldRetry) {
+                    setTimeout(() => {
+                        document.getElementById('sellCarForm').dispatchEvent(new Event('submit'));
+                    }, 1000);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

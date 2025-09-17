@@ -1,129 +1,1453 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>طلب قطعة – تشاليح تبوك</title>
-  <style>
-    body{font-family:Tahoma,Arial,sans-serif;background:#f7f7f7;margin:0}
-    header{background:#2c3e50;color:#fff;padding:1rem}
-    .container{max-width:900px;margin:1.5rem auto;background:#fff;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,.08);padding:1.5rem}
-    h1{margin:0 0 .5rem}
-    form{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem}
-    label{font-weight:bold;font-size:.9rem;margin-bottom:.25rem;display:block}
-    input,select,textarea{width:100%;padding:.7rem;border:1px solid #ddd;border-radius:8px;font-size:.95rem}
-    textarea{min-height:110px;grid-column:1/-1}
-    .actions{grid-column:1/-1;display:flex;gap:.75rem}
-    button{padding:.9rem 1.4rem;border:0;border-radius:10px;cursor:pointer;font-size:1rem}
-    .primary{background:#27ae60;color:#fff}
-    .secondary{background:#eee}
-    .msg{margin-top:1rem;padding:.75rem;border-radius:8px;display:none}
-    .msg.ok{background:#eafaf1;color:#1e7e34;display:block}
-    .msg.err{background:#fdecea;color:#b71c1c;display:block}
-    .small{color:#777;font-size:.85rem}
-    .back{color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.3);padding:.4rem .7rem;border-radius:8px;margin-left:.5rem}
-    .brand{font-weight:bold}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>طلب قطعة غيار - تشاليح تبوك</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --success: #00c853;
+            --warning: #ff6f00;
+            --danger: #d32f2f;
+            --dark: #1a1a1a;
+            --light: #f5f5f5;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 30px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.2);
+            overflow: hidden;
+            animation: slideUp 0.6s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Header */
+        .form-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 3rem 2rem;
+            color: white;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .form-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            animation: move 15s linear infinite;
+        }
+
+        @keyframes move {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(40px, 40px); }
+        }
+
+        .form-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-header p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            background: rgba(255,255,255,0.2);
+            height: 8px;
+            border-radius: 10px;
+            margin-top: 2rem;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: white;
+            border-radius: 10px;
+            width: 0;
+            transition: width 0.3s ease;
+        }
+
+        /* Form Steps */
+        .form-steps {
+            display: flex;
+            justify-content: center;
+            padding: 2rem;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            color: #999;
+            font-weight: 500;
+            position: relative;
+            padding: 0 2rem;
+        }
+
+        .step:not(:last-child)::after {
+            content: '←';
+            position: absolute;
+            left: -1rem;
+            color: #ccc;
+            font-size: 1.2rem;
+        }
+
+        .step.active {
+            color: var(--primary);
+        }
+
+        .step.completed {
+            color: var(--success);
+        }
+
+        .step-number {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 0.5rem;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .step.active .step-number {
+            background: var(--primary);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .step.completed .step-number {
+            background: var(--success);
+            color: white;
+        }
+
+        /* Form Content */
+        .form-content {
+            padding: 3rem 2rem;
+        }
+
+        .form-section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .form-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f0f0f0;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            right: 0;
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        /* Form Groups */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            position: relative;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group:hover {
+            transform: translateY(-2px);
+            transition: transform 0.2s ease;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #555;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .required {
+            color: var(--danger);
+            margin-right: 0.25rem;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            transform: translateY(-1px);
+        }
+
+        input:valid:not(:placeholder-shown),
+        select:valid:not([value=""]),
+        textarea:valid:not(:placeholder-shown) {
+            border-color: var(--success);
+            background: rgba(0, 200, 83, 0.05);
+        }
+
+        input:valid:not(:placeholder-shown)::after,
+        select:valid:not([value=""])::after,
+        textarea:valid:not(:placeholder-shown)::after {
+            content: '✓';
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        /* Custom Select Style */
+        .custom-select {
+            position: relative;
+        }
+
+        .custom-select::after {
+            content: '▼';
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            pointer-events: none;
+        }
+
+        /* Radio/Checkbox Groups */
+        .radio-group,
+        .checkbox-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .radio-option,
+        .checkbox-option {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .radio-label,
+        .checkbox-label {
+            display: block;
+            padding: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .radio-label:hover,
+        .checkbox-label:hover {
+            border-color: var(--primary);
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        input[type="radio"]:checked + .radio-label,
+        input[type="checkbox"]:checked + .checkbox-label {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        input[type="radio"],
+        input[type="checkbox"] {
+            display: none;
+        }
+
+        /* Upload Area */
+        .upload-area {
+            border: 2px dashed #e0e0e0;
+            border-radius: 12px;
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #fafafa;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .upload-area.active {
+            border-color: var(--primary);
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #999;
+        }
+
+        .upload-text {
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-hint {
+            font-size: 0.9rem;
+            color: #999;
+        }
+
+        /* Image Preview */
+        .image-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .preview-item {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f5f5f5;
+            height: 100px;
+        }
+
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .remove-image {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            width: 25px;
+            height: 25px;
+            background: rgba(211, 47, 47, 0.9);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        /* Info Cards */
+        .info-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .info-card-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-card-content {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* Buttons */
+        .form-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 2rem;
+            background: #f8f9fa;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #666;
+            border: 2px solid #e0e0e0;
+        }
+
+        .btn-secondary:hover {
+            background: #f5f5f5;
+            border-color: #ccc;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Summary Section */
+        .summary-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 2rem;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        .summary-label {
+            color: #666;
+        }
+
+        .summary-value {
+            color: #333;
+            font-weight: 500;
+        }
+
+        /* Success Message */
+        .success-message {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .success-icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #00c853, #00e676);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+            margin: 0 auto 2rem;
+            animation: scaleIn 0.5s ease;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+            }
+            to {
+                transform: scale(1);
+            }
+        }
+
+        .success-title {
+            font-size: 2rem;
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        .order-number {
+            background: #f5f5f5;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            display: inline-block;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 1rem 0;
+        }
+
+        /* Loading Spinner */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Validation Messages */
+        .error-message {
+            color: var(--danger);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: shake 0.3s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .form-group.error input,
+        .form-group.error select,
+        .form-group.error textarea {
+            border-color: var(--danger);
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+            margin-right: 0.5rem;
+            color: var(--primary);
+        }
+
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 250px;
+            background-color: #333;
+            color: white;
+            text-align: center;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            right: 50%;
+            transform: translateX(50%);
+            font-size: 0.85rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .form-header h1 {
+                font-size: 1.8rem;
+            }
+
+            .form-steps {
+                overflow-x: auto;
+                padding: 1rem;
+            }
+
+            .step {
+                padding: 0 1rem;
+                font-size: 0.9rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-buttons {
+                flex-direction: column-reverse;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .radio-group,
+            .checkbox-group {
+                flex-direction: column;
+            }
+
+            .radio-option,
+            .checkbox-option {
+                width: 100%;
+            }
+        }
+
+        /* Animations */
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(102, 126, 234, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(102, 126, 234, 0);
+            }
+        }
+    </style>
 </head>
 <body>
-  <header>
-    <a class="back" href="/">⬅ رجوع</a>
-    <span class="brand">تشاليح تبوك</span>
-  </header>
+    <div class="container">
+        <!-- Form Header -->
+        <div class="form-header">
+            <h1>🔧 طلب قطعة غيار</h1>
+            <p>املأ النموذج التالي وسنوفر لك القطعة المطلوبة بأفضل سعر</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+        </div>
 
-  <div class="container">
-    <h1>طلب قطعة</h1>
-    <p class="small">عبّ البيانات التالية وسيتم التواصل معك لتأكيد الطلب.</p>
+        <!-- Form Steps -->
+        <div class="form-steps">
+            <div class="step active" data-step="1">
+                <span class="step-number">1</span>
+                <span>معلومات السيارة</span>
+            </div>
+            <div class="step" data-step="2">
+                <span class="step-number">2</span>
+                <span>تفاصيل القطعة</span>
+            </div>
+            <div class="step" data-step="3">
+                <span class="step-number">3</span>
+                <span>معلومات التواصل</span>
+            </div>
+            <div class="step" data-step="4">
+                <span class="step-number">4</span>
+                <span>المراجعة والإرسال</span>
+            </div>
+        </div>
 
-    <form id="orderForm">
-      <div>
-        <label>اسمك الكامل *</label>
-        <input type="text" name="name" required />
-      </div>
-      <div>
-        <label>رقم الجوال *</label>
-        <input type="tel" name="phone" required placeholder="05xxxxxxxx" />
-      </div>
-      <div>
-        <label>ماركة السيارة *</label>
-        <input type="text" name="car_make" required placeholder="تويوتا / نيسان ..." />
-      </div>
-      <div>
-        <label>موديل السيارة *</label>
-        <input type="text" name="car_model" required placeholder="كامري / ألتيما ..." />
-      </div>
-      <div>
-        <label>سنة الصنع *</label>
-        <input type="number" name="model_year" required min="1980" max="2099" />
-      </div>
-      <div>
-        <label>رقم الهيكل (اختياري)</label>
-        <input type="text" name="vin" />
-      </div>
-      <div style="grid-column:1/-1">
-        <label>اسم القطعة المطلوبة *</label>
-        <input type="text" name="part_name" required placeholder="مثال: رديتر، كمبرسر مكيف ..." />
-      </div>
-      <div>
-        <label>الأولوية</label>
-        <select name="urgency">
-          <option value="normal">عادي</option>
-          <option value="rush">مستعجل</option>
-        </select>
-      </div>
-      <textarea name="notes" placeholder="ملاحظات إضافية (حالة السيارة، رقم القطعة إن وجد...)"></textarea>
+        <!-- Form Content -->
+        <form id="partRequestForm">
+            <div class="form-content">
+                <!-- Step 1: Car Information -->
+                <div class="form-section active" data-section="1">
+                    <h2 class="section-title">معلومات السيارة</h2>
+                    
+                    <div class="info-card">
+                        <div class="info-card-title">
+                            <span>💡</span>
+                            <span>نصيحة</span>
+                        </div>
+                        <div class="info-card-content">
+                            كلما كانت المعلومات أكثر دقة، كلما تمكنا من توفير القطعة المناسبة بشكل أسرع
+                        </div>
+                    </div>
 
-      <div class="actions">
-        <button class="primary" type="submit">إرسال الطلب</button>
-        <button class="secondary" type="reset">مسح الحقول</button>
-      </div>
-      <div id="msg" class="msg"></div>
-    </form>
-  </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>
+                                <span class="required">*</span>
+                                ماركة السيارة
+                                <span class="tooltip">ℹ️
+                                    <span class="tooltip-text">اختر الشركة المصنعة لسيارتك</span>
+                                </span>
+                            </label>
+                            <div class="custom-select">
+                                <select name="carMake" id="carMake" required onchange="updateModels()">
+                                    <option value="">-- اختر الماركة --</option>
+                                    <option value="toyota">تويوتا</option>
+                                    <option value="honda">هوندا</option>
+                                    <option value="nissan">نيسان</option>
+                                    <option value="mazda">مازدا</option>
+                                    <option value="hyundai">هيونداي</option>
+                                    <option value="kia">كيا</option>
+                                    <option value="ford">فورد</option>
+                                    <option value="chevrolet">شيفروليه</option>
+                                    <option value="mercedes">مرسيدس</option>
+                                    <option value="bmw">بي إم دبليو</option>
+                                    <option value="audi">أودي</option>
+                                    <option value="volkswagen">فولكس واجن</option>
+                                </select>
+                            </div>
+                            <div class="error-message">الرجاء اختيار ماركة السيارة</div>
+                        </div>
 
-<script>
-  const API_URL = `${location.origin}/api`;
+                        <div class="form-group">
+                            <label>
+                                <span class="required">*</span>
+                                موديل السيارة
+                            </label>
+                            <div class="custom-select">
+                                <select name="carModel" id="carModel" required disabled>
+                                    <option value="">-- اختر الموديل --</option>
+                                </select>
+                            </div>
+                            <div class="error-message">الرجاء اختيار موديل السيارة</div>
+                        </div>
 
-  document.getElementById('orderForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const msg = document.getElementById('msg');
-    msg.className = 'msg'; msg.style.display = 'none'; msg.textContent = '';
+                        <div class="form-group">
+                            <label>
+                                <span class="required">*</span>
+                                سنة الصنع
+                            </label>
+                            <input type="number" name="carYear" id="carYear" 
+                                   min="1990" max="2030" required 
+                                   placeholder="مثال: 2020">
+                            <div class="error-message">الرجاء إدخال سنة صنع صحيحة</div>
+                        </div>
 
-    // اجمع البيانات
-    const fd = new FormData(e.target);
-    const payload = Object.fromEntries(fd.entries());
+                        <div class="form-group">
+                            <label>
+                                رقم الهيكل (VIN)
+                                <span class="tooltip">ℹ️
+                                    <span class="tooltip-text">رقم مكون من 17 حرف ورقم يمكن إيجاده على لوحة القيادة أو دفتر السيارة</span>
+                                </span>
+                            </label>
+                            <input type="text" name="vin" id="vin" 
+                                   placeholder="اختياري - يساعد في الحصول على القطعة الصحيحة"
+                                   maxlength="17" style="text-transform: uppercase;"
+                                   pattern="[A-HJ-NPR-Z0-9]{17}"
+                                   title="رقم الهيكل يجب أن يكون 17 حرف ورقم بدون I, O, Q">
+                            <div class="error-message">رقم الهيكل غير صحيح (17 حرف ورقم)</div>
+                        </div>
 
-    // تحققات بسيطة
-    if(!payload.name || !payload.phone || !payload.car_make || !payload.car_model || !payload.model_year || !payload.part_name){
-      msg.className = 'msg err'; msg.textContent = 'رجاءً أكمل الحقول المطلوبة'; msg.style.display = 'block';
-      return;
-    }
+                        <div class="form-group full-width">
+                            <label>نوع المحرك</label>
+                            <div class="radio-group">
+                                <div class="radio-option">
+                                    <input type="radio" name="engineType" id="engine4" value="4cylinder">
+                                    <label for="engine4" class="radio-label">4 سلندر</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="engineType" id="engine6" value="6cylinder">
+                                    <label for="engine6" class="radio-label">6 سلندر</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="engineType" id="engine8" value="8cylinder">
+                                    <label for="engine8" class="radio-label">8 سلندر</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="engineType" id="engineOther" value="other">
+                                    <label for="engineOther" class="radio-label">أخرى</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-    try {
-      const res = await fetch(`${API_URL}/orders`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
+                <!-- Step 2: Part Details -->
+                <div class="form-section" data-section="2">
+                    <h2 class="section-title">تفاصيل القطعة المطلوبة</h2>
 
-      if(res.ok){
-        msg.className = 'msg ok';
-        msg.textContent = `✅ تم استلام الطلب بنجاح. رقم الطلب: ${data.id || '—'}`;
-        msg.style.display = 'block';
-        e.target.reset();
-      }else{
-        msg.className = 'msg err';
-        msg.textContent = data.error || data.message || 'تعذّر إرسال الطلب.';
-        msg.style.display = 'block';
-      }
-    } catch (err) {
-      msg.className = 'msg err';
-      msg.textContent = 'تعذّر الاتصال بالسيرفر. سنتأكد من مسار /api/orders في الخطوة التالية.';
-      msg.style.display = 'block';
-      console.error(err);
-    }
-  });
-</script>
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label>
+                                <span class="required">*</span>
+                                اسم القطعة
+                            </label>
+                            <input type="text" name="partName" id="partName" required 
+                                   placeholder="مثال: رديتر، كمبريسر مكيف، طرمبة بنزين...">
+                            <div class="error-message">الرجاء إدخال اسم القطعة</div>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label>فئة القطعة</label>
+                            <div class="checkbox-group">
+                                <div class="checkbox-option">
+                                    <input type="checkbox" id="cat1" value="engine">
+                                    <label for="cat1" class="checkbox-label">محرك</label>
+                                </div>
+                                <div class="checkbox-option">
+                                    <input type="checkbox" id="cat2" value="transmission">
+                                    <label for="cat2" class="checkbox-label">جير</label>
+                                </div>
+                                <div class="checkbox-option">
+                                    <input type="checkbox" id="cat3" value="electric">
+                                    <label for="cat3" class="checkbox-label">كهرباء</label>
+                                </div>
+                                <div class="checkbox-option">
+                                    <input type="checkbox" id="cat4" value="cooling">
+                                    <label for="cat4" class="checkbox-label">تبريد</label>
+                                </div>
+                                <div class="checkbox-option">
+                                    <input type="checkbox" id="cat5" value="suspension">
+                                    <label for="cat5" class="checkbox-label">عفشة</label>
+                                </div>
+                                <div class="checkbox-option">
+                                    <input type="checkbox" id="cat6" value="body">
+                                    <label for="cat6" class="checkbox-label">بودي</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>رقم القطعة (إن وجد)</label>
+                            <input type="text" name="partNumber" id="partNumber" 
+                                   placeholder="رقم القطعة الأصلي">
+                        </div>
+
+                        <div class="form-group">
+                            <label>حالة القطعة المطلوبة</label>
+                            <div class="custom-select">
+                                <select name="partCondition" id="partCondition">
+                                    <option value="any">لا يهم</option>
+                                    <option value="new">جديد فقط</option>
+                                    <option value="used">مستعمل</option>
+                                    <option value="refurbished">مجدد</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label>وصف إضافي للقطعة</label>
+                            <textarea name="partDescription" id="partDescription" 
+                                      placeholder="أي تفاصيل إضافية تساعد في تحديد القطعة المطلوبة..."></textarea>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label>صور القطعة (اختياري)</label>
+                            <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                                <div class="upload-icon">📷</div>
+                                <div class="upload-text">انقر لرفع الصور أو اسحب الملفات هنا</div>
+                                <div class="upload-hint">يمكنك رفع حتى 5 صور (JPG, PNG - حجم أقصى 5MB)</div>
+                            </div>
+                            <input type="file" id="fileInput" accept="image/*" multiple style="display: none;">
+                            <div class="image-preview" id="imagePreview"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Contact Information -->
+                <div class="form-section" data-section="3">
+                    <h2 class="section-title">معلومات التواصل</h2>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>
+                                <span class="required">*</span>
+                                الاسم الكامل
+                            </label>
+                            <input type="text" name="fullName" id="fullName" required 
+                                   placeholder="أدخل اسمك الكامل">
+                            <div class="error-message">الرجاء إدخال الاسم</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <span class="required">*</span>
+                                رقم الجوال
+                            </label>
+                            <input type="tel" name="phone" id="phone" required 
+                                   placeholder="05XXXXXXXX" pattern="05[0-9]{8}" maxlength="10">
+                            <div class="error-message">الرجاء إدخال رقم جوال صحيح</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>البريد الإلكتروني</label>
+                            <input type="email" name="email" id="email" 
+                                   placeholder="example@email.com">
+                            <div class="error-message">الرجاء إدخال بريد إلكتروني صحيح</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>المدينة</label>
+                            <div class="custom-select">
+                                <select name="city" id="city">
+                                    <option value="tabuk">تبوك</option>
+                                    <option value="riyadh">الرياض</option>
+                                    <option value="jeddah">جدة</option>
+                                    <option value="dammam">الدمام</option>
+                                    <option value="makkah">مكة</option>
+                                    <option value="madinah">المدينة</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label>طريقة التواصل المفضلة</label>
+                            <div class="radio-group">
+                                <div class="radio-option">
+                                    <input type="radio" name="contactMethod" id="whatsapp" value="whatsapp" checked>
+                                    <label for="whatsapp" class="radio-label">واتساب</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="contactMethod" id="call" value="call">
+                                    <label for="call" class="radio-label">اتصال</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="contactMethod" id="sms" value="sms">
+                                    <label for="sms" class="radio-label">رسالة نصية</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label>الأولوية</label>
+                            <div class="radio-group">
+                                <div class="radio-option">
+                                    <input type="radio" name="urgency" id="normal" value="normal" checked>
+                                    <label for="normal" class="radio-label">عادي (2-3 أيام)</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="urgency" id="urgent" value="urgent">
+                                    <label for="urgent" class="radio-label">مستعجل (24 ساعة)</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label>ملاحظات إضافية</label>
+                            <textarea name="notes" id="notes" 
+                                      placeholder="أي معلومات إضافية تود إخبارنا بها..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Review & Submit -->
+                <div class="form-section" data-section="4">
+                    <h2 class="section-title">مراجعة الطلب</h2>
+
+                    <div class="summary-section">
+                        <h3 style="margin-bottom: 1.5rem; color: #333;">معلومات السيارة</h3>
+                        <div class="summary-item">
+                            <span class="summary-label">السيارة:</span>
+                            <span class="summary-value" id="summarycar">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">السنة:</span>
+                            <span class="summary-value" id="summaryYear">-</span>
+                        </div>
+
+                        <h3 style="margin: 1.5rem 0; color: #333;">القطعة المطلوبة</h3>
+                        <div class="summary-item">
+                            <span class="summary-label">اسم القطعة:</span>
+                            <span class="summary-value" id="summaryPart">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">الحالة:</span>
+                            <span class="summary-value" id="summaryCondition">-</span>
+                        </div>
+
+                        <h3 style="margin: 1.5rem 0; color: #333;">معلومات التواصل</h3>
+                        <div class="summary-item">
+                            <span class="summary-label">الاسم:</span>
+                            <span class="summary-value" id="summaryName">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">الجوال:</span>
+                            <span class="summary-value" id="summaryPhone">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">الأولوية:</span>
+                            <span class="summary-value" id="summaryUrgency">عادي</span>
+                        </div>
+                    </div>
+
+                    <div class="info-card" style="margin-top: 2rem;">
+                        <div class="info-card-title">
+                            <span>✅</span>
+                            <span>شروط الخدمة</span>
+                        </div>
+                        <div class="info-card-content">
+                            بإرسال هذا الطلب، أوافق على أن يتم التواصل معي من قبل فريق تشاليح تبوك لتوفير القطعة المطلوبة
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Buttons -->
+            <div class="form-buttons">
+                <button type="button" class="btn btn-secondary" id="prevBtn" onclick="changeStep(-1)" style="display: none;">
+                    <span>→</span>
+                    <span>السابق</span>
+                </button>
+                <button type="button" class="btn btn-primary pulse" id="nextBtn" onclick="changeStep(1)">
+                    <span>التالي</span>
+                    <span>←</span>
+                </button>
+                <button type="submit" class="btn btn-primary" id="submitBtn" style="display: none;">
+                    <span>إرسال الطلب</span>
+                    <span>✓</span>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <script>
+        // Car Models Data
+        const carModels = {
+            toyota: ['كامري', 'كورولا', 'هايلوكس', 'لاندكروزر', 'برادو', 'يارس', 'افالون', 'هايلاندر'],
+            honda: ['أكورد', 'سيفيك', 'بايلوت', 'CR-V', 'HR-V', 'سيتي'],
+            nissan: ['ألتيما', 'صني', 'باترول', 'ماكسيما', 'سنترا', 'اكس تريل'],
+            mazda: ['3', '6', 'CX-5', 'CX-9', 'CX-30'],
+            hyundai: ['سوناتا', 'النترا', 'توسان', 'أكسنت', 'سانتافي', 'كريتا'],
+            kia: ['أوبتيما', 'سيراتو', 'سبورتاج', 'كرنفال', 'سورينتو', 'ريو'],
+            ford: ['تورس', 'اكسبلورر', 'ايدج', 'F-150', 'اكسبديشن'],
+            chevrolet: ['كابرس', 'ماليبو', 'تاهو', 'سوبربان', 'كروز'],
+            mercedes: ['C-Class', 'E-Class', 'S-Class', 'GLE', 'GLC'],
+            bmw: ['Series 3', 'Series 5', 'Series 7', 'X3', 'X5'],
+            audi: ['A4', 'A6', 'A8', 'Q3', 'Q5', 'Q7'],
+            volkswagen: ['جيتا', 'باسات', 'تيجوان', 'طوارق']
+        };
+
+        let currentStep = 1;
+        const totalSteps = 4;
+
+        // Update car models based on selected make
+        function updateModels() {
+            const make = document.getElementById('carMake').value;
+            const modelSelect = document.getElementById('carModel');
+            
+            modelSelect.innerHTML = '<option value="">-- اختر الموديل --</option>';
+            modelSelect.disabled = !make;
+            
+            if (make && carModels[make]) {
+                carModels[make].forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = model;
+                    option.textContent = model;
+                    modelSelect.appendChild(option);
+                });
+            }
+        }
+
+        // Change form step
+        function changeStep(direction) {
+            const currentSection = document.querySelector(`.form-section[data-section="${currentStep}"]`);
+            
+            // Validate current step before moving forward
+            if (direction > 0 && !validateStep(currentStep)) {
+                return;
+            }
+            
+            currentSection.classList.remove('active');
+            
+            currentStep += direction;
+            currentStep = Math.max(1, Math.min(currentStep, totalSteps));
+            
+            const newSection = document.querySelector(`.form-section[data-section="${currentStep}"]`);
+            newSection.classList.add('active');
+            
+            updateStepIndicators();
+            updateButtons();
+            updateProgressBar();
+            
+            // Update summary if on last step
+            if (currentStep === 4) {
+                updateSummary();
+            }
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Validate current step
+        function validateStep(step) {
+            let isValid = true;
+            const section = document.querySelector(`.form-section[data-section="${step}"]`);
+            const requiredFields = section.querySelectorAll('[required]');
+            
+            requiredFields.forEach(field => {
+                const formGroup = field.closest('.form-group');
+                const errorMsg = formGroup.querySelector('.error-message');
+                
+                if (!field.value.trim()) {
+                    formGroup.classList.add('error');
+                    if (errorMsg) errorMsg.classList.add('show');
+                    isValid = false;
+                } else {
+                    formGroup.classList.remove('error');
+                    if (errorMsg) errorMsg.classList.remove('show');
+                }
+            });
+            
+            // Special validation for step 3
+            if (step === 3) {
+                const phone = document.getElementById('phone');
+                const phoneRegex = /^05[0-9]{8}$/;
+                if (phone.value && !phoneRegex.test(phone.value)) {
+                    phone.closest('.form-group').classList.add('error');
+                    phone.closest('.form-group').querySelector('.error-message').classList.add('show');
+                    isValid = false;
+                }
+
+                const email = document.getElementById('email');
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (email.value && !emailRegex.test(email.value)) {
+                    email.closest('.form-group').classList.add('error');
+                    const errorMsg = email.closest('.form-group').querySelector('.error-message');
+                    if (errorMsg) {
+                        errorMsg.textContent = 'الرجاء إدخال بريد إلكتروني صحيح';
+                        errorMsg.classList.add('show');
+                    }
+                    isValid = false;
+                }
+            }
+
+            // VIN validation
+            const vin = document.getElementById('vin');
+            if (vin && vin.value) {
+                const vinRegex = /^[A-HJ-NPR-Z0-9]{17}$/;
+                if (!vinRegex.test(vin.value)) {
+                    vin.closest('.form-group').classList.add('error');
+                    const errorMsg = vin.closest('.form-group').querySelector('.error-message');
+                    if (errorMsg) {
+                        errorMsg.textContent = 'رقم الهيكل غير صحيح (17 حرف ورقم)';
+                        errorMsg.classList.add('show');
+                    }
+                    isValid = false;
+                }
+            }
+            
+            return isValid;
+        }
+
+        // Update step indicators
+        function updateStepIndicators() {
+            document.querySelectorAll('.step').forEach((step, index) => {
+                const stepNumber = index + 1;
+                step.classList.remove('active', 'completed');
+                
+                if (stepNumber < currentStep) {
+                    step.classList.add('completed');
+                } else if (stepNumber === currentStep) {
+                    step.classList.add('active');
+                }
+            });
+        }
+
+        // Update navigation buttons
+        function updateButtons() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            prevBtn.style.display = currentStep === 1 ? 'none' : 'flex';
+            
+            if (currentStep === totalSteps) {
+                nextBtn.style.display = 'none';
+                submitBtn.style.display = 'flex';
+            } else {
+                nextBtn.style.display = 'flex';
+                submitBtn.style.display = 'none';
+            }
+        }
+
+        // Update progress bar
+        function updateProgressBar() {
+            const progress = (currentStep / totalSteps) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+        }
+
+        // Update summary
+        function updateSummary() {
+            const makeElement = document.getElementById('carMake').selectedOptions[0];
+            const make = makeElement ? makeElement.text : '-';
+            const model = document.getElementById('carModel').value || '-';
+            const year = document.getElementById('carYear').value || '-';
+            const partName = document.getElementById('partName').value || '-';
+            const conditionElement = document.getElementById('partCondition').selectedOptions[0];
+            const condition = conditionElement ? conditionElement.text : '-';
+            const name = document.getElementById('fullName').value || '-';
+            const phone = document.getElementById('phone').value || '-';
+            const urgencyElement = document.querySelector('input[name="urgency"]:checked');
+            const urgency = urgencyElement ? urgencyElement.nextElementSibling.textContent : '-';
+            
+            document.getElementById('summarycar').textContent = `${make} ${model}`;
+            document.getElementById('summaryYear').textContent = year;
+            document.getElementById('summaryPart').textContent = partName;
+            document.getElementById('summaryCondition').textContent = condition;
+            document.getElementById('summaryName').textContent = name;
+            document.getElementById('summaryPhone').textContent = phone;
+            document.getElementById('summaryUrgency').textContent = urgency;
+        }
+
+        // Handle file upload
+        const fileInput = document.getElementById('fileInput');
+        const uploadArea = document.getElementById('uploadArea');
+        const imagePreview = document.getElementById('imagePreview');
+        let uploadedFiles = [];
+
+        fileInput.addEventListener('change', handleFileUpload);
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('active');
+        });
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('active');
+        });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('active');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        function handleFileUpload(e) {
+            handleFiles(e.target.files);
+        }
+
+        function handleFiles(files) {
+            Array.from(files).forEach(file => {
+                if (uploadedFiles.length >= 5) {
+                    alert('يمكنك رفع 5 صور كحد أقصى');
+                    return;
+                }
+                
+                if (!file.type.startsWith('image/')) {
+                    alert('يرجى رفع ملفات صور فقط');
+                    return;
+                }
+                
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('حجم الصورة يجب أن يكون أقل من 5MB');
+                    return;
+                }
+                
+                uploadedFiles.push(file);
+                displayImage(file, uploadedFiles.length - 1);
+            });
+        }
+
+        function displayImage(file, index) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const previewItem = document.createElement('div');
+                previewItem.className = 'preview-item';
+                previewItem.dataset.index = index;
+                previewItem.innerHTML = `
+                    <img src="${e.target.result}" alt="Preview">
+                    <span class="remove-image" onclick="removeImage(${index})">×</span>
+                `;
+                imagePreview.appendChild(previewItem);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removeImage(index) {
+            uploadedFiles.splice(index, 1);
+            updateImagePreview();
+        }
+
+        function updateImagePreview() {
+            imagePreview.innerHTML = '';
+            uploadedFiles.forEach((file, index) => {
+                displayImage(file, index);
+            });
+        }
+
+        // Handle form submission
+        document.getElementById('partRequestForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Validate last step
+            if (!validateStep(currentStep)) {
+                return;
+            }
+            
+            // Show loading
+            document.getElementById('loadingOverlay').classList.add('active');
+            
+            // Prepare form data
+            const formData = new FormData(e.target);
+            
+            // Add uploaded files
+            uploadedFiles.forEach(file => {
+                formData.append('images', file);
+            });
+            
+            try {
+                // Send real API request
+                const response = await fetch('/api/orders', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('فشل في إرسال الطلب');
+                }
+
+                const result = await response.json();
+                
+                // Show success message
+                document.querySelector('.container').innerHTML = `
+                    <div class="success-message">
+                        <div class="success-icon">✓</div>
+                        <h2 class="success-title">تم إرسال طلبك بنجاح! 🎉</h2>
+                        <p style="color: #666; font-size: 1.1rem; margin-bottom: 2rem;">
+                            سيتواصل معك فريقنا خلال 24 ساعة لتأكيد توفر القطعة والسعر
+                        </p>
+                        <div class="order-number">
+                            رقم الطلب: ${result.orderNumber || 'ORD-' + Date.now()}
+                        </div>
+                        <p style="color: #999; margin-top: 2rem;">
+                            يمكنك تتبع حالة طلبك باستخدام رقم الجوال المسجل
+                        </p>
+                        <div style="margin-top: 3rem;">
+                            <a href="index.html" class="btn btn-primary" style="text-decoration: none;">
+                                العودة للرئيسية
+                            </a>
+                        </div>
+                    </div>
+                `;
+                
+                // Hide loading
+                document.getElementById('loadingOverlay').classList.remove('active');
+                
+                // Scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+            } catch (error) {
+                console.error('Error submitting order:', error);
+                document.getElementById('loadingOverlay').classList.remove('active');
+                
+                // Show error message with retry option
+                const errorMessage = error.message || 'حدث خطأ في إرسال الطلب';
+                const shouldRetry = confirm(`${errorMessage}\n\nهل تريد المحاولة مرة أخرى؟`);
+                
+                if (shouldRetry) {
+                    // Retry submission
+                    setTimeout(() => {
+                        document.getElementById('partRequestForm').dispatchEvent(new Event('submit'));
+                    }, 1000);
+                }
+            }
+        });
+
+        // Initialize
+        updateProgressBar();
+        updateButtons();
+    </script>
 </body>
 </html>

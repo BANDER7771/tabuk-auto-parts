@@ -741,10 +741,10 @@
                 const response = await fetch('/api/admin/orders');
                 if (response.ok) {
                     const data = await response.json();
-                    currentOrders = data.orders || [];
+                    currentOrders = data || [];
                 } else {
-                    // Fallback to mock data for demo
-                    currentOrders = generateMockOrders();
+                    console.warn('Failed to load orders from API');
+                    currentOrders = [];
                 }
                 
                 filteredOrders = [...currentOrders];
@@ -752,46 +752,13 @@
                 renderOrders();
             } catch (error) {
                 console.error('Error loading orders:', error);
-                // Use mock data as fallback
-                currentOrders = generateMockOrders();
-                filteredOrders = [...currentOrders];
+                currentOrders = [];
+                filteredOrders = [];
                 updateStats();
                 renderOrders();
             }
         }
 
-        function generateMockOrders() {
-            const statuses = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'];
-            const carMakes = ['تويوتا', 'نيسان', 'هيونداي', 'كيا', 'هوندا'];
-            const carModels = ['كامري', 'ألتيما', 'سوناتا', 'أوبتيما', 'أكورد'];
-            const parts = ['رديتر', 'كمبريسر مكيف', 'طرمبة بنزين', 'مرايا جانبية', 'فانوس خلفي'];
-            
-            return Array.from({length: 25}, (_, i) => {
-                const date = new Date();
-                date.setDate(date.getDate() - Math.floor(Math.random() * 30));
-                
-                return {
-                    _id: `order_${i + 1}`,
-                    orderNumber: `ORD-${Date.now() + i}`,
-                    customerName: `عميل رقم ${i + 1}`,
-                    customerPhone: `0555${String(Math.floor(Math.random() * 1000000)).padStart(6, '0')}`,
-                    carInfo: {
-                        make: carMakes[Math.floor(Math.random() * carMakes.length)],
-                        model: carModels[Math.floor(Math.random() * carModels.length)],
-                        year: 2015 + Math.floor(Math.random() * 10)
-                    },
-                    items: [{
-                        partName: parts[Math.floor(Math.random() * parts.length)],
-                        quantity: 1
-                    }],
-                    status: statuses[Math.floor(Math.random() * statuses.length)],
-                    urgency: Math.random() > 0.7 ? 'urgent' : 'normal',
-                    totalAmount: Math.floor(Math.random() * 2000) + 100,
-                    createdAt: date.toISOString(),
-                    notes: Math.random() > 0.5 ? 'ملاحظات إضافية على الطلب' : ''
-                };
-            });
-        }
 
         function updateStats() {
             const stats = {
@@ -1117,29 +1084,11 @@
                     alert('تم تحديث حالة الطلب بنجاح');
                     closeOrderModal();
                 } else {
-                    // Mock success for demo
-                    const orderIndex = currentOrders.findIndex(o => o._id === orderId);
-                    if (orderIndex !== -1) {
-                        currentOrders[orderIndex].status = newStatus;
-                        filteredOrders = [...currentOrders];
-                        updateStats();
-                        renderOrders();
-                    }
-                    alert('تم تحديث حالة الطلب بنجاح');
-                    closeOrderModal();
+                    alert('فشل في تحديث حالة الطلب');
                 }
             } catch (error) {
                 console.error('Error updating order:', error);
-                // Mock success for demo
-                const orderIndex = currentOrders.findIndex(o => o._id === orderId);
-                if (orderIndex !== -1) {
-                    currentOrders[orderIndex].status = newStatus;
-                    filteredOrders = [...currentOrders];
-                    updateStats();
-                    renderOrders();
-                }
-                alert('تم تحديث حالة الطلب بنجاح');
-                closeOrderModal();
+                alert('حدث خطأ في تحديث حالة الطلب');
             }
         }
 

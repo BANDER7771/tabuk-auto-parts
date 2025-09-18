@@ -1368,21 +1368,9 @@
                 if (response.ok) {
                     const data = await response.json();
                     orders = data || [];
-                } else {
-                    // Fallback to mock data for demo
-                    await new Promise(resolve => setTimeout(resolve, 1500));
-                    orders = [{
-                        orderNumber: 'ORD-' + Date.now(),
-                        createdAt: new Date().toISOString(),
-                        items: [{ partName: 'رديتر كامري 2020' }],
-                        status: 'shipped',
-                        timeline: [
-                            { status: 'pending', description: 'تم الاستلام' },
-                            { status: 'processing', description: 'قيد المعالجة' },
-                            { status: 'shipped', description: 'في الطريق' }
-                        ]
-                    }];
-                }
+               } else {
+                   orders = [];
+               }
                 
                 if (orders.length === 0) {
                     resultsDiv.innerHTML = `

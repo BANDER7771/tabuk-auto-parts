@@ -443,22 +443,23 @@
                                placeholder="مثال: 150000">
                     </div>
 
-                    <div class="form-group">
-                        <label>
-                            <span class="required">*</span>
-                            حالة السيارة العامة
-                        </label>
-                        <div class="custom-select">
-                            <select name="condition" id="condition" required>
-                                <option value="">-- اختر الحالة --</option>
-                                <option value="excellent">ممتازة</option>
-                                <option value="very-good">جيدة جداً</option>
-                                <option value="good">جيدة</option>
-                                <option value="fair">مقبولة</option>
-                                <option value="poor">تحتاج إصلاحات</option>
-                            </select>
+                        <div class="form-group">
+                            <label>
+                                <span class="required">*</span>
+                                حالة السيارة العامة
+                            </label>
+                            <div class="custom-select">
+                                <select name="condition" id="condition" required>
+                                    <option value="">-- اختر الحالة --</option>
+                                    <option value="سليمة">سليمة</option>
+                                    <option value="مخبطة مكينة">مخبطة مكينة</option>
+                                    <option value="مخبطة قير">مخبطة قير</option>
+                                    <option value="مخبطة مكينة وقير">مخبطة مكينة وقير</option>
+                                    <option value="مصدومة">مصدومة</option>
+                                    <option value="تالف">تالف</option>
+                                </select>
+                            </div>
                         </div>
-                    </div>
 
                     <div class="form-group">
                         <label>نوع الجير</label>
@@ -523,11 +524,39 @@
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label>السعر المتوقع (ريال)</label>
-                        <input type="number" name="expectedPrice" id="expectedPrice" 
-                               placeholder="اختياري - السعر الذي تتوقعه">
-                    </div>
+                        <div class="form-group">
+                            <label>سبب البيع (اختياري)</label>
+                            <div class="custom-select">
+                                <select name="sellReason" id="sellReason">
+                                    <option value="">-- اختر السبب --</option>
+                                    <option value="تغيير السيارة">تغيير السيارة</option>
+                                    <option value="عدم الحاجة">عدم الحاجة</option>
+                                    <option value="ظروف مالية">ظروف مالية</option>
+                                    <option value="السفر">السفر</option>
+                                    <option value="أعطال متكررة">أعطال متكررة</option>
+                                    <option value="أخرى">أخرى</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>المخالفات والصدمات (اختياري)</label>
+                            <div class="custom-select">
+                                <select name="violations" id="violations">
+                                    <option value="">-- اختر الحالة --</option>
+                                    <option value="لا توجد">لا توجد مخالفات أو صدمات</option>
+                                    <option value="مخالفات قديمة">مخالفات قديمة</option>
+                                    <option value="صدمات خفيفة">صدمات خفيفة</option>
+                                    <option value="مخالفات وصدمات خفيفة">مخالفات قديمة وصدمات خفيفة</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>السعر المتوقع (ريال)</label>
+                            <input type="number" name="expectedPrice" id="expectedPrice" 
+                                   placeholder="اختياري - السعر الذي تتوقعه">
+                        </div>
                 </div>
 
                 <button type="submit" class="btn btn-primary">

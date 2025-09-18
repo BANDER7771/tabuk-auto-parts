@@ -737,36 +737,32 @@
         <div class="form-steps">
             <div class="step active" data-step="1">
                 <span class="step-number">1</span>
-                <span>معلومات السيارة</span>
+                <span>معلومات أساسية</span>
             </div>
             <div class="step" data-step="2">
                 <span class="step-number">2</span>
-                <span>تفاصيل القطعة</span>
+                <span>تفاصيل الطلب</span>
             </div>
             <div class="step" data-step="3">
                 <span class="step-number">3</span>
-                <span>معلومات التواصل</span>
-            </div>
-            <div class="step" data-step="4">
-                <span class="step-number">4</span>
-                <span>المراجعة والإرسال</span>
+                <span>إرسال الطلب</span>
             </div>
         </div>
 
         <!-- Form Content -->
         <form id="partRequestForm">
             <div class="form-content">
-                <!-- Step 1: Car Information -->
+                <!-- Step 1: Basic Information -->
                 <div class="form-section active" data-section="1">
-                    <h2 class="section-title">معلومات السيارة</h2>
+                    <h2 class="section-title">المعلومات الأساسية</h2>
                     
                     <div class="info-card">
                         <div class="info-card-title">
-                            <span>💡</span>
-                            <span>نصيحة</span>
+                            <span>🚗</span>
+                            <span>معلومات بسيطة</span>
                         </div>
                         <div class="info-card-content">
-                            كلما كانت المعلومات أكثر دقة، كلما تمكنا من توفير القطعة المناسبة بشكل أسرع
+                            فقط اذكر لنا نوع سيارتك والقطعة المطلوبة وسنتولى الباقي
                         </div>
                     </div>
 
@@ -774,29 +770,11 @@
                         <div class="form-group">
                             <label>
                                 <span class="required">*</span>
-                                ماركة السيارة
-                                <span class="tooltip">ℹ️
-                                    <span class="tooltip-text">اختر الشركة المصنعة لسيارتك</span>
-                                </span>
+                                اسم السيارة (الماركة)
                             </label>
-                            <div class="custom-select">
-                                <select name="carMake" id="carMake" required onchange="updateModels()">
-                                    <option value="">-- اختر الماركة --</option>
-                                    <option value="toyota">تويوتا</option>
-                                    <option value="honda">هوندا</option>
-                                    <option value="nissan">نيسان</option>
-                                    <option value="mazda">مازدا</option>
-                                    <option value="hyundai">هيونداي</option>
-                                    <option value="kia">كيا</option>
-                                    <option value="ford">فورد</option>
-                                    <option value="chevrolet">شيفروليه</option>
-                                    <option value="mercedes">مرسيدس</option>
-                                    <option value="bmw">بي إم دبليو</option>
-                                    <option value="audi">أودي</option>
-                                    <option value="volkswagen">فولكس واجن</option>
-                                </select>
-                            </div>
-                            <div class="error-message">الرجاء اختيار ماركة السيارة</div>
+                            <input type="text" name="carMake" id="carMake" required 
+                                   placeholder="مثال: تويوتا، نيسان، هيونداي...">
+                            <div class="error-message">الرجاء إدخال اسم السيارة</div>
                         </div>
 
                         <div class="form-group">
@@ -804,151 +782,18 @@
                                 <span class="required">*</span>
                                 موديل السيارة
                             </label>
-                            <div class="custom-select">
-                                <select name="carModel" id="carModel" required disabled>
-                                    <option value="">-- اختر الموديل --</option>
-                                </select>
-                            </div>
-                            <div class="error-message">الرجاء اختيار موديل السيارة</div>
+                            <input type="text" name="carModel" id="carModel" required 
+                                   placeholder="مثال: كامري، ألتيما، سوناتا...">
+                            <div class="error-message">الرجاء إدخال موديل السيارة</div>
                         </div>
 
                         <div class="form-group">
-                            <label>
-                                <span class="required">*</span>
-                                سنة الصنع
-                            </label>
+                            <label>سنة الصنع</label>
                             <input type="number" name="carYear" id="carYear" 
-                                   min="1990" max="2030" required 
-                                   placeholder="مثال: 2020">
-                            <div class="error-message">الرجاء إدخال سنة صنع صحيحة</div>
+                                   min="1990" max="2030" 
+                                   placeholder="مثال: 2020 (اختياري)">
                         </div>
 
-                        <div class="form-group">
-                            <label>
-                                رقم الهيكل (VIN)
-                                <span class="tooltip">ℹ️
-                                    <span class="tooltip-text">رقم مكون من 17 حرف ورقم يمكن إيجاده على لوحة القيادة أو دفتر السيارة</span>
-                                </span>
-                            </label>
-                            <input type="text" name="vin" id="vin" 
-                                   placeholder="اختياري - يساعد في الحصول على القطعة الصحيحة"
-                                   maxlength="17" style="text-transform: uppercase;"
-                                   pattern="[A-HJ-NPR-Z0-9]{17}"
-                                   title="رقم الهيكل يجب أن يكون 17 حرف ورقم بدون I, O, Q">
-                            <div class="error-message">رقم الهيكل غير صحيح (17 حرف ورقم)</div>
-                        </div>
-
-                        <div class="form-group full-width">
-                            <label>نوع المحرك</label>
-                            <div class="radio-group">
-                                <div class="radio-option">
-                                    <input type="radio" name="engineType" id="engine4" value="4cylinder">
-                                    <label for="engine4" class="radio-label">4 سلندر</label>
-                                </div>
-                                <div class="radio-option">
-                                    <input type="radio" name="engineType" id="engine6" value="6cylinder">
-                                    <label for="engine6" class="radio-label">6 سلندر</label>
-                                </div>
-                                <div class="radio-option">
-                                    <input type="radio" name="engineType" id="engine8" value="8cylinder">
-                                    <label for="engine8" class="radio-label">8 سلندر</label>
-                                </div>
-                                <div class="radio-option">
-                                    <input type="radio" name="engineType" id="engineOther" value="other">
-                                    <label for="engineOther" class="radio-label">أخرى</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Step 2: Part Details -->
-                <div class="form-section" data-section="2">
-                    <h2 class="section-title">تفاصيل القطعة المطلوبة</h2>
-
-                    <div class="form-grid">
-                        <div class="form-group full-width">
-                            <label>
-                                <span class="required">*</span>
-                                اسم القطعة
-                            </label>
-                            <input type="text" name="partName" id="partName" required 
-                                   placeholder="مثال: رديتر، كمبريسر مكيف، طرمبة بنزين...">
-                            <div class="error-message">الرجاء إدخال اسم القطعة</div>
-                        </div>
-
-                        <div class="form-group full-width">
-                            <label>فئة القطعة</label>
-                            <div class="checkbox-group">
-                                <div class="checkbox-option">
-                                    <input type="checkbox" id="cat1" value="engine">
-                                    <label for="cat1" class="checkbox-label">محرك</label>
-                                </div>
-                                <div class="checkbox-option">
-                                    <input type="checkbox" id="cat2" value="transmission">
-                                    <label for="cat2" class="checkbox-label">جير</label>
-                                </div>
-                                <div class="checkbox-option">
-                                    <input type="checkbox" id="cat3" value="electric">
-                                    <label for="cat3" class="checkbox-label">كهرباء</label>
-                                </div>
-                                <div class="checkbox-option">
-                                    <input type="checkbox" id="cat4" value="cooling">
-                                    <label for="cat4" class="checkbox-label">تبريد</label>
-                                </div>
-                                <div class="checkbox-option">
-                                    <input type="checkbox" id="cat5" value="suspension">
-                                    <label for="cat5" class="checkbox-label">عفشة</label>
-                                </div>
-                                <div class="checkbox-option">
-                                    <input type="checkbox" id="cat6" value="body">
-                                    <label for="cat6" class="checkbox-label">بودي</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>رقم القطعة (إن وجد)</label>
-                            <input type="text" name="partNumber" id="partNumber" 
-                                   placeholder="رقم القطعة الأصلي">
-                        </div>
-
-                        <div class="form-group">
-                            <label>حالة القطعة المطلوبة</label>
-                            <div class="custom-select">
-                                <select name="partCondition" id="partCondition">
-                                    <option value="any">لا يهم</option>
-                                    <option value="new">جديد فقط</option>
-                                    <option value="used">مستعمل</option>
-                                    <option value="refurbished">مجدد</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-group full-width">
-                            <label>وصف إضافي للقطعة</label>
-                            <textarea name="partDescription" id="partDescription" 
-                                      placeholder="أي تفاصيل إضافية تساعد في تحديد القطعة المطلوبة..."></textarea>
-                        </div>
-
-                        <div class="form-group full-width">
-                            <label>صور القطعة (اختياري)</label>
-                            <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
-                                <div class="upload-icon">📷</div>
-                                <div class="upload-text">انقر لرفع الصور أو اسحب الملفات هنا</div>
-                                <div class="upload-hint">يمكنك رفع حتى 5 صور (JPG, PNG - حجم أقصى 5MB)</div>
-                            </div>
-                            <input type="file" id="fileInput" accept="image/*" multiple style="display: none;">
-                            <div class="image-preview" id="imagePreview"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Step 3: Contact Information -->
-                <div class="form-section" data-section="3">
-                    <h2 class="section-title">معلومات التواصل</h2>
-
-                    <div class="form-grid">
                         <div class="form-group">
                             <label>
                                 <span class="required">*</span>
@@ -970,13 +815,6 @@
                         </div>
 
                         <div class="form-group">
-                            <label>البريد الإلكتروني</label>
-                            <input type="email" name="email" id="email" 
-                                   placeholder="example@email.com">
-                            <div class="error-message">الرجاء إدخال بريد إلكتروني صحيح</div>
-                        </div>
-
-                        <div class="form-group">
                             <label>المدينة</label>
                             <div class="custom-select">
                                 <select name="city" id="city">
@@ -989,23 +827,41 @@
                                 </select>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Part Details -->
+                <div class="form-section" data-section="2">
+                    <h2 class="section-title">تفاصيل الطلب</h2>
+
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label>
+                                <span class="required">*</span>
+                                القطعة المطلوبة بالتفصيل
+                            </label>
+                            <textarea name="partDetails" id="partDetails" required
+                                      placeholder="اكتب اسم القطعة بالتفصيل مثل:&#10;- رديتر كامري 2020&#10;- كمبريسر مكيف نيسان ألتيما&#10;- طرمبة بنزين هيونداي سوناتا&#10;- مرايا جانبية يمين&#10;- فانوس خلفي شمال"
+                                      style="min-height: 120px;"></textarea>
+                            <div class="error-message">الرجاء وصف القطعة المطلوبة بالتفصيل</div>
+                        </div>
 
                         <div class="form-group full-width">
-                            <label>طريقة التواصل المفضلة</label>
-                            <div class="radio-group">
-                                <div class="radio-option">
-                                    <input type="radio" name="contactMethod" id="whatsapp" value="whatsapp" checked>
-                                    <label for="whatsapp" class="radio-label">واتساب</label>
-                                </div>
-                                <div class="radio-option">
-                                    <input type="radio" name="contactMethod" id="call" value="call">
-                                    <label for="call" class="radio-label">اتصال</label>
-                                </div>
-                                <div class="radio-option">
-                                    <input type="radio" name="contactMethod" id="sms" value="sms">
-                                    <label for="sms" class="radio-label">رسالة نصية</label>
-                                </div>
+                            <label>صور القطعة (اختياري)</label>
+                            <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                                <div class="upload-icon">📷</div>
+                                <div class="upload-text">انقر لرفع الصور أو اسحب الملفات هنا</div>
+                                <div class="upload-hint">صور القطعة المطلوبة أو موقعها في السيارة (اختياري)</div>
                             </div>
+                            <input type="file" id="fileInput" accept="image/*" multiple style="display: none;">
+                            <div class="image-preview" id="imagePreview"></div>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label>ملاحظات إضافية</label>
+                            <textarea name="notes" id="notes" 
+                                      placeholder="أي معلومات إضافية تود إخبارنا بها... (اختياري)"
+                                      style="min-height: 80px;"></textarea>
                         </div>
 
                         <div class="form-group full-width">
@@ -1021,21 +877,15 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div class="form-group full-width">
-                            <label>ملاحظات إضافية</label>
-                            <textarea name="notes" id="notes" 
-                                      placeholder="أي معلومات إضافية تود إخبارنا بها..."></textarea>
-                        </div>
                     </div>
                 </div>
 
-                <!-- Step 4: Review & Submit -->
-                <div class="form-section" data-section="4">
-                    <h2 class="section-title">مراجعة الطلب</h2>
+                <!-- Step 3: Submit -->
+                <div class="form-section" data-section="3">
+                    <h2 class="section-title">إرسال الطلب</h2>
 
                     <div class="summary-section">
-                        <h3 style="margin-bottom: 1.5rem; color: #333;">معلومات السيارة</h3>
+                        <h3 style="margin-bottom: 1.5rem; color: #333;">ملخص الطلب</h3>
                         <div class="summary-item">
                             <span class="summary-label">السيارة:</span>
                             <span class="summary-value" id="summarycar">-</span>
@@ -1044,18 +894,10 @@
                             <span class="summary-label">السنة:</span>
                             <span class="summary-value" id="summaryYear">-</span>
                         </div>
-
-                        <h3 style="margin: 1.5rem 0; color: #333;">القطعة المطلوبة</h3>
                         <div class="summary-item">
-                            <span class="summary-label">اسم القطعة:</span>
+                            <span class="summary-label">القطعة المطلوبة:</span>
                             <span class="summary-value" id="summaryPart">-</span>
                         </div>
-                        <div class="summary-item">
-                            <span class="summary-label">الحالة:</span>
-                            <span class="summary-value" id="summaryCondition">-</span>
-                        </div>
-
-                        <h3 style="margin: 1.5rem 0; color: #333;">معلومات التواصل</h3>
                         <div class="summary-item">
                             <span class="summary-label">الاسم:</span>
                             <span class="summary-value" id="summaryName">-</span>
@@ -1123,25 +965,9 @@
         };
 
         let currentStep = 1;
-        const totalSteps = 4;
+        const totalSteps = 3;
 
-        // Update car models based on selected make
-        function updateModels() {
-            const make = document.getElementById('carMake').value;
-            const modelSelect = document.getElementById('carModel');
-            
-            modelSelect.innerHTML = '<option value="">-- اختر الموديل --</option>';
-            modelSelect.disabled = !make;
-            
-            if (make && carModels[make]) {
-                carModels[make].forEach(model => {
-                    const option = document.createElement('option');
-                    option.value = model;
-                    option.textContent = model;
-                    modelSelect.appendChild(option);
-                });
-            }
-        }
+        // No longer needed since we simplified to text inputs
 
         // Change form step
         function changeStep(direction) {
@@ -1193,40 +1019,13 @@
                 }
             });
             
-            // Special validation for step 3
-            if (step === 3) {
+            // Phone validation for step 1
+            if (step === 1) {
                 const phone = document.getElementById('phone');
                 const phoneRegex = /^05[0-9]{8}$/;
                 if (phone.value && !phoneRegex.test(phone.value)) {
                     phone.closest('.form-group').classList.add('error');
                     phone.closest('.form-group').querySelector('.error-message').classList.add('show');
-                    isValid = false;
-                }
-
-                const email = document.getElementById('email');
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (email.value && !emailRegex.test(email.value)) {
-                    email.closest('.form-group').classList.add('error');
-                    const errorMsg = email.closest('.form-group').querySelector('.error-message');
-                    if (errorMsg) {
-                        errorMsg.textContent = 'الرجاء إدخال بريد إلكتروني صحيح';
-                        errorMsg.classList.add('show');
-                    }
-                    isValid = false;
-                }
-            }
-
-            // VIN validation
-            const vin = document.getElementById('vin');
-            if (vin && vin.value) {
-                const vinRegex = /^[A-HJ-NPR-Z0-9]{17}$/;
-                if (!vinRegex.test(vin.value)) {
-                    vin.closest('.form-group').classList.add('error');
-                    const errorMsg = vin.closest('.form-group').querySelector('.error-message');
-                    if (errorMsg) {
-                        errorMsg.textContent = 'رقم الهيكل غير صحيح (17 حرف ورقم)';
-                        errorMsg.classList.add('show');
-                    }
                     isValid = false;
                 }
             }
@@ -1273,13 +1072,10 @@
 
         // Update summary
         function updateSummary() {
-            const makeElement = document.getElementById('carMake').selectedOptions[0];
-            const make = makeElement ? makeElement.text : '-';
+            const make = document.getElementById('carMake').value || '-';
             const model = document.getElementById('carModel').value || '-';
             const year = document.getElementById('carYear').value || '-';
-            const partName = document.getElementById('partName').value || '-';
-            const conditionElement = document.getElementById('partCondition').selectedOptions[0];
-            const condition = conditionElement ? conditionElement.text : '-';
+            const partDetails = document.getElementById('partDetails').value || '-';
             const name = document.getElementById('fullName').value || '-';
             const phone = document.getElementById('phone').value || '-';
             const urgencyElement = document.querySelector('input[name="urgency"]:checked');
@@ -1287,8 +1083,7 @@
             
             document.getElementById('summarycar').textContent = `${make} ${model}`;
             document.getElementById('summaryYear').textContent = year;
-            document.getElementById('summaryPart').textContent = partName;
-            document.getElementById('summaryCondition').textContent = condition;
+            document.getElementById('summaryPart').textContent = partDetails.substring(0, 100) + (partDetails.length > 100 ? '...' : '');
             document.getElementById('summaryName').textContent = name;
             document.getElementById('summaryPhone').textContent = phone;
             document.getElementById('summaryUrgency').textContent = urgency;

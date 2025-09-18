@@ -738,7 +738,7 @@
 
         async function loadOrders() {
             try {
-                const response = await fetch('/api/admin/orders');
+                const response = await fetch('/api/orders/admin');
                 if (response.ok) {
                     const data = await response.json();
                     currentOrders = data || [];
@@ -1060,7 +1060,7 @@
             const statusNote = document.getElementById('statusNote').value;
 
             try {
-                const response = await fetch(`/api/admin/orders/${orderId}/status`, {
+                const response = await fetch(`/api/orders/admin/${orderId}/status`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'

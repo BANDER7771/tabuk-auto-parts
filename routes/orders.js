@@ -63,6 +63,74 @@ router.post('/', async (req, res) => {
 });
 
 // الحصول على جميع الطلبات (للوحة الإدارة)
+router.get('/admin', async (req, res) => {
+    try {
+        const orders = await Order.find()
+            .sort({ createdAt: -1 })
+            .populate('items.partId');
+        
+        res.json(orders);
+    } catch (error) {
+        res.status(500).json({ 
+            message: 'خطأ في جلب الطلبات', 
+            error: error.message 
+        });
+    }
+});
+
+// تحديث حالة الطلب للإدارة
+router.put('/admin/:id/status', async (req, res) => {
+    try {
+        const { status, description } = req.body;
+        
+        const order = await Order.findById(req.params.id);
+
+        if (!order) {
+            return res.status(404).json({ 
+                message: 'الطلب غير موجود' 
+            });
+        }
+
+        // تحديث الحالة
+        order.status = status;
+        
+        // إضافة إلى Timeline
+        order.timeline.push({
+            status: status,
+            date: new Date(),
+            description: description || `تم تحديث الحالة إلى ${status}`
+        });
+
+        await order.save();
+
+        res.json({
+            message: 'تم تحديث حالة الطلب',
+            order
+        });
+    } catch (error) {
+        res.status(500).json({ 
+            message: 'خطأ في تحديث الطلب', 
+            error: error.message 
+        });
+    }
+});
+
+// تتبع الطلبات بالجوال
+router.get('/track/:phone', async (req, res) => {
+    try {
+        const orders = await Order.find({ 
+            customerPhone: req.params.phone 
+        }).sort({ createdAt: -1 });
+        
+        res.json(orders);
+    } catch (error) {
+        res.status(500).json({ 
+            message: 'خطأ في تتبع الطلبات', 
+            error: error.message 
+        });
+    }
+});
+
 router.get('/', async (req, res) => {
     try {
         const { status, phone } = req.query;

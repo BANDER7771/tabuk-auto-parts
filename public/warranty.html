@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سياسة الضمان - تشاليح تبوك</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.8;
+            color: #333;
+            background: #f8f9fa;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: white;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .section {
+            margin-bottom: 2.5rem;
+        }
+
+        .section h2 {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .section p {
+            margin-bottom: 1rem;
+            text-align: justify;
+        }
+
+        .section ul {
+            margin-bottom: 1rem;
+            padding-right: 2rem;
+        }
+
+        .section li {
+            margin-bottom: 0.5rem;
+        }
+
+        .warranty-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .warranty-table th,
+        .warranty-table td {
+            padding: 1rem;
+            text-align: right;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .warranty-table th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+
+        .warranty-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .warranty-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin: 2rem 0;
+        }
+
+        .warranty-card h3 {
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .warranty-card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .warranty-card li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .warranty-card li:last-child {
+            border-bottom: none;
+        }
+
+        .warranty-card li:before {
+            content: "✓";
+            margin-left: 0.5rem;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .back-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 1rem 2rem;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: transform 0.2s;
+            margin-top: 2rem;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            border-right: 4px solid #f39c12;
+        }
+
+        .warning-box h3 {
+            color: #856404;
+            margin-bottom: 1rem;
+        }
+
+        .success-box {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            border-right: 4px solid #28a745;
+        }
+
+        .success-box h3 {
+            color: #155724;
+            margin-bottom: 1rem;
+        }
+
+        .steps {
+            background: #f8f9fa;
+            padding: 2rem;
+            border-radius: 12px;
+            margin: 2rem 0;
+        }
+
+        .step {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-left: 1rem;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .warranty-table {
+                font-size: 0.9rem;
+            }
+
+            .warranty-table th,
+            .warranty-table td {
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛡️ سياسة الضمان</h1>
+            <p>تشاليح تبوك - ضمان الجودة والثقة</p>
+        </div>
+
+        <div class="section">
+            <h2>التزامنا بالجودة</h2>
+            <p>
+                في تشاليح تبوك، نؤمن بأن الجودة هي أساس الثقة. لذلك نقدم ضمانات شاملة على جميع قطع الغيار التي نوفرها، لنضمن لك راحة البال والحماية الكاملة لاستثمارك.
+            </p>
+        </div>
+
+        <div class="warranty-card">
+            <h3>🎯 ما يشمله الضمان</h3>
+            <ul>
+                <li>عيوب التصنيع والمواد الخام</li>
+                <li>الأعطال الناتجة عن سوء جودة القطعة</li>
+                <li>عدم مطابقة المواصفات المعلنة</li>
+                <li>التلف أثناء الاستخدام العادي</li>
+                <li>استبدال مجاني للقطع المعيبة</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>فترات الضمان</h2>
+            <table class="warranty-table">
+                <thead>
+                    <tr>
+                        <th>نوع القطعة</th>
+                        <th>فترة الضمان</th>
+                        <th>الحد الأقصى للممشى</th>
+                        <th>الشروط الخاصة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>قطع غيار أصلية</strong></td>
+                        <td>6 أشهر</td>
+                        <td>10,000 كم</td>
+                        <td>ضمان شامل</td>
+                    </tr>
+                    <tr>
+                        <td><strong>قطع غيار بديلة عالية الجودة</strong></td>
+                        <td>3 أشهر</td>
+                        <td>5,000 كم</td>
+                        <td>ضمان ضد عيوب التصنيع</td>
+                    </tr>
+                    <tr>
+                        <td><strong>قطع غيار مستعملة</strong></td>
+                        <td>شهر واحد</td>
+                        <td>1,000 كم</td>
+                        <td>فحص مجاني فقط</td>
+                    </tr>
+                    <tr>
+                        <td><strong>قطع المحرك الرئيسية</strong></td>
+                        <td>12 شهر</td>
+                        <td>15,000 كم</td>
+                        <td>ضمان ممتد</td>
+                    </tr>
+                    <tr>
+                        <td><strong>الإطارات</strong></td>
+                        <td>6 أشهر</td>
+                        <td>20,000 كم</td>
+                        <td>ضد عيوب التصنيع فقط</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="success-box">
+            <h3>✅ مميزات ضماننا</h3>
+            <ul>
+                <li><strong>استبدال مجاني:</strong> لأي قطعة معيبة خلال فترة الضمان</li>
+                <li><strong>فحص مجاني:</strong> تشخيص المشكلة دون رسوم</li>
+                <li><strong>شحن مجاني:</strong> نتحمل تكاليف الشحن في حالات الضمان</li>
+                <li><strong>ضمان ممتد:</strong> إمكانية تمديد الضمان برسوم رمزية</li>
+                <li><strong>خدمة سريعة:</strong> معالجة طلبات الضمان خلال 24 ساعة</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>شروط الضمان</h2>
+            <h3>الشروط العامة:</h3>
+            <ul>
+                <li>الاحتفاظ بالفاتورة الأصلية وبطاقة الضمان</li>
+                <li>التركيب في مركز صيانة معتمد أو بواسطة فني مختص</li>
+                <li>الاستخدام العادي للسيارة وعدم التعرض لحوادث</li>
+                <li>اتباع تعليمات الصيانة الدورية</li>
+                <li>عدم العبث بالقطعة أو محاولة إصلاحها ذاتياً</li>
+            </ul>
+
+            <h3>شروط خاصة بقطع معينة:</h3>
+            <ul>
+                <li><strong>البطاريات:</strong> ضمان لمدة سنة، يتطلب فحص دوري كل 3 أشهر</li>
+                <li><strong>المكابح:</strong> ضمان 6 أشهر، يتطلب فحص نظام المكابح كاملاً</li>
+                <li><strong>التكييف:</strong> ضمان 3 أشهر، يتطلب صيانة دورية للنظام</li>
+                <li><strong>الإضاءة:</strong> ضمان شهرين، لا يشمل الكسر الناتج عن الحوادث</li>
+            </ul>
+        </div>
+
+        <div class="warning-box">
+            <h3>⚠️ ما لا يشمله الضمان</h3>
+            <ul>
+                <li>الأضرار الناتجة عن الحوادث أو سوء الاستخدام</li>
+                <li>التلف الناتج عن التركيب الخاطئ</li>
+                <li>الأضرار الناتجة عن عدم الصيانة الدورية</li>
+                <li>التآكل الطبيعي نتيجة الاستخدام العادي</li>
+                <li>الأضرار الناتجة عن العوامل الجوية القاسية</li>
+                <li>التعديل أو التحوير في القطعة</li>
+                <li>استخدام زيوت أو سوائل غير مناسبة</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>كيفية المطالبة بالضمان</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <div class="step-title">التواصل الفوري</div>
+                        <p>اتصل بنا فور ملاحظة أي مشكلة على الرقم 0555123456 أو عبر الواتساب</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <div class="step-title">تقديم المستندات</div>
+                        <p>أرسل صورة من الفاتورة وبطاقة الضمان ووصف مفصل للمشكلة</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <div class="step-title">الفحص الأولي</div>
+                        <p>فريقنا الفني سيقوم بتقييم المشكلة والتأكد من شمولها بالضمان</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <div class="step-title">الحل السريع</div>
+                        <p>استبدال فوري للقطعة المعيبة أو إصلاح مجاني حسب الحالة</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">5</div>
+                    <div class="step-content">
+                        <div class="step-title">المتابعة</div>
+                        <p>نتابع معك للتأكد من حل المشكلة وعدم تكرارها</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>الضمان الممتد</h2>
+            <p>
+                نوفر خدمة الضمان الممتد للعملاء الذين يرغبون في حماية إضافية:
+            </p>
+            <ul>
+                <li><strong>ضمان ممتد سنة إضافية:</strong> 15% من قيمة القطعة</li>
+                <li><strong>ضمان ممتد سنتين:</strong> 25% من قيمة القطعة</li>
+                <li><strong>ضمان شامل:</strong> يشمل التركيب والصيانة - 35% من قيمة القطعة</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>خدمة العملاء</h2>
+            <p>
+                فريق خدمة العملاء متاح لمساعدتك في جميع أمور الضمان:
+            </p>
+            <ul>
+                <li><strong>الهاتف:</strong> 0555123456 (24/7)</li>
+                <li><strong>واتساب:</strong> 0555123456</li>
+                <li><strong>البريد الإلكتروني:</strong> warranty@tabuk-parts.com</li>
+                <li><strong>الزيارة المباشرة:</strong> تبوك، شارع الملك عبدالعزيز</li>
+            </ul>
+        </div>
+
+        <div class="success-box">
+            <h3>🌟 التزامنا بالتميز</h3>
+            <p>
+                في تشاليح تبوك، نؤمن بأن رضا العميل هو مقياس نجاحنا. لذلك نسعى دائماً لتقديم أفضل خدمة ضمان في المنطقة، مع فريق مختص ومتفهم لاحتياجاتكم.
+            </p>
+        </div>
+
+        <div style="text-align: center;">
+            <a href="index.html" class="back-btn">العودة للرئيسية</a>
+        </div>
+    </div>
+</body>
+</html>

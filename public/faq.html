@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الأسئلة الشائعة - تشاليح تبوك</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.8;
+            color: #333;
+            background: #f8f9fa;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: white;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .search-box {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 3rem;
+            border: 1px solid #e0e0e0;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .faq-category {
+            margin-bottom: 3rem;
+        }
+
+        .category-title {
+            font-size: 1.8rem;
+            color: #333;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #667eea;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .category-icon {
+            font-size: 2rem;
+        }
+
+        .faq-item {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .faq-item:hover {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .faq-question {
+            padding: 1.5rem;
+            background: #f8f9fa;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #333;
+            transition: background-color 0.3s;
+        }
+
+        .faq-question:hover {
+            background: #e9ecef;
+        }
+
+        .faq-question.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .faq-toggle {
+            font-size: 1.5rem;
+            transition: transform 0.3s;
+        }
+
+        .faq-question.active .faq-toggle {
+            transform: rotate(45deg);
+        }
+
+        .faq-answer {
+            padding: 0 1.5rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .faq-answer.active {
+            padding: 1.5rem;
+            max-height: 500px;
+        }
+
+        .faq-answer p {
+            margin-bottom: 1rem;
+            text-align: justify;
+        }
+
+        .faq-answer ul {
+            margin-bottom: 1rem;
+            padding-right: 2rem;
+        }
+
+        .faq-answer li {
+            margin-bottom: 0.5rem;
+        }
+
+        .back-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 1rem 2rem;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: transform 0.2s;
+            margin-top: 2rem;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .highlight {
+            background: #fff3cd;
+            padding: 1rem;
+            border-radius: 6px;
+            border-left: 4px solid #ffc107;
+            margin: 1rem 0;
+        }
+
+        .contact-cta {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin: 3rem 0;
+        }
+
+        .contact-cta h3 {
+            margin-bottom: 1rem;
+        }
+
+        .contact-cta p {
+            margin-bottom: 1.5rem;
+            opacity: 0.9;
+        }
+
+        .contact-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 0.8rem 2rem;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin: 0 0.5rem;
+        }
+
+        .contact-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .category-title {
+                font-size: 1.5rem;
+            }
+
+            .faq-question {
+                padding: 1rem;
+                font-size: 1rem;
+            }
+
+            .contact-btn {
+                display: block;
+                margin: 0.5rem 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>❓ الأسئلة الشائعة</h1>
+            <p>تشاليح تبوك - إجابات على أكثر الأسئلة شيوعاً</p>
+        </div>
+
+        <div class="search-box">
+            <input type="text" class="search-input" id="searchInput" placeholder="ابحث في الأسئلة الشائعة...">
+        </div>
+
+        <!-- قطع الغيار -->
+        <div class="faq-category">
+            <h2 class="category-title">
+                <span class="category-icon">🔧</span>
+                قطع الغيار
+            </h2>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>كيف أطلب قطعة غيار؟</span>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>يمكنك طلب قطعة الغيار بسهولة من خلال:</p>
+                    <ul>
+                        <li>زيارة صفحة "اطلب قطعتك" من الموقع</li>
+                        <li>تعبئة النموذج بمعلومات السيارة والقطعة المطلوبة</li>
+                        <li>إرفاق صور للقطعة إن أمكن</li>
+                        <li>سيتواصل معك فريقنا خلال 24 ساعة</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>هل تتوفر قطع غيار أصلية؟</span>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>نعم، نوفر نوعين من قطع الغيار:</p>
+                    <ul>
+                        <li><strong>قطع أصلية:</strong> من الوكالة مع ضمان 6 أشهر</li>
+                        <li><strong>قطع بديلة عالية الجودة:</strong> مع ضمان 3 أشهر</li>
+                    </ul>
+                    <div class="highlight">
+                        <strong>ملاحظة:</strong> نضمن جودة جميع قطع الغيار ونقدم استشارة مجانية لاختيار الأنسب لسيارتك.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>كم يستغرق توفير القطعة؟</span>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>مدة التوفير تعتمد على نوع القطعة:</p>
+                    <ul>
+                        <li><strong>القطع المتوفرة:</strong> نفس اليوم أو خلال 24 ساعة</li>
+                        <li><strong>القطع غير المتوفرة:</strong> 3-7 أيام</li>
+                        <li><strong>القطع النادرة:</strong> 7-14 يوم</li>
+                        <li><strong>الطلبات المستعجلة:</strong> خدمة سريعة خلال 24 ساعة (رسوم إضافية)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>هل يمكنني إلغاء الطلب؟</span>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>نعم، يمكن إلغاء الطلب وفق الشروط التالية:</p>
+                    <ul>
+                        <li>قبل تأكيد الطلب: إلغاء مجاني</li>
+                        <li>بعد التأكيد وخلال ساعتين: إلغاء مجاني</li>
+                        <li>بعد بدء التحضير: قد تطبق رسوم إلغاء</li>
+                        <li>بعد الشحن: لا يمكن الإلغاء (يمكن الإرجاع)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- الأسعار والدفع -->
+        <div class="faq-category">
+            <h2 class="category-title">
+                <span class="category-icon">💰</span>
+                الأسعار والدفع
+            </h2>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>كيف يتم تحديد السعر؟</span>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>يتم تحديد السعر بناءً على:</p>
+                    <ul>
+                        <li>نوع القطعة (أصلية أم بديلة)</li>
+                        <li>ماركة وموديل السيارة</li>
+                        <li>توفر القطعة في السوق</li>
+                        <li>جودة ومصدر القطعة</li>
+                    </ul>
+                    <p>نقدم لك عرض سعر مفصل قبل تأكيد الطلب.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>ما هي طرق الدفع المتاحة؟</span>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>نوفر عدة طرق دفع مريحة:</p>
+                    <ul>
+                        <li><strong>الدفع عند الاستلام:</strong> نقداً أو بالبطاقة</li>
+                        <li><strong>التحويل البنكي:</strong> قبل الشحن</li>
+                        <li><strong>الدفع الإلكتروني:</strong> عبر الموقع (قريباً)</li>
+                        <li><strong>التقسيط:</strong> للمبالغ الكبيرة (شروط خاصة)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>هل الأسعار تشمل ضريبة القيمة المضافة؟</span>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>نعم، جميع أسعارنا تشمل ضريبة القيمة المضافة (15%). ستحصل على فاتورة ضريبية رسمية مع كل عملية شراء.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- التوصيل والشحن -->
+        <div class="faq-category">
+            <h2 class="category-title">
+                <span class="category-icon">🚚</span>
+                التوصيل والشحن
+            </h2>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>ما هي مناطق التوصيل؟</span>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>نوفر خدمة التوصيل في:</p>
+                    <ul>
+                        <li><strong>داخل تبوك:</strong> توصيل مجاني للطلبات أكثر من 200 ريال</li>
+                        <li><strong>المناطق المجاورة:</strong> رسوم توصيل حسب المسافة</li>
+                        <li><strong>جميع مناطق المملكة:</strong> عبر شركات الشحن</li>
+                        <li><strong>التوصيل السريع:</strong> خلال ساعات (داخل تبوك فقط)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>كم تكلفة الشحن؟</span>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>تكلفة الشحن تعتمد على:</p>
+                    <ul>
+                        <li><strong>داخل تبوك:</strong> مجاني للطلبات +200 ريال، 15 ريال للطلبات الأقل</li>
+                        <li><strong>المناطق القريبة:</strong> 25-50 ريال</li>
+                        <li><strong>باقي المناطق:</strong> 30-80 ريال حسب الوزن والمسافة</li>
+                        <li><strong>الشحن السريع:</strong> 50% إضافية على سعر الشحن العادي</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>كيف أتتبع طلبي؟</span>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>يمكنك تتبع طلبك بعدة طرق:</p>
+                    <ul>
+                        <li>من الصفحة الرئيسية للموقع - قسم "تتبع طلبك"</li>
+                        <li>أدخل رقم الجوال المسجل</li>
+                        <li>ستظهر لك حالة الطلب الحالية</li>
+                        <li>ستصلك رسائل تحديث عبر الواتساب</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- بيع السيارات -->
+        <div class="faq-category">
+            <h2 class="category-title">
+                <span class="category-icon">🚗</span>
+                بيع السيارات
+            </h2>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>كيف أبيع سيارتي؟</span>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>عملية بيع السيارة سهلة وسريعة:</p>
+                    <ul>
+                        <li>املأ نموذج "بيع سيارتك" بمعلومات السيارة</li>
+                        <li>أرفق صور واضحة للسيارة من جميع الجهات</li>
+                        <li>سيتواصل معك فريق التقييم خلال 24 ساعة</li>
+                        <li>موعد معاينة مجانية في موقع السيارة</li>
+                        <li>عرض سعر فوري بعد المعاينة</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>ما هي أنواع السيارات التي تشترونها؟</span>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>نشتري جميع أنواع السيارات:</p>
+                    <ul>
+                        <li><strong>السيارات السليمة:</strong> بأفضل الأسعار</li>
+                        <li><strong>السيارات المتضررة:</strong> حوادث، أعطال</li>
+                        <li><strong>السيارات المعطلة:</strong> مشاكل في المحرك أو القير</li>
+                        <li><strong>السيارات القديمة:</strong> لقطع الغيار</li>
+                        <li><strong>جميع الماركات:</strong> يابانية، أمريكية، أوروبية، كورية</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>كيف يتم تحديد سعر السيارة؟</span>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>نحدد السعر بناءً على تقييم شامل يشمل:</p>
+                    <ul>
+                        <li>حالة السيارة العامة والمحرك</li>
+                        <li>الماركة والموديل وسنة الصنع</li>
+                        <li>الممشى والصيانة</li>
+                        <li>حالة الهيكل والطلاء</li>
+                        <li>أسعار السوق الحالية</li>
+                        <li>قيمة قطع الغيار</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>كم يستغرق بيع السيارة؟</span>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>عملية البيع سريعة:</p>
+                    <ul>
+                        <li><strong>التواصل الأولي:</strong> خلال 24 ساعة</li>
+                        <li><strong>موعد المعاينة:</strong> خلال 2-3 أيام</li>
+                        <li><strong>التقييم والعرض:</strong> فوري أثناء المعاينة</li>
+                        <li><strong>إتمام البيع:</strong> نفس اليوم عند الموافقة</li>
+                        <li><strong>الدفع:</strong> نقداً أو تحويل فوري</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- الضمان والخدمة -->
+        <div class="faq-category">
+            <h2 class="category-title">
+                <span class="category-icon">🛡️</span>
+                الضمان والخدمة
+            </h2>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>ما هي مدة الضمان؟</span>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>نقدم ضمانات متنوعة حسب نوع القطعة:</p>
+                    <ul>
+                        <li><strong>القطع الأصلية:</strong> 6 أشهر أو 10,000 كم</li>
+                        <li><strong>القطع البديلة:</strong> 3 أشهر أو 5,000 كم</li>
+                        <li><strong>القطع المستعملة:</strong> شهر واحد</li>
+                        <li><strong>الزيوت والسوائل:</strong> بدون ضمان</li>
+                    </ul>
+                    <div class="highlight">
+                        الضمان يغطي عيوب التصنيع فقط، وليس سوء الاستخدام أو التركيب الخاطئ.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>كيف أستفيد من الضمان؟</span>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>للاستفادة من الضمان:</p>
+                    <ul>
+                        <li>احتفظ بالفاتورة الأصلية</li>
+                        <li>تواصل معنا عند ظهور أي مشكلة</li>
+                        <li>سنقوم بفحص القطعة مجاناً</li>
+                        <li>استبدال أو إصلاح مجاني إذا كان العيب مشمول بالضمان</li>
+                        <li>نتحمل تكاليف الشحن في حالات الضمان</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="contact-cta">
+            <h3>🤝 لم تجد إجابة لسؤالك؟</h3>
+            <p>فريق خدمة العملاء جاهز لمساعدتك على مدار الساعة</p>
+            <a href="tel:0555123456" class="contact-btn">📞 اتصل بنا</a>
+            <a href="https://wa.me/966555123456" class="contact-btn">💬 واتساب</a>
+        </div>
+
+        <div style="text-align: center;">
+            <a href="index.html" class="back-btn">العودة للرئيسية</a>
+        </div>
+    </div>
+
+    <script>
+        function toggleFaq(element) {
+            const answer = element.nextElementSibling;
+            const toggle = element.querySelector('.faq-toggle');
+            
+            // Close all other FAQs
+            document.querySelectorAll('.faq-question.active').forEach(q => {
+                if (q !== element) {
+                    q.classList.remove('active');
+                    q.nextElementSibling.classList.remove('active');
+                    q.querySelector('.faq-toggle').textContent = '+';
+                }
+            });
+            
+            // Toggle current FAQ
+            element.classList.toggle('active');
+            answer.classList.toggle('active');
+            toggle.textContent = element.classList.contains('active') ? '×' : '+';
+        }
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const faqItems = document.querySelectorAll('.faq-item');
+            
+            faqItems.forEach(item => {
+                const question = item.querySelector('.faq-question span').textContent.toLowerCase();
+                const answer = item.querySelector('.faq-answer').textContent.toLowerCase();
+                
+                if (question.includes(searchTerm) || answer.includes(searchTerm)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

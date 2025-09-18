@@ -12,56 +12,23 @@
         }
 
         :root {
-            --primary: #1a73e8;
-            --secondary: #0d47a1;
+            --primary: #667eea;
+            --secondary: #764ba2;
             --accent: #00bfa5;
             --success: #00c853;
             --warning: #ff6f00;
             --danger: #d32f2f;
-            --dark: #212121;
+            --dark: #1a1a1a;
             --light: #f5f5f5;
             --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #ffffff;
             color: #333;
             overflow-x: hidden;
-        }
-
-        /* Animated Background */
-        .bg-animation {
-            position: fixed;
-            width: 100vw;
-            height: 100vh;
-            top: 0;
-            left: 0;
-            z-index: -1;
-            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
-            opacity: 0.05;
-        }
-
-        .bg-animation::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 200%;
-            height: 100%;
-            background: repeating-linear-gradient(
-                90deg,
-                transparent,
-                transparent 2px,
-                rgba(255,255,255,0.03) 2px,
-                rgba(255,255,255,0.03) 4px
-            );
-            animation: scan 10s linear infinite;
-        }
-
-        @keyframes scan {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(50%); }
+            line-height: 1.6;
         }
 
         /* Modern Navigation */
@@ -82,11 +49,11 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1rem 2rem;
+            padding: 1rem 1.5rem;
         }
 
         .logo {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             font-weight: 800;
             background: linear-gradient(135deg, #667eea, #764ba2);
             background-clip: text;
@@ -99,20 +66,20 @@
         }
 
         .logo-icon {
-            width: 40px;
-            height: 40px;
+            width: 35px;
+            height: 35px;
             background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 12px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 1.5rem;
+            font-size: 1.2rem;
         }
 
         .nav-menu {
             display: flex;
-            gap: 2rem;
+            gap: 1.5rem;
             list-style: none;
             align-items: center;
         }
@@ -123,6 +90,7 @@
             font-weight: 500;
             transition: color 0.3s;
             position: relative;
+            font-size: 0.95rem;
         }
 
         .nav-menu a:hover {
@@ -144,13 +112,25 @@
             width: 100%;
         }
 
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #333;
+        }
+
         /* Hero Section */
         .hero {
             margin-top: 70px;
-            padding: 5rem 2rem;
+            padding: 3rem 1.5rem;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             position: relative;
             overflow: hidden;
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
         }
 
         .hero::before {
@@ -180,8 +160,8 @@
         }
 
         .hero h1 {
-            font-size: 3.5rem;
-            margin-bottom: 1.5rem;
+            font-size: 2.2rem;
+            margin-bottom: 1rem;
             font-weight: 800;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
             animation: fadeInUp 0.8s ease;
@@ -199,73 +179,227 @@
         }
 
         .hero p {
-            font-size: 1.3rem;
-            margin-bottom: 3rem;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
             opacity: 0.95;
             animation: fadeInUp 0.8s ease 0.2s both;
         }
 
-        /* Quick Actions */
-        .quick-actions {
+        .hero-stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            max-width: 900px;
-            margin: 3rem auto;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 1rem;
+            max-width: 600px;
+            margin: 2rem auto;
             animation: fadeInUp 0.8s ease 0.4s both;
         }
 
-        .action-card {
-            background: rgba(255, 255, 255, 0.95);
+        .hero-stat {
+            text-align: center;
+            padding: 1rem 0.5rem;
+            background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .hero-stat h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.3rem;
+            font-weight: 800;
+        }
+
+        .hero-stat p {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        /* Services Section */
+        .services {
+            padding: 4rem 1.5rem;
+            background: #f8f9fa;
+        }
+
+        .services-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-header h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #333;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-header h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 2px;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        .service-card {
+            background: white;
             border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        .service-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
             padding: 2rem;
             text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
+            position: relative;
         }
 
-        .action-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-            border-color: #667eea;
+        .service-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 30px 30px;
         }
 
-        .action-icon {
+        .service-icon {
             width: 80px;
             height: 80px;
-            margin: 0 auto 1rem;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: rgba(255, 255, 255, 0.2);
             border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
-            transition: all 0.3s ease;
+            font-size: 2.5rem;
+            margin: 0 auto 1rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
-        .action-card:hover .action-icon {
-            transform: scale(1.1) rotate(5deg);
-        }
-
-        .action-card h3 {
-            color: #333;
+        .service-header h3 {
+            font-size: 1.8rem;
             margin-bottom: 0.5rem;
-            font-size: 1.3rem;
+            font-weight: 700;
         }
 
-        .action-card p {
-            color: #666;
+        .service-header p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .service-content {
+            padding: 2rem;
+        }
+
+        .service-features {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+
+        .service-features li {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.8rem;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .service-features li:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .feature-icon {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #00c853, #00e676);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: bold;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .feature-text {
+            flex: 1;
+        }
+
+        .feature-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.3rem;
             font-size: 0.95rem;
         }
 
-        /* Track Order Section */
+        .feature-desc {
+            color: #666;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .service-btn {
+            width: 100%;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .service-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Track Section with Black Theme */
         .track-section {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e3f2fd 100%);
-            padding: 5rem 2rem;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            padding: 4rem 1.5rem;
             text-align: center;
             position: relative;
+            overflow: hidden;
         }
 
         .track-section::before {
@@ -275,84 +409,103 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="%23667eea" opacity="0.1"/></svg>') repeat;
-            background-size: 50px 50px;
-            animation: float 20s infinite linear;
+            background: 
+                radial-gradient(circle at 25% 25%, rgba(102, 126, 234, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(118, 75, 162, 0.1) 0%, transparent 50%);
+            animation: float 15s infinite alternate;
         }
 
         @keyframes float {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(50px, 50px); }
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(20px, -20px) rotate(1deg); }
         }
 
         .track-container {
-            max-width: 700px;
+            max-width: 600px;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(0, 0, 0, 0.6);
             backdrop-filter: blur(20px);
             border-radius: 25px;
-            padding: 3rem;
-            box-shadow: 0 25px 80px rgba(0,0,0,0.15);
+            padding: 2.5rem 2rem;
+            box-shadow: 
+                0 25px 80px rgba(0,0,0,0.3),
+                inset 0 1px 0 rgba(255,255,255,0.1);
             position: relative;
             z-index: 1;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .track-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.02) 50%, transparent 70%);
+            border-radius: 25px;
+            pointer-events: none;
         }
 
         .track-container h2 {
-            font-size: 2.2rem;
-            margin-bottom: 1.5rem;
-            color: #333;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            color: transparent;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: #ffffff;
             font-weight: 800;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        .track-container > p {
+            color: #cccccc;
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
         }
 
         .track-form {
             display: flex;
+            flex-direction: column;
             gap: 1rem;
             margin-bottom: 1.5rem;
             position: relative;
         }
 
         .track-input {
-            flex: 1;
-            padding: 1.2rem 1.8rem;
-            border: 2px solid rgba(102, 126, 234, 0.2);
-            border-radius: 50px;
-            font-size: 1.1rem;
+            padding: 1rem 1.5rem;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            font-size: 1rem;
             transition: all 0.3s;
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(10px);
+            color: #ffffff;
+            text-align: center;
         }
 
         .track-input:focus {
             outline: none;
             border-color: #667eea;
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
-            transform: translateY(-2px);
-            background: white;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .track-input::placeholder {
             color: #999;
-            font-weight: 500;
+            font-weight: 400;
         }
 
         .track-btn {
-            padding: 1.2rem 2.5rem;
+            padding: 1rem 2rem;
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
             border: none;
-            border-radius: 50px;
-            font-size: 1.1rem;
+            border-radius: 15px;
+            font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 0.5rem;
             box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
             position: relative;
@@ -375,24 +528,22 @@
         }
 
         .track-btn:hover {
-            transform: translateY(-3px) scale(1.02);
+            transform: translateY(-2px);
             box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
-        }
-
-        .track-btn:active {
-            transform: translateY(-1px) scale(0.98);
         }
 
         /* Track Results */
         .track-results {
             display: none;
             margin-top: 2rem;
-            padding: 2.5rem;
-            background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(248,249,250,0.95));
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(20px);
             border-radius: 20px;
-            box-shadow: 0 15px 50px rgba(0,0,0,0.15);
-            border: 1px solid rgba(255,255,255,0.3);
+            box-shadow: 
+                0 15px 50px rgba(0,0,0,0.3),
+                inset 0 1px 0 rgba(255,255,255,0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .track-results.active {
@@ -412,9 +563,9 @@
         }
 
         .track-results h4 {
-            color: #333;
+            color: #ffffff;
             margin-bottom: 1.5rem;
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             font-weight: 700;
             text-align: center;
         }
@@ -422,7 +573,7 @@
         .order-status {
             display: flex;
             justify-content: space-between;
-            margin: 2.5rem 0;
+            margin: 2rem 0;
             position: relative;
             padding: 0 1rem;
         }
@@ -433,8 +584,8 @@
             top: 20px;
             left: 12%;
             right: 12%;
-            height: 4px;
-            background: linear-gradient(90deg, #e0e0e0, #f0f0f0, #e0e0e0);
+            height: 3px;
+            background: rgba(255, 255, 255, 0.2);
             border-radius: 2px;
             z-index: 0;
         }
@@ -444,12 +595,13 @@
             position: absolute;
             top: 20px;
             left: 12%;
-            height: 4px;
+            height: 3px;
             width: 60%;
             background: linear-gradient(90deg, #667eea, #764ba2);
             border-radius: 2px;
             z-index: 1;
             animation: progressFill 1s ease-out;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
         }
 
         @keyframes progressFill {
@@ -466,39 +618,42 @@
         }
 
         .status-icon {
-            width: 45px;
-            height: 45px;
-            background: #e0e0e0;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 0.8rem;
-            color: #999;
+            color: #ccc;
             transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            font-size: 1.1rem;
+            font-size: 0.9rem;
             font-weight: bold;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            border: 2px solid rgba(255, 255, 255, 0.1);
         }
 
         .status-step.active .status-icon {
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
-            transform: scale(1.25);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            transform: scale(1.2);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
             animation: pulse 2s infinite;
+            border-color: rgba(102, 126, 234, 0.3);
         }
 
         .status-step.completed .status-icon {
             background: linear-gradient(135deg, #00c853, #00e676);
             color: white;
             transform: scale(1.1);
-            box-shadow: 0 6px 20px rgba(0, 200, 83, 0.3);
+            box-shadow: 0 6px 20px rgba(0, 200, 83, 0.4);
+            border-color: rgba(0, 200, 83, 0.3);
         }
 
         .status-step span {
-            font-size: 0.9rem;
-            color: #666;
+            font-size: 0.8rem;
+            color: #ccc;
             font-weight: 500;
             line-height: 1.2;
         }
@@ -515,270 +670,57 @@
 
         @keyframes pulse {
             0%, 100% {
-                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
             }
             50% {
-                box-shadow: 0 12px 35px rgba(102, 126, 234, 0.6);
+                box-shadow: 0 12px 35px rgba(102, 126, 234, 0.7);
             }
-        }
-
-        /* Features Grid */
-        .features {
-            padding: 5rem 2rem;
-            background: #f8f9fa;
-        }
-
-        .features-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .section-header {
-            text-align: center;
-            margin-bottom: 4rem;
-        }
-
-        .section-header h2 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            color: #333;
-            position: relative;
-            display: inline-block;
-        }
-
-        .section-header h2::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80px;
-            height: 4px;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            border-radius: 2px;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 2rem;
-        }
-
-        .feature-card {
-            background: white;
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .feature-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            transform: scaleX(0);
-            transition: transform 0.3s ease;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-        }
-
-        .feature-card:hover::before {
-            transform: scaleX(1);
-        }
-
-        .feature-icon {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .feature-card h3 {
-            color: #333;
-            margin-bottom: 1rem;
-            font-size: 1.3rem;
-        }
-
-        .feature-card p {
-            color: #666;
-            line-height: 1.6;
-        }
-
-        /* Search Modal */
-        .search-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.8);
-            z-index: 2000;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .search-modal.active {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .search-modal-content {
-            background: white;
-            border-radius: 20px;
-            padding: 3rem;
-            max-width: 600px;
-            width: 90%;
-            animation: slideUp 0.3s ease;
-        }
-
-        @keyframes slideUp {
-            from {
-                transform: translateY(50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        .search-modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
-
-        .close-modal {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: none;
-            background: #f5f5f5;
-            cursor: pointer;
-            font-size: 1.5rem;
-            transition: all 0.3s;
-        }
-
-        .close-modal:hover {
-            background: #e0e0e0;
-            transform: rotate(90deg);
-        }
-
-        .search-input-group {
-            position: relative;
-            margin-bottom: 1.5rem;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 1rem 3rem 1rem 1.5rem;
-            border: 2px solid #e0e0e0;
-            border-radius: 15px;
-            font-size: 1.1rem;
-            transition: all 0.3s;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 1.5rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #999;
-        }
-
-        /* Stats Section */
-        .stats {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 4rem 2rem;
-            color: white;
-        }
-
-        .stats-grid {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 2rem;
-            text-align: center;
-        }
-
-        .stat-item h3 {
-            font-size: 3rem;
-            margin-bottom: 0.5rem;
-            font-weight: 800;
-        }
-
-        .stat-item p {
-            font-size: 1.1rem;
-            opacity: 0.9;
         }
 
         /* CTA Section */
         .cta {
             background: white;
-            padding: 5rem 2rem;
+            padding: 4rem 1.5rem;
             text-align: center;
         }
 
         .cta-content {
-            max-width: 800px;
+            max-width: 700px;
             margin: 0 auto;
         }
 
         .cta h2 {
-            font-size: 2.5rem;
+            font-size: 2rem;
             margin-bottom: 1.5rem;
             color: #333;
         }
 
         .cta p {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             color: #666;
             margin-bottom: 2rem;
+            line-height: 1.6;
         }
 
         .cta-buttons {
-            display: flex;
+            display: grid;
+            grid-template-columns: 1fr;
             gap: 1rem;
-            justify-content: center;
-            flex-wrap: wrap;
+            max-width: 400px;
+            margin: 0 auto;
         }
 
         .cta-btn {
-            padding: 1rem 2.5rem;
-            border-radius: 50px;
-            font-size: 1.1rem;
+            padding: 1rem 2rem;
+            border-radius: 15px;
+            font-size: 1rem;
+            font-weight: 600;
             text-decoration: none;
             transition: all 0.3s;
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
 
         .cta-btn-primary {
@@ -788,8 +730,8 @@
         }
 
         .cta-btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.3);
         }
 
         .cta-btn-secondary {
@@ -807,22 +749,22 @@
         footer {
             background: #1a1a1a;
             color: white;
-            padding: 3rem 2rem 1rem;
+            padding: 3rem 1.5rem 1rem;
         }
 
         .footer-content {
             max-width: 1200px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: 1fr;
             gap: 2rem;
             margin-bottom: 2rem;
         }
 
         .footer-section h4 {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
             color: #667eea;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
         }
 
         .footer-section ul {
@@ -837,6 +779,7 @@
             color: #ccc;
             text-decoration: none;
             transition: color 0.3s;
+            font-size: 0.9rem;
         }
 
         .footer-section ul li a:hover {
@@ -847,6 +790,7 @@
             display: flex;
             gap: 1rem;
             margin-top: 1rem;
+            justify-content: center;
         }
 
         .social-link {
@@ -865,7 +809,7 @@
         .social-link:hover {
             background: #667eea;
             color: white;
-            transform: translateY(-3px);
+            transform: translateY(-2px);
         }
 
         .footer-bottom {
@@ -873,66 +817,40 @@
             padding-top: 2rem;
             text-align: center;
             color: #999;
+            font-size: 0.9rem;
         }
 
-        /* Mobile Menu */
-        .mobile-menu-toggle {
-            display: none;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
+        /* WhatsApp Button */
+        .whatsapp-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 1.5rem;
+            width: 60px;
+            height: 60px;
+            background: #25d366;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.8rem;
             cursor: pointer;
-            color: #333;
+            box-shadow: 0 10px 30px rgba(37,211,102,0.4);
+            transition: all 0.3s;
+            z-index: 999;
+            text-decoration: none;
         }
 
-        @media (max-width: 768px) {
-            .nav-menu {
-                display: none;
-                position: absolute;
-                top: 100%;
-                left: 0;
-                right: 0;
-                background: white;
-                flex-direction: column;
-                padding: 2rem;
-                box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            }
-
-            .nav-menu.active {
-                display: flex;
-            }
-
-            .mobile-menu-toggle {
-                display: block;
-            }
-
-            .hero h1 {
-                font-size: 2.5rem;
-            }
-
-            .quick-actions {
-                grid-template-columns: 1fr;
-            }
-
-            .track-form {
-                flex-direction: column;
-            }
-
-            .features-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .cta-buttons {
-                flex-direction: column;
-                align-items: center;
-            }
+        .whatsapp-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 15px 40px rgba(37,211,102,0.5);
         }
 
         /* Loading Spinner */
         .spinner {
             width: 40px;
             height: 40px;
-            border: 4px solid rgba(102, 126, 234, 0.1);
+            border: 4px solid rgba(255, 255, 255, 0.2);
             border-radius: 50%;
             border-top-color: #667eea;
             animation: spin 1s ease-in-out infinite;
@@ -943,62 +861,213 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Floating Action Button */
-        .fab {
-            position: fixed;
-            bottom: 2rem;
-            left: 2rem;
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, #00c853, #00e676);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.5rem;
-            cursor: pointer;
-            box-shadow: 0 10px 30px rgba(0,200,83,0.3);
-            transition: all 0.3s;
-            z-index: 999;
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            .nav-container {
+                padding: 1rem;
+            }
+
+            .nav-menu {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: white;
+                flex-direction: column;
+                padding: 1.5rem;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+                gap: 1rem;
+            }
+
+            .nav-menu.active {
+                display: flex;
+            }
+
+            .mobile-menu-toggle {
+                display: block;
+            }
+
+            .hero {
+                padding: 2rem 1rem;
+            }
+
+            .hero h1 {
+                font-size: 1.8rem;
+                line-height: 1.3;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .hero-stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.8rem;
+            }
+
+            .hero-stat {
+                padding: 0.8rem 0.5rem;
+            }
+
+            .hero-stat h3 {
+                font-size: 1.3rem;
+            }
+
+            .hero-stat p {
+                font-size: 0.8rem;
+            }
+
+            .services {
+                padding: 3rem 1rem;
+            }
+
+            .section-header h2 {
+                font-size: 1.6rem;
+            }
+
+            .service-card {
+                margin-bottom: 1rem;
+            }
+
+            .service-header {
+                padding: 1.5rem;
+            }
+
+            .service-icon {
+                width: 70px;
+                height: 70px;
+                font-size: 2rem;
+            }
+
+            .service-header h3 {
+                font-size: 1.5rem;
+            }
+
+            .service-content {
+                padding: 1.5rem;
+            }
+
+            .track-section {
+                padding: 3rem 1rem;
+            }
+
+            .track-container {
+                padding: 2rem 1.5rem;
+            }
+
+            .track-container h2 {
+                font-size: 1.5rem;
+            }
+
+            .order-status {
+                padding: 0;
+            }
+
+            .status-step span {
+                font-size: 0.75rem;
+            }
+
+            .cta {
+                padding: 3rem 1rem;
+            }
+
+            .cta h2 {
+                font-size: 1.6rem;
+            }
+
+            .cta p {
+                font-size: 1rem;
+            }
+
+            .footer-content {
+                text-align: center;
+            }
+
+            .whatsapp-btn {
+                width: 55px;
+                height: 55px;
+                font-size: 1.6rem;
+                right: 1rem;
+                bottom: 1.5rem;
+            }
         }
 
-        .fab:hover {
-            transform: scale(1.1) rotate(90deg);
-            box-shadow: 0 15px 40px rgba(0,200,83,0.4);
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 1.6rem;
+            }
+
+            .hero-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .track-form {
+                gap: 0.8rem;
+            }
+
+            .track-input,
+            .track-btn {
+                padding: 0.8rem 1.2rem;
+                font-size: 0.95rem;
+            }
+
+            .status-icon {
+                width: 35px;
+                height: 35px;
+                font-size: 0.8rem;
+            }
+
+            .status-step span {
+                font-size: 0.7rem;
+            }
         }
 
-        /* WhatsApp Button */
-        .whatsapp-btn {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            width: 60px;
-            height: 60px;
-            background: #25d366;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 2rem;
-            cursor: pointer;
-            box-shadow: 0 10px 30px rgba(37,211,102,0.3);
-            transition: all 0.3s;
-            z-index: 999;
-            text-decoration: none;
+        /* Tablet Styles */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .services-grid {
+                grid-template-columns: 1fr;
+                max-width: 600px;
+                margin: 0 auto;
+            }
+
+            .footer-content {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .cta-buttons {
+                grid-template-columns: repeat(2, 1fr);
+                max-width: 500px;
+            }
         }
 
-        .whatsapp-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 15px 40px rgba(37,211,102,0.4);
+        /* Large Screens */
+        @media (min-width: 1025px) {
+            .services-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .footer-content {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .track-form {
+                flex-direction: row;
+                align-items: stretch;
+            }
+
+            .track-input {
+                flex: 1;
+            }
+
+            .cta-buttons {
+                grid-template-columns: repeat(2, 1fr);
+                max-width: 500px;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Animated Background -->
-    <div class="bg-animation"></div>
-
     <!-- Navigation -->
     <nav>
         <div class="nav-container">
@@ -1010,7 +1079,6 @@
                 <li><a href="#home">الرئيسية</a></li>
                 <li><a href="#services">خدماتنا</a></li>
                 <li><a href="#track">تتبع الطلب</a></li>
-                <li><a href="#features">المميزات</a></li>
                 <li><a href="#contact">تواصل معنا</a></li>
             </ul>
             <button class="mobile-menu-toggle" id="menuToggle">☰</button>
@@ -1021,34 +1089,150 @@
     <section class="hero" id="home">
         <div class="hero-content">
             <h1>منصة قطع غيار السيارات الأولى في تبوك</h1>
-            <p>أكثر من 10,000 قطعة غيار أصلية ومضمونة بأفضل الأسعار</p>
+            <p>أكثر من 10,000 قطعة غيار أصلية ومضمونة بأفضل الأسعار والتوصيل السريع</p>
             
-            <!-- Quick Actions -->
-            <div class="quick-actions">
-                <div class="action-card" onclick="window.location.href='request.html'">
-                    <div class="action-icon">🔧</div>
-                    <h3>اطلب قطعة</h3>
-                    <p>اطلب أي قطعة غيار وسنوفرها لك</p>
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <h3>10K+</h3>
+                    <p>قطعة غيار</p>
                 </div>
-                <div class="action-card" onclick="window.location.href='sell-car.html'">
-                    <div class="action-icon">🚙</div>
-                    <h3>بع سيارتك</h3>
-                    <p>احصل على أفضل سعر لسيارتك المستعملة</p>
+                <div class="hero-stat">
+                    <h3>5K+</h3>
+                    <p>عميل سعيد</p>
                 </div>
-                <div class="action-card" onclick="document.getElementById('track').scrollIntoView()">
-                    <div class="action-icon">📍</div>
-                    <h3>تتبع طلبك</h3>
-                    <p>تابع حالة طلبك بكل سهولة</p>
+                <div class="hero-stat">
+                    <h3>50+</h3>
+                    <p>تشليح شريك</p>
+                </div>
+                <div class="hero-stat">
+                    <h3>24/7</h3>
+                    <p>خدمة عملاء</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Track Order Section -->
+    <!-- Services Section -->
+    <section class="services" id="services">
+        <div class="services-container">
+            <div class="section-header">
+                <h2>خدماتنا المتخصصة</h2>
+                <p style="color: #666; font-size: 1rem;">حلول شاملة لجميع احتياجات سيارتك</p>
+            </div>
+            
+            <div class="services-grid">
+                <!-- Service 1: اطلبها -->
+                <div class="service-card">
+                    <div class="service-header">
+                        <div class="service-icon">🔧</div>
+                        <h3>اطلبها</h3>
+                        <p>اطلب أي قطعة غيار تحتاجها وسنوفرها لك</p>
+                    </div>
+                    <div class="service-content">
+                        <ul class="service-features">
+                            <li>
+                                <span class="feature-icon">✓</span>
+                                <div class="feature-text">
+                                    <div class="feature-title">البحث الذكي</div>
+                                    <div class="feature-desc">نبحث في أكثر من 50 تشليح لإيجاد القطعة المطلوبة</div>
+                                </div>
+                            </li>
+                            <li>
+                                <span class="feature-icon">✓</span>
+                                <div class="feature-text">
+                                    <div class="feature-title">توصيل سريع</div>
+                                    <div class="feature-desc">توصيل خلال 24 ساعة داخل تبوك</div>
+                                </div>
+                            </li>
+                            <li>
+                                <span class="feature-icon">✓</span>
+                                <div class="feature-text">
+                                    <div class="feature-title">ضمان الجودة</div>
+                                    <div class="feature-desc">جميع القطع مفحوصة ومضمونة 100%</div>
+                                </div>
+                            </li>
+                            <li>
+                                <span class="feature-icon">✓</span>
+                                <div class="feature-text">
+                                    <div class="feature-title">أسعار منافسة</div>
+                                    <div class="feature-desc">أفضل الأسعار مع ضمان الجودة</div>
+                                </div>
+                            </li>
+                            <li>
+                                <span class="feature-icon">✓</span>
+                                <div class="feature-text">
+                                    <div class="feature-title">دعم متواصل</div>
+                                    <div class="feature-desc">متابعة طلبك من الطلب حتى التسليم</div>
+                                </div>
+                            </li>
+                        </ul>
+                        <a href="request.html" class="service-btn">
+                            <span>اطلب قطعتك الآن</span>
+                            <span>🔧</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Service 2: بيعها -->
+                <div class="service-card">
+                    <div class="service-header">
+                        <div class="service-icon">🚙</div>
+                        <h3>بيعها</h3>
+                        <p>احصل على أفضل سعر لسيارتك المستعملة</p>
+                    </div>
+                    <div class="service-content">
+                        <ul class="service-features">
+                            <li>
+                                <span class="feature-icon">✓</span>
+                                <div class="feature-text">
+                                    <div class="feature-title">تقييم مجاني</div>
+                                    <div class="feature-desc">تقييم احترافي لسيارتك بدون أي تكلفة</div>
+                                </div>
+                            </li>
+                            <li>
+                                <span class="feature-icon">✓</span>
+                                <div class="feature-text">
+                                    <div class="feature-title">شبكة واسعة</div>
+                                    <div class="feature-desc">عرض سيارتك على أكثر من 50 تشليح</div>
+                                </div>
+                            </li>
+                            <li>
+                                <span class="feature-icon">✓</span>
+                                <div class="feature-text">
+                                    <div class="feature-title">أفضل الأسعار</div>
+                                    <div class="feature-desc">مزايدات تنافسية لضمان أفضل سعر</div>
+                                </div>
+                            </li>
+                            <li>
+                                <span class="feature-icon">✓</span>
+                                <div class="feature-text">
+                                    <div class="feature-title">إجراءات سريعة</div>
+                                    <div class="feature-desc">استكمال البيع خلال 48 ساعة</div>
+                                </div>
+                            </li>
+                            <li>
+                                <span class="feature-icon">✓</span>
+                                <div class="feature-text">
+                                    <div class="feature-title">خدمة شاملة</div>
+                                    <div class="feature-desc">نساعدك في جميع إجراءات النقل</div>
+                                </div>
+                            </li>
+                        </ul>
+                        <a href="sell-car.html" class="service-btn">
+                            <span>بع سيارتك الآن</span>
+                            <span>🚙</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Track Order Section - Black Theme -->
     <section class="track-section" id="track">
         <div class="track-container">
             <h2>🚚 تتبع طلبك</h2>
-            <p style="color: #666; margin-bottom: 2rem;">أدخل رقم جوالك لمعرفة حالة طلباتك</p>
+            <p>أدخل رقم جوالك لمعرفة حالة طلباتك</p>
             
             <div class="track-form">
                 <input type="tel" class="track-input" id="trackPhone" placeholder="05XXXXXXXX" maxlength="10">
@@ -1059,7 +1243,7 @@
             </div>
 
             <div class="track-results" id="trackResults">
-                <h4 style="margin-bottom: 1rem;">طلباتك الحالية</h4>
+                <h4>طلباتك الحالية</h4>
                 <div class="order-status">
                     <div class="status-step completed">
                         <div class="status-icon">✓</div>
@@ -1078,76 +1262,6 @@
                         <span>تم التسليم</span>
                     </div>
                 </div>
-                <div style="background: #f5f5f5; padding: 1rem; border-radius: 10px; margin-top: 1rem;">
-                    <p><strong>رقم الطلب:</strong> ORD-2024-1234</p>
-                    <p><strong>التاريخ:</strong> 2024-01-15</p>
-                    <p><strong>القطعة:</strong> رديتر كامري 2020</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Features Section -->
-    <section class="features" id="features">
-        <div class="features-container">
-            <div class="section-header">
-                <h2>لماذا تختار تشاليح تبوك؟</h2>
-                <p style="color: #666; font-size: 1.1rem;">نقدم لك أفضل تجربة في شراء قطع غيار السيارات</p>
-            </div>
-            
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">⚡</div>
-                    <h3>توصيل سريع</h3>
-                    <p>احصل على قطع الغيار خلال 24 ساعة فقط داخل تبوك، مع خيارات التوصيل السريع للمناطق المجاورة</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🛡️</div>
-                    <h3>ضمان شامل</h3>
-                    <p>جميع القطع مضمونة 100% مع إمكانية الاسترجاع خلال 14 يوم بدون أي رسوم إضافية</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">💎</div>
-                    <h3>قطع أصلية</h3>
-                    <p>نوفر قطع غيار أصلية ومعتمدة من أفضل التشاليح والموردين المعتمدين</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">💰</div>
-                    <h3>أسعار منافسة</h3>
-                    <p>احصل على أفضل الأسعار في السوق مع ضمان الجودة والأصالة</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🎯</div>
-                    <h3>دقة في التوافق</h3>
-                    <p>فريق من الخبراء يضمن توافق القطع 100% مع سيارتك</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🤝</div>
-                    <h3>دعم متواصل</h3>
-                    <p>فريق دعم متخصص متاح على مدار الساعة للإجابة على استفساراتك</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Stats Section -->
-    <section class="stats">
-        <div class="stats-grid">
-            <div class="stat-item">
-                <h3>10,000+</h3>
-                <p>قطعة غيار متوفرة</p>
-            </div>
-            <div class="stat-item">
-                <h3>5,000+</h3>
-                <p>عميل سعيد</p>
-            </div>
-            <div class="stat-item">
-                <h3>50+</h3>
-                <p>تشليح شريك</p>
-            </div>
-            <div class="stat-item">
-                <h3>24/7</h3>
-                <p>خدمة عملاء</p>
             </div>
         </div>
     </section>
@@ -1156,10 +1270,16 @@
     <section class="cta">
         <div class="cta-content">
             <h2>هل تبحث عن قطعة غيار معينة؟</h2>
-            <p>فريقنا المتخصص جاهز لمساعدتك في العثور على أي قطعة تحتاجها</p>
+            <p>فريقنا المتخصص جاهز لمساعدتك في العثور على أي قطعة تحتاجها بأفضل سعر وأسرع توصيل في تبوك</p>
             <div class="cta-buttons">
-                <a href="request.html" class="cta-btn cta-btn-primary">اطلب قطعتك الآن</a>
-                <a href="sell-car.html" class="cta-btn cta-btn-secondary">بع سيارتك</a>
+                <a href="request.html" class="cta-btn cta-btn-primary">
+                    <span>اطلب قطعتك الآن</span>
+                    <span>🔧</span>
+                </a>
+                <a href="sell-car.html" class="cta-btn cta-btn-secondary">
+                    <span>بع سيارتك</span>
+                    <span>🚙</span>
+                </a>
             </div>
         </div>
     </section>
@@ -1169,14 +1289,14 @@
         <div class="footer-content">
             <div class="footer-section">
                 <h4>عن تشاليح تبوك</h4>
-                <p style="color: #ccc; line-height: 1.8;">
+                <p style="color: #ccc; line-height: 1.6;">
                     منصتك الموثوقة للحصول على قطع غيار السيارات الأصلية بأفضل الأسعار وأسرع توصيل في منطقة تبوك
                 </p>
                 <div class="social-links">
-                    <a href="#" class="social-link">📘</a>
-                    <a href="#" class="social-link">🐦</a>
-                    <a href="#" class="social-link">📷</a>
-                    <a href="#" class="social-link">💼</a>
+                    <a href="#" class="social-link" title="فيسبوك">📘</a>
+                    <a href="#" class="social-link" title="تويتر">🐦</a>
+                    <a href="#" class="social-link" title="انستقرام">📷</a>
+                    <a href="#" class="social-link" title="لينكد إن">💼</a>
                 </div>
             </div>
             <div class="footer-section">
@@ -1185,7 +1305,7 @@
                     <li><a href="request.html">اطلب قطعة</a></li>
                     <li><a href="sell-car.html">بع سيارتك</a></li>
                     <li><a href="#track">تتبع الطلب</a></li>
-                    <li><a href="#features">خدماتنا</a></li>
+                    <li><a href="#services">خدماتنا</a></li>
                 </ul>
             </div>
             <div class="footer-section">
@@ -1212,28 +1332,8 @@
         </div>
     </footer>
 
-    <!-- Floating Action Button -->
-    <div class="fab" onclick="showSearchModal()">🔍</div>
-
     <!-- WhatsApp Button -->
-    <a href="https://wa.me/966555123456" class="whatsapp-btn" target="_blank">📱</a>
-
-    <!-- Search Modal -->
-    <div class="search-modal" id="searchModal">
-        <div class="search-modal-content">
-            <div class="search-modal-header">
-                <h3>البحث عن قطع الغيار</h3>
-                <button class="close-modal" onclick="closeSearchModal()">×</button>
-            </div>
-            <div class="search-input-group">
-                <span class="search-icon">🔍</span>
-                <input type="text" class="search-input" placeholder="ابحث عن قطعة، نوع السيارة، أو رقم القطعة...">
-            </div>
-            <div id="searchResults">
-                <!-- نتائج البحث ستظهر هنا -->
-            </div>
-        </div>
-    </div>
+    <a href="https://wa.me/966555123456" class="whatsapp-btn" target="_blank" title="واتساب">📱</a>
 
     <script>
         // Mobile Menu Toggle
@@ -1262,42 +1362,46 @@
 
             try {
                 // Try real API call first
-                const response = await fetch(`/api/orders/track?phone=${phone}`);
+                const response = await fetch(`/api/orders/track/${phone}`);
                 
                 let orders = [];
                 if (response.ok) {
                     const data = await response.json();
-                    orders = data.orders || [];
+                    orders = data || [];
                 } else {
                     // Fallback to mock data for demo
                     await new Promise(resolve => setTimeout(resolve, 1500));
                     orders = [{
                         orderNumber: 'ORD-' + Date.now(),
-                        date: new Date().toLocaleDateString('ar-SA'),
-                        partName: 'رديتر كامري 2020',
-                        status: 'في الطريق',
-                        statusStep: 3,
-                        estimatedDelivery: 'خلال 24 ساعة'
+                        createdAt: new Date().toISOString(),
+                        items: [{ partName: 'رديتر كامري 2020' }],
+                        status: 'shipped',
+                        timeline: [
+                            { status: 'pending', description: 'تم الاستلام' },
+                            { status: 'processing', description: 'قيد المعالجة' },
+                            { status: 'shipped', description: 'في الطريق' }
+                        ]
                     }];
                 }
                 
                 if (orders.length === 0) {
                     resultsDiv.innerHTML = `
                         <div style="text-align: center; padding: 2rem;">
-                            <div style="font-size: 3rem; margin-bottom: 1rem;">📦</div>
-                            <h4 style="color: #666; margin-bottom: 1rem;">لا توجد طلبات</h4>
-                            <p style="color: #999;">لم نجد أي طلبات مرتبطة بهذا الرقم</p>
+                            <div style="font-size: 3rem; margin-bottom: 1rem; color: #666;">📦</div>
+                            <h4 style="color: #ffffff; margin-bottom: 1rem;">لا توجد طلبات</h4>
+                            <p style="color: #ccc;">لم نجد أي طلبات مرتبطة بهذا الرقم</p>
                             <div style="margin-top: 2rem;">
-                                <a href="request.html" class="btn" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; text-decoration: none; padding: 0.8rem 2rem; border-radius: 25px;">اطلب قطعة الآن</a>
+                                <a href="request.html" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; text-decoration: none; padding: 1rem 2rem; border-radius: 15px; display: inline-block; font-weight: 600;">اطلب قطعة الآن</a>
                             </div>
                         </div>
                     `;
                     return;
                 }
 
-                // Show results for first order (can be expanded for multiple orders)
+                // Show results for first order
                 const order = orders[0];
                 const statusSteps = ['تم الاستلام', 'قيد المعالجة', 'في الطريق', 'تم التسليم'];
+                const currentStep = getCurrentStep(order.status);
                 
                 let statusHtml = '';
                 statusSteps.forEach((step, index) => {
@@ -1305,10 +1409,10 @@
                     let stepClass = '';
                     let icon = stepNumber;
                     
-                    if (stepNumber < order.statusStep) {
+                    if (stepNumber < currentStep) {
                         stepClass = 'completed';
                         icon = '✓';
-                    } else if (stepNumber === order.statusStep) {
+                    } else if (stepNumber === currentStep) {
                         stepClass = 'active';
                         icon = stepNumber === 3 ? '🚚' : stepNumber === 4 ? '📦' : stepNumber;
                     }
@@ -1321,29 +1425,35 @@
                     `;
                 });
                 
+                const orderDate = new Date(order.createdAt).toLocaleDateString('ar-SA');
+                const partName = order.items && order.items[0] ? order.items[0].partName : 'قطعة غيار';
+                const statusText = getStatusText(order.status);
+                
                 resultsDiv.innerHTML = `
                     <h4>طلباتك الحالية</h4>
                     <div class="order-status">${statusHtml}</div>
-                    <div style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05)); padding: 1.5rem; border-radius: 15px; margin-top: 1.5rem; border: 1px solid rgba(102, 126, 234, 0.1);">
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <div style="background: rgba(255, 255, 255, 0.05); padding: 1.5rem; border-radius: 15px; margin-top: 1.5rem; border: 1px solid rgba(255, 255, 255, 0.1);">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; color: #ffffff;">
                             <div>
-                                <p style="color: #666; font-size: 0.9rem; margin-bottom: 0.3rem;">رقم الطلب</p>
-                                <p style="font-weight: bold; color: #333;">${order.orderNumber}</p>
+                                <p style="color: #ccc; font-size: 0.85rem; margin-bottom: 0.3rem;">رقم الطلب</p>
+                                <p style="font-weight: bold;">${order.orderNumber}</p>
                             </div>
                             <div>
-                                <p style="color: #666; font-size: 0.9rem; margin-bottom: 0.3rem;">التاريخ</p>
-                                <p style="font-weight: bold; color: #333;">${order.date}</p>
+                                <p style="color: #ccc; font-size: 0.85rem; margin-bottom: 0.3rem;">التاريخ</p>
+                                <p style="font-weight: bold;">${orderDate}</p>
                             </div>
                             <div>
-                                <p style="color: #666; font-size: 0.9rem; margin-bottom: 0.3rem;">القطعة</p>
-                                <p style="font-weight: bold; color: #333;">${order.partName}</p>
+                                <p style="color: #ccc; font-size: 0.85rem; margin-bottom: 0.3rem;">القطعة</p>
+                                <p style="font-weight: bold;">${partName}</p>
                             </div>
                             <div>
-                                <p style="color: #666; font-size: 0.9rem; margin-bottom: 0.3rem;">الحالة</p>
-                                <p style="font-weight: bold; color: #667eea;">${order.status}</p>
+                                <p style="color: #ccc; font-size: 0.85rem; margin-bottom: 0.3rem;">الحالة</p>
+                                <p style="font-weight: bold; color: #667eea;">${statusText}</p>
                             </div>
                         </div>
-                        ${order.estimatedDelivery ? `<div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(102, 126, 234, 0.1);"><p style="color: #666;"><strong>التوصيل المتوقع:</strong> ${order.estimatedDelivery}</p></div>` : ''}
+                        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                            <p style="color: #ccc; font-size: 0.9rem;"><strong>التوصيل المتوقع:</strong> خلال 24 ساعة</p>
+                        </div>
                     </div>
                 `;
             } catch (error) {
@@ -1352,20 +1462,33 @@
                     <div style="text-align: center; padding: 2rem;">
                         <div style="font-size: 3rem; margin-bottom: 1rem; color: #d32f2f;">⚠️</div>
                         <h4 style="color: #d32f2f; margin-bottom: 1rem;">حدث خطأ</h4>
-                        <p style="color: #666;">تعذر الوصول لخدمة التتبع حالياً</p>
-                        <button onclick="trackOrder()" style="margin-top: 1rem; padding: 0.8rem 2rem; background: #667eea; color: white; border: none; border-radius: 25px; cursor: pointer;">حاول مرة أخرى</button>
+                        <p style="color: #ccc;">تعذر الوصول لخدمة التتبع حالياً</p>
+                        <button onclick="trackOrder()" style="margin-top: 1rem; padding: 0.8rem 2rem; background: #667eea; color: white; border: none; border-radius: 15px; cursor: pointer; font-weight: 600;">حاول مرة أخرى</button>
                     </div>
                 `;
             }
         }
 
-        // Search Modal Functions
-        function showSearchModal() {
-            document.getElementById('searchModal').classList.add('active');
+        function getCurrentStep(status) {
+            switch(status) {
+                case 'pending': return 1;
+                case 'confirmed': 
+                case 'processing': return 2;
+                case 'shipped': return 3;
+                case 'delivered': return 4;
+                default: return 1;
+            }
         }
 
-        function closeSearchModal() {
-            document.getElementById('searchModal').classList.remove('active');
+        function getStatusText(status) {
+            const statusMap = {
+                'pending': 'تم الاستلام',
+                'confirmed': 'قيد المعالجة', 
+                'processing': 'قيد المعالجة',
+                'shipped': 'في الطريق',
+                'delivered': 'تم التسليم'
+            };
+            return statusMap[status] || 'تم الاستلام';
         }
 
         // Smooth Scroll
@@ -1392,23 +1515,36 @@
             }
         });
 
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('nav') && navMenu.classList.contains('active')) {
+                navMenu.classList.remove('active');
+            }
+        });
+
         // Animate elements on scroll
         const observerOptions = {
             threshold: 0.1,
-            rootMargin: '0px 0px -100px 0px'
+            rootMargin: '0px 0px -50px 0px'
         };
 
         const observer = new IntersectionObserver(function(entries) {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    entry.target.style.animation = 'fadeInUp 0.8s ease both';
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
                 }
             });
         }, observerOptions);
 
-        document.querySelectorAll('.feature-card, .stat-item').forEach(el => {
+        // Set initial state and observe service cards
+        document.querySelectorAll('.service-card').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'all 0.8s ease';
             observer.observe(el);
         });
     </script>
 </body>
+</html>
 </html>

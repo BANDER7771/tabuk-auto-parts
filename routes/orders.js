@@ -5,13 +5,13 @@ const Order = require('../models/Order');
 router.post('/', async (req, res) => {
     try {
         const {
-            name,
+            fullName,
             phone,
-            car_make,
-            car_model,
-            model_year,
+            carMake,
+            carModel,
+            carYear,
             vin,
-            part_name,
+            partDetails,
             urgency,
             notes,
             email,
@@ -20,23 +20,23 @@ router.post('/', async (req, res) => {
 
         // إنشاء طلب جديد
         const order = new Order({
-            customerName: name,
+            customerName: fullName,
             customerPhone: phone,
             customerEmail: email,
             items: [{
-                partName: part_name,
+                partName: partDetails,
                 quantity: 1
             }],
             carInfo: {
-                make: car_make,
-                model: car_model,
-                year: model_year,
+                make: carMake,
+                model: carModel,
+                year: carYear,
                 vin: vin
             },
             urgency: urgency || 'normal',
             notes: notes,
             shippingAddress: {
-                name: name,
+                name: fullName,
                 phone: phone,
                 city: city || 'تبوك',
                 district: '',
@@ -259,6 +259,61 @@ router.get('/track/:phone', async (req, res) => {
     } catch (error) {
         res.status(500).json({ 
             message: 'خطأ في تتبع الطلبات', 
+            error: error.message 
+        });
+    }
+});
+
+// إنشاء طلب بيع سيارة
+router.post('/sell-car', async (req, res) => {
+    try {
+        const {
+            fullName,
+            phone,
+            carMake,
+            carModel,
+            carYear,
+            condition,
+            sellReason,
+            violations,
+            notes
+        } = req.body;
+
+        // إنشاء طلب بيع سيارة
+        const order = new Order({
+            customerName: fullName,
+            customerPhone: phone,
+            items: [{
+                partName: `سيارة ${carMake} ${carModel} ${carYear}`,
+                quantity: 1
+            }],
+            carInfo: {
+                make: carMake,
+                model: carModel,
+                year: carYear,
+                condition: condition
+            },
+            notes: `حالة السيارة: ${condition}${sellReason ? `\nسبب البيع: ${sellReason}` : ''}${violations ? `\nالمخالفات: ${violations}` : ''}${notes ? `\nملاحظات: ${notes}` : ''}`,
+            shippingAddress: {
+                name: fullName,
+                phone: phone,
+                city: 'تبوك',
+                details: 'طلب بيع سيارة'
+            },
+            totalAmount: 0, // سيتم تحديده بعد التقييم
+            status: 'pending'
+        });
+
+        await order.save();
+
+        res.status(201).json({
+            message: 'تم استلام طلب بيع السيارة بنجاح',
+            orderNumber: order.orderNumber,
+            order
+        });
+    } catch (error) {
+        res.status(500).json({ 
+            message: 'خطأ في إنشاء طلب بيع السيارة', 
             error: error.message 
         });
     }

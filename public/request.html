@@ -1193,12 +1193,9 @@
                 if (response.ok) {
                     result = await response.json();
                 } else {
-                    // If API fails, simulate success for demo
-                    result = {
-                        success: true,
-                        orderNumber: 'ORD-' + Date.now(),
-                        message: 'تم استلام طلبك بنجاح'
-                    };
+                    // Show real error instead of fake success
+                    const errorText = await response.text();
+                    throw new Error(`خطأ في الخادم: ${response.status} - ${errorText}`);
                 }
                 
                 // Show success message

@@ -18,8 +18,12 @@ router.post('/', async (req, res) => {
             city
         } = req.body;
 
+        // إنشاء رقم طلب فريد
+        const orderNumber = 'ORD-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4).toUpperCase();
+
         // إنشاء طلب جديد
         const order = new Order({
+            orderNumber: orderNumber,
             customerName: fullName,
             customerPhone: phone,
             customerEmail: email,

@@ -15,11 +15,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Database Connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/tabuk_auto_parts', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://Bander997:!1Qqaallpp@cluster0.vmeeqir.mongodb.net/tabuk_auto_parts?retryWrites=true&w=majority&appName=Cluster0';
+
+mongoose.connect(MONGODB_URI)
+.then(() => {
+    console.log('✅ تم الاتصال بقاعدة البيانات MongoDB Atlas');
+    console.log('🌐 قاعدة البيانات جاهزة ودائمة');
 })
-.then(() => console.log('✅ تم الاتصال بقاعدة البيانات'))
 .catch(err => console.error('❌ خطأ في الاتصال:', err));
 
 // Routes - بدون المصادقة
@@ -32,7 +34,7 @@ app.use('/api/users', require('./routes/users'));
 // Serve static files
 app.use(express.static('public'));
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
     console.log(`🚀 السيرفر يعمل على البورت ${PORT}`);
 });

@@ -1,6 +1,9 @@
 const router = require('express').Router();
 const Order = require('../models/Order');
 
+// فحص صحة الخدمة
+router.get('/health', (req, res) => res.json({ ok: true, route: 'orders' }));
+
 // إنشاء طلب جديد
 router.post('/', async (req, res) => {
     try {

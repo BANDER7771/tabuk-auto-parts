@@ -3,6 +3,9 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { body, validationResult } = require('express-validator');
 
+// فحص صحة الخدمة
+router.get('/health', (req, res) => res.json({ ok: true, route: 'auth' }));
+
 // تسجيل مستخدم جديد
 router.post('/register', [
     body('name').notEmpty().withMessage('الاسم مطلوب'),

@@ -2,6 +2,9 @@ const router = require('express').Router();
 const Part = require('../models/Part');
 const upload = require('../middleware/upload');
 
+// فحص صحة الخدمة
+router.get('/health', (req, res) => res.json({ ok: true, route: 'parts' }));
+
 // الحصول على جميع القطع
 router.get('/', async (req, res) => {
     try {

@@ -15,7 +15,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Database Connection
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://Bander997:!1Qqaallpp@cluster0.vmeeqir.mongodb.net/tabuk_auto_parts?retryWrites=true&w=majority&appName=Cluster0';
+const MONGODB_URI = process.env.MONGODB_URI;
+if (!MONGODB_URI) {
+    console.error('❌ MONGODB_URI غير محدد في ملف .env');
+    console.error('💡 يرجى إنشاء ملف .env وإضافة MONGODB_URI');
+    process.exit(1);
+}
 
 mongoose.connect(MONGODB_URI)
 .then(() => {
@@ -24,8 +29,8 @@ mongoose.connect(MONGODB_URI)
 })
 .catch(err => console.error('❌ خطأ في الاتصال:', err));
 
-// Routes - بدون المصادقة
-// app.use('/api/auth', require('./routes/auth')); // تم إزالة هذا السطر
+// Routes - مع المصادقة
+app.use('/api/auth', require('./routes/auth'));
 app.use('/api/parts', require('./routes/parts'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/shops', require('./routes/shops'));

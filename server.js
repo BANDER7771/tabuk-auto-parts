@@ -120,10 +120,6 @@ if (!MONGODB_URI) {
 mongoose.connect(MONGODB_URI, {
     serverSelectionTimeoutMS: 5000,
     socketTimeoutMS: 45000,
-    ssl: true,
-    sslValidate: true,
-    tlsAllowInvalidCertificates: false,
-    tlsAllowInvalidHostnames: false,
     retryWrites: true,
     w: 'majority'
 })
@@ -149,10 +145,6 @@ mongoose.connect(MONGODB_URI, {
         mongoose.connect(MONGODB_URI, {
             serverSelectionTimeoutMS: 5000,
             socketTimeoutMS: 45000,
-            ssl: true,
-            sslValidate: true,
-            tlsAllowInvalidCertificates: false,
-            tlsAllowInvalidHostnames: false,
             retryWrites: true,
             w: 'majority'
         });

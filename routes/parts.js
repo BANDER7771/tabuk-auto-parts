@@ -1,142 +1,154 @@
-const router = require('express').Router();
+const express = require('express');
+const router = express.Router();
+const multer = require('multer');
 const Part = require('../models/Part');
-const upload = require('../middleware/upload');
 
-// فحص صحة الخدمة
-router.get('/health', (req, res) => res.json({ ok: true, route: 'parts' }));
+// استيراد middleware المصادقة
+const { authMiddleware } = require('../middleware/auth');
 
-// الحصول على جميع القطع
+// إعداد multer لتحميل الصور
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/')
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + '-' + file.originalname)
+    }
+});
+
+const upload = multer({ 
+    storage: storage,
+    limits: {
+        fileSize: 5 * 1024 * 1024 // 5MB
+    },
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype.startsWith('image/')) {
+            cb(null, true);
+        } else {
+            cb(new Error('يجب أن يكون الملف صورة'), false);
+        }
+    }
+});
+
+// الحصول على جميع قطع الغيار (عام - بدون مصادقة)
 router.get('/', async (req, res) => {
     try {
-        const { category, carMake, carModel, minPrice, maxPrice, search } = req.query;
-        
-        let query = {};
-        
-        if (category) query.category = category;
-        if (carMake) query.carMake = carMake;
-        if (carModel) query.carModel = carModel;
-        if (minPrice || maxPrice) {
-            query.price = {};
-            if (minPrice) query.price.$gte = Number(minPrice);
-            if (maxPrice) query.price.$lte = Number(maxPrice);
-        }
-        if (search) {
-            query.$text = { $search: search };
-        }
-
-        const parts = await Part.find(query)
-            .populate('shop', 'name phone')
-            .sort({ createdAt: -1 });
-
+        const parts = await Part.find().populate('shop', 'name');
         res.json(parts);
     } catch (error) {
-        res.status(500).json({ message: 'خطأ في جلب القطع', error: error.message });
+        res.status(500).json({ message: 'خطأ في استرجاع قطع الغيار' });
     }
 });
 
-// إضافة قطعة جديدة - بدون مصادقة
-router.post('/', upload.array('images', 5), async (req, res) => {
-    try {
-        const partData = req.body;
-        
-        // إضافة مسارات الصور
-        if (req.files) {
-            partData.images = req.files.map(file => `/uploads/${file.filename}`);
-        }
-
-        const part = new Part(partData);
-        await part.save();
-
-        res.status(201).json({
-            message: 'تم إضافة القطعة بنجاح',
-            part
-        });
-    } catch (error) {
-        res.status(500).json({ message: 'خطأ في إضافة القطعة', error: error.message });
-    }
-});
-
-// البحث عن قطعة
-router.get('/search', async (req, res) => {
-    try {
-        const { q } = req.query;
-        
-        const parts = await Part.find({
-            $or: [
-                { name: { $regex: q, $options: 'i' } },
-                { nameAr: { $regex: q, $options: 'i' } },
-                { description: { $regex: q, $options: 'i' } }
-            ]
-        }).limit(10);
-
-        res.json(parts);
-    } catch (error) {
-        res.status(500).json({ message: 'خطأ في البحث', error: error.message });
-    }
-});
-
-// الحصول على تفاصيل قطعة واحدة
+// الحصول على قطعة غيار واحدة (عام - بدون مصادقة)
 router.get('/:id', async (req, res) => {
     try {
-        const part = await Part.findById(req.params.id)
-            .populate('shop', 'name phone location');
-        
+        const part = await Part.findById(req.params.id).populate('shop', 'name phone location');
         if (!part) {
-            return res.status(404).json({ message: 'القطعة غير موجودة' });
+            return res.status(404).json({ message: 'قطعة الغيار غير موجودة' });
         }
-
-        // زيادة عدد المشاهدات
-        part.views += 1;
-        await part.save();
-
         res.json(part);
     } catch (error) {
-        res.status(500).json({ message: 'خطأ في جلب القطعة', error: error.message });
+        res.status(500).json({ message: 'خطأ في استرجاع قطعة الغيار' });
     }
 });
 
-// تحديث قطعة
-router.put('/:id', upload.array('images', 5), async (req, res) => {
+// البحث في قطع الغيار (عام - بدون مصادقة)
+router.get('/search/:query', async (req, res) => {
     try {
-        const updates = req.body;
-        
-        // إضافة الصور الجديدة
-        if (req.files && req.files.length > 0) {
-            updates.images = req.files.map(file => `/uploads/${file.filename}`);
-        }
+        const query = req.params.query;
+        const parts = await Part.find({
+            $or: [
+                { name: { $regex: query, $options: 'i' } },
+                { description: { $regex: query, $options: 'i' } },
+                { category: { $regex: query, $options: 'i' } }
+            ]
+        }).populate('shop', 'name');
+        res.json(parts);
+    } catch (error) {
+        res.status(500).json({ message: 'خطأ في البحث' });
+    }
+});
 
-        const part = await Part.findByIdAndUpdate(
-            req.params.id,
-            updates,
+// ============================================
+// العمليات المحمية (تحتاج مصادقة)
+// ============================================
+
+// إضافة قطعة غيار جديدة (محمي)
+router.post('/', authMiddleware, upload.array('images', 5), async (req, res) => {
+    try {
+        const { name, description, price, category, shopId, inStock } = req.body;
+        
+        const images = req.files ? req.files.map(file => file.filename) : [];
+        
+        const part = new Part({
+            name,
+            description,
+            price: parseFloat(price),
+            category,
+            shop: shopId,
+            images,
+            inStock: inStock === 'true'
+        });
+        
+        const savedPart = await part.save();
+        res.status(201).json(savedPart);
+    } catch (error) {
+        console.error('Error creating part:', error);
+        res.status(400).json({ message: 'خطأ في إنشاء قطعة الغيار', error: error.message });
+    }
+});
+
+// تحديث قطعة غيار (محمي)
+router.put('/:id', authMiddleware, upload.array('images', 5), async (req, res) => {
+    try {
+        const { name, description, price, category, inStock } = req.body;
+        
+        const updateData = {
+            name,
+            description,
+            price: parseFloat(price),
+            category,
+            inStock: inStock === 'true'
+        };
+        
+        if (req.files && req.files.length > 0) {
+            updateData.images = req.files.map(file => file.filename);
+        }
+        
+        const updatedPart = await Part.findByIdAndUpdate(
+            req.params.id, 
+            updateData, 
             { new: true }
         );
-
-        if (!part) {
-            return res.status(404).json({ message: 'القطعة غير موجودة' });
+        
+        if (!updatedPart) {
+            return res.status(404).json({ message: 'قطعة الغيار غير موجودة' });
         }
-
-        res.json({
-            message: 'تم تحديث القطعة بنجاح',
-            part
-        });
+        
+        res.json(updatedPart);
     } catch (error) {
-        res.status(500).json({ message: 'خطأ في تحديث القطعة', error: error.message });
+        console.error('Error updating part:', error);
+        res.status(400).json({ message: 'خطأ في تحديث قطعة الغيار', error: error.message });
     }
 });
 
-// حذف قطعة
-router.delete('/:id', async (req, res) => {
+// حذف قطعة غيار (محمي)
+router.delete('/:id', authMiddleware, async (req, res) => {
     try {
-        const part = await Part.findByIdAndDelete(req.params.id);
-        
-        if (!part) {
-            return res.status(404).json({ message: 'القطعة غير موجودة' });
+        const deletedPart = await Part.findByIdAndDelete(req.params.id);
+        if (!deletedPart) {
+            return res.status(404).json({ message: 'قطعة الغيار غير موجودة' });
         }
-
-        res.json({ message: 'تم حذف القطعة بنجاح' });
+        res.json({ message: 'تم حذف قطعة الغيار بنجاح' });
     } catch (error) {
-        res.status(500).json({ message: 'خطأ في حذف القطعة', error: error.message });
+        res.status(500).json({ message: 'خطأ في حذف قطعة الغيار' });
     }
+});
+
+// فحص صحة النظام
+router.get('/health', (req, res) => {
+    res.json({ message: 'نظام قطع الغيار يعمل بنجاح' });
 });
 
 module.exports = router;

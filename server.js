@@ -121,11 +121,7 @@ mongoose.connect(MONGODB_URI, {
     serverSelectionTimeoutMS: 10000,
     socketTimeoutMS: 45000,
     retryWrites: true,
-    w: 'majority',
-    tls: true,
-    tlsInsecure: false,
-    tlsAllowInvalidCertificates: false,
-    tlsAllowInvalidHostnames: false
+    w: 'majority'
 })
 .then(() => {
     console.log('✅ تم الاتصال بقاعدة البيانات MongoDB Atlas');
@@ -150,11 +146,7 @@ mongoose.connect(MONGODB_URI, {
             serverSelectionTimeoutMS: 10000,
             socketTimeoutMS: 45000,
             retryWrites: true,
-            w: 'majority',
-            tls: true,
-            tlsInsecure: false,
-            tlsAllowInvalidCertificates: false,
-            tlsAllowInvalidHostnames: false
+            w: 'majority'
         });
     }, 5000);
 });

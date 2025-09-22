@@ -106,6 +106,12 @@ if (!MONGODB_URI) {
 mongoose.connect(MONGODB_URI, {
     serverSelectionTimeoutMS: 5000,
     socketTimeoutMS: 45000,
+    ssl: true,
+    sslValidate: true,
+    tlsAllowInvalidCertificates: false,
+    tlsAllowInvalidHostnames: false,
+    retryWrites: true,
+    w: 'majority'
 })
 .then(() => {
     console.log('✅ تم الاتصال بقاعدة البيانات MongoDB Atlas');
@@ -113,9 +119,29 @@ mongoose.connect(MONGODB_URI, {
 })
 .catch(err => {
     console.error('❌ خطأ في الاتصال بقاعدة البيانات:', err.message);
+    
+    // معالجة أخطاء SSL/TLS
+    if (err.code === 'ERR_SSL_TLSV1_ALERT_INTERNAL_ERROR' || 
+        err.message.includes('SSL') || 
+        err.message.includes('TLS')) {
+        console.error('🔒 خطأ SSL/TLS - تحقق من إعدادات MongoDB Atlas');
+        console.error('💡 تأكد من أن IP Address مُضاف في Network Access');
+        console.error('💡 تأكد من أن المستخدم له صلاحيات كافية');
+    }
+    
     // إعادة محاولة الاتصال بعد 5 ثواني
     setTimeout(() => {
-        mongoose.connect(MONGODB_URI);
+        console.log('🔄 إعادة محاولة الاتصال...');
+        mongoose.connect(MONGODB_URI, {
+            serverSelectionTimeoutMS: 5000,
+            socketTimeoutMS: 45000,
+            ssl: true,
+            sslValidate: true,
+            tlsAllowInvalidCertificates: false,
+            tlsAllowInvalidHostnames: false,
+            retryWrites: true,
+            w: 'majority'
+        });
     }, 5000);
 });
 

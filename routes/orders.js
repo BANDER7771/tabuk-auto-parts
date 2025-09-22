@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const Order = require('../models/Order');
+const { sendNewOrderNotification, sendOrderStatusUpdate } = require('../config/email');
 
 // فحص صحة الخدمة
 router.get('/health', (req, res) => res.json({ ok: true, route: 'orders' }));
@@ -7,6 +8,14 @@ router.get('/health', (req, res) => res.json({ ok: true, route: 'orders' }));
 // إنشاء طلب جديد
 router.post('/', async (req, res) => {
     try {
+        // فحص وجود البيانات
+        if (!req.body) {
+            return res.status(400).json({ 
+                message: 'لم يتم استلام البيانات بشكل صحيح',
+                error: 'Request body is undefined'
+            });
+        }
+
         const {
             fullName,
             phone,
@@ -20,6 +29,14 @@ router.post('/', async (req, res) => {
             email,
             city
         } = req.body;
+
+        // فحص البيانات المطلوبة
+        if (!fullName || !phone || !carMake || !carModel || !partDetails) {
+            return res.status(400).json({ 
+                message: 'البيانات المطلوبة مفقودة',
+                required: ['fullName', 'phone', 'carMake', 'carModel', 'partDetails']
+            });
+        }
 
         // إنشاء رقم طلب فريد
         const orderNumber = 'ORD-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4).toUpperCase();
@@ -55,6 +72,24 @@ router.post('/', async (req, res) => {
         });
 
         await order.save();
+
+        // إرسال إشعار للادارة
+        try {
+            await sendNewOrderNotification({
+                orderNumber: order.orderNumber,
+                customerName: order.customerName,
+                customerPhone: order.customerPhone,
+                customerEmail: order.customerEmail,
+                orderType: 'طلب قطع غيار',
+                carMake: order.carInfo.make,
+                carModel: order.carInfo.model,
+                carYear: order.carInfo.year,
+                description: order.items[0].partName,
+                createdAt: order.createdAt
+            });
+        } catch (emailError) {
+            console.error('خطأ في إرسال إشعار الطلب:', emailError);
+        }
 
         res.status(201).json({
             message: 'تم استلام طلبك بنجاح',
@@ -109,6 +144,13 @@ router.put('/admin/:id/status', async (req, res) => {
         });
 
         await order.save();
+
+        // إرسال إشعار للعميل
+        try {
+            await sendOrderStatusUpdate(order, status);
+        } catch (emailError) {
+            console.error('خطأ في إرسال إشعار تحديث الحالة:', emailError);
+        }
 
         res.json({
             message: 'تم تحديث حالة الطلب',
@@ -274,6 +316,14 @@ router.get('/track/:phone', async (req, res) => {
 // إنشاء طلب بيع سيارة
 router.post('/sell-car', async (req, res) => {
     try {
+        // فحص وجود البيانات
+        if (!req.body) {
+            return res.status(400).json({ 
+                message: 'لم يتم استلام البيانات بشكل صحيح',
+                error: 'Request body is undefined'
+            });
+        }
+
         const {
             fullName,
             phone,
@@ -285,6 +335,14 @@ router.post('/sell-car', async (req, res) => {
             violations,
             notes
         } = req.body;
+
+        // فحص البيانات المطلوبة
+        if (!fullName || !phone || !carMake || !carModel || !carYear) {
+            return res.status(400).json({ 
+                message: 'البيانات المطلوبة مفقودة',
+                required: ['fullName', 'phone', 'carMake', 'carModel', 'carYear']
+            });
+        }
 
         // إنشاء طلب بيع سيارة
         const order = new Order({
@@ -312,6 +370,24 @@ router.post('/sell-car', async (req, res) => {
         });
 
         await order.save();
+
+        // إرسال إشعار للادارة
+        try {
+            await sendNewOrderNotification({
+                orderNumber: order.orderNumber,
+                customerName: order.customerName,
+                customerPhone: order.customerPhone,
+                customerEmail: order.customerEmail,
+                orderType: 'طلب بيع سيارة',
+                carMake: order.carInfo.make,
+                carModel: order.carInfo.model,
+                carYear: order.carInfo.year,
+                description: order.items[0].partName,
+                createdAt: order.createdAt
+            });
+        } catch (emailError) {
+            console.error('خطأ في إرسال إشعار الطلب:', emailError);
+        }
 
         res.status(201).json({
             message: 'تم استلام طلب بيع السيارة بنجاح',

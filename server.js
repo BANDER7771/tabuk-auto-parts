@@ -8,6 +8,9 @@ const fs = require('fs');
 // تحميل المتغيرات البيئية
 dotenv.config();
 
+// فرض TLS 1.2 لـ MongoDB
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
 const app = express();
 
 // ============================================
@@ -118,10 +121,16 @@ if (!MONGODB_URI) {
 }
 
 mongoose.connect(MONGODB_URI, {
-    serverSelectionTimeoutMS: 10000,
+    serverSelectionTimeoutMS: 30000,
     socketTimeoutMS: 45000,
     retryWrites: true,
-    w: 'majority'
+    w: 'majority',
+    tls: true,
+    tlsAllowInvalidCertificates: false,
+    tlsAllowInvalidHostnames: false,
+    tlsInsecure: false,
+    bufferCommands: false,
+    bufferMaxEntries: 0
 })
 .then(() => {
     console.log('✅ تم الاتصال بقاعدة البيانات MongoDB Atlas');
@@ -143,10 +152,16 @@ mongoose.connect(MONGODB_URI, {
     setTimeout(() => {
         console.log('🔄 إعادة محاولة الاتصال...');
         mongoose.connect(MONGODB_URI, {
-            serverSelectionTimeoutMS: 10000,
+            serverSelectionTimeoutMS: 30000,
             socketTimeoutMS: 45000,
             retryWrites: true,
-            w: 'majority'
+            w: 'majority',
+            tls: true,
+            tlsAllowInvalidCertificates: false,
+            tlsAllowInvalidHostnames: false,
+            tlsInsecure: false,
+            bufferCommands: false,
+            bufferMaxEntries: 0
         });
     }, 5000);
 });

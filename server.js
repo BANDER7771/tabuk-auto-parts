@@ -37,13 +37,27 @@ const corsOptions = {
         const allowedOrigins = [
             'http://localhost:3000',
             'http://localhost:5000',
-            'https://your-domain.com'
+            'https://tabuk-auto-parts.onrender.com',
+            'https://www.tabuk-auto-parts.onrender.com',
+            'http://tabuk-auto-parts.onrender.com',
+            'http://www.tabuk-auto-parts.onrender.com'
         ];
         
         // السماح للطلبات بدون origin (مثل Postman)
-        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+        if (!origin) {
+            return callback(null, true);
+        }
+        
+        // السماح لجميع subdomains من onrender.com في الإنتاج
+        if (process.env.NODE_ENV === 'production' && origin.includes('.onrender.com')) {
+            return callback(null, true);
+        }
+        
+        // التحقق من القائمة المسموحة
+        if (allowedOrigins.indexOf(origin) !== -1) {
             callback(null, true);
         } else {
+            console.log('❌ CORS Error - Origin not allowed:', origin);
             callback(new Error('Not allowed by CORS'));
         }
     },

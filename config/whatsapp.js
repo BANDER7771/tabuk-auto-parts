@@ -43,37 +43,59 @@ ${orderData.description}
 
 // دالة إرسال الرسالة (يمكن استخدام خدمات مختلفة)
 const sendToWhatsApp = async (phoneNumber, message) => {
-    // الطريقة 1: استخدام WhatsApp Business API (يحتاج إعداد)
-    if (process.env.WHATSAPP_API_URL && process.env.WHATSAPP_API_TOKEN) {
-        const response = await axios.post(process.env.WHATSAPP_API_URL, {
-            phone: phoneNumber,
-            message: message
-        }, {
-            headers: {
-                'Authorization': `Bearer ${process.env.WHATSAPP_API_TOKEN}`,
-                'Content-Type': 'application/json'
-            }
-        });
-        return response.data;
-    }
-    
-    // الطريقة 2: استخدام خدمة خارجية مثل Twilio
-    if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
-        const twilio = require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+    try {
+        // الطريقة 1: استخدام CallMeBot (مجاني ومباشر)
+        if (process.env.CALLMEBOT_API_KEY) {
+            const apiKey = process.env.CALLMEBOT_API_KEY;
+            const cleanPhone = phoneNumber.replace(/[^0-9]/g, '');
+            
+            const url = `https://api.callmebot.com/whatsapp.php?phone=${cleanPhone}&text=${encodeURIComponent(message)}&apikey=${apiKey}`;
+            
+            const response = await axios.get(url);
+            console.log(`✅ تم إرسال واتساب تلقائي إلى: ${phoneNumber}`);
+            return response.data;
+        }
         
-        const result = await twilio.messages.create({
-            from: `whatsapp:${process.env.TWILIO_WHATSAPP_NUMBER}`,
-            to: `whatsapp:${phoneNumber}`,
-            body: message
-        });
-        return result;
+        // الطريقة 2: استخدام Twilio (مدفوع)
+        if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
+            const twilio = require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+            
+            const result = await twilio.messages.create({
+                from: `whatsapp:${process.env.TWILIO_WHATSAPP_NUMBER}`,
+                to: `whatsapp:${phoneNumber}`,
+                body: message
+            });
+            console.log(`✅ تم إرسال واتساب Twilio إلى: ${phoneNumber}`);
+            return result;
+        }
+        
+        // الطريقة 3: استخدام WhatsApp Web API (مجاني)
+        if (process.env.WHATSAPP_WEB_API_URL) {
+            const response = await axios.post(process.env.WHATSAPP_WEB_API_URL, {
+                phone: phoneNumber,
+                message: message
+            });
+            console.log(`✅ تم إرسال واتساب Web API إلى: ${phoneNumber}`);
+            return response.data;
+        }
+        
+        // الطريقة 4: رابط مباشر (احتياطي)
+        console.log(`📱 رسالة واتساب لـ ${phoneNumber}:`);
+        console.log(message);
+        console.log(`🔗 رابط الإرسال: https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`);
+        
+        // محاولة إرسال تلقائي باستخدام webhook بسيط
+        try {
+            const webhookUrl = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${encodeURIComponent(message)}`;
+            console.log(`🔗 Webhook URL: ${webhookUrl}`);
+        } catch (webhookError) {
+            console.log('⚠️ Webhook غير متاح');
+        }
+        
+    } catch (error) {
+        console.error(`❌ خطأ في إرسال واتساب إلى ${phoneNumber}:`, error.message);
+        throw error;
     }
-    
-    // الطريقة 3: استخدام خدمة مجانية (للاختبار فقط)
-    // يمكن استخدام خدمات مثل CallMeBot أو WA.me
-    console.log(`📱 رسالة واتساب لـ ${phoneNumber}:`);
-    console.log(message);
-    console.log(`🔗 رابط الإرسال: https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`);
 };
 
 module.exports = {

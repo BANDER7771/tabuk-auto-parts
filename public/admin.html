@@ -710,6 +710,28 @@
     </div>
 
     <script>
+        // فحص كلمة المرور
+        function checkAdminPassword() {
+            const savedPassword = localStorage.getItem('adminPassword');
+            if (savedPassword !== '8899') {
+                const password = prompt('أدخل كلمة مرور الإدارة:');
+                if (password === '8899') {
+                    localStorage.setItem('adminPassword', '8899');
+                    return true;
+                } else {
+                    alert('كلمة مرور خاطئة!');
+                    window.location.href = 'index.html';
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // التحقق من كلمة المرور عند تحميل الصفحة
+        if (!checkAdminPassword()) {
+            throw new Error('Unauthorized access');
+        }
+
         let currentOrders = [];
         let filteredOrders = [];
 
@@ -800,11 +822,27 @@
             document.getElementById('processingOrders').textContent = stats.processing;
             document.getElementById('deliveredOrders').textContent = stats.delivered;
 
-            // Mock percentage changes
-            document.getElementById('totalOrdersChange').textContent = '+12% من الشهر الماضي';
-            document.getElementById('pendingOrdersChange').innerHTML = '<span>↗</span><span>+5 اليوم</span>';
-            document.getElementById('processingOrdersChange').innerHTML = '<span>→</span><span>لا تغيير</span>';
-            document.getElementById('deliveredOrdersChange').textContent = '+8% هذا الأسبوع';
+            // إحصائيات حقيقية بدلاً من القيم الوهمية
+            const today = new Date();
+            const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+            const thisWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+            
+            const todayOrders = currentOrders.filter(order => 
+                new Date(order.createdAt) >= yesterday
+            ).length;
+            
+            const weekOrders = currentOrders.filter(order => 
+                new Date(order.createdAt) >= thisWeek
+            ).length;
+            
+            document.getElementById('totalOrdersChange').textContent = 
+                stats.total > 0 ? `${stats.total} طلب إجمالي` : 'لا توجد طلبات بعد';
+            document.getElementById('pendingOrdersChange').innerHTML = 
+                `<span>📋</span><span>${todayOrders} طلب اليوم</span>`;
+            document.getElementById('processingOrdersChange').innerHTML = 
+                `<span>⚡</span><span>${stats.processing} قيد المعالجة</span>`;
+            document.getElementById('deliveredOrdersChange').textContent = 
+                `${weekOrders} طلب هذا الأسبوع`;
         }
 
         function renderOrders() {
@@ -1142,8 +1180,21 @@
             };
         }
 
-        // Auto refresh every 5 minutes
-        setInterval(loadOrders, 5 * 60 * 1000);
+        // Auto refresh every 30 seconds for real-time updates
+        setInterval(loadOrders, 30 * 1000);
+        
+        // إضافة مؤشر التحديث التلقائي
+        let refreshCounter = 30;
+        setInterval(() => {
+            refreshCounter--;
+            const refreshIndicator = document.getElementById('refresh-indicator');
+            if (refreshIndicator) {
+                refreshIndicator.textContent = `التحديث التلقائي خلال ${refreshCounter} ثانية`;
+            }
+            if (refreshCounter <= 0) {
+                refreshCounter = 30;
+            }
+        }, 1000);
     </script>
 </body>
 </html>

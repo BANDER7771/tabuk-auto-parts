@@ -9,11 +9,22 @@ router.get('/health', (req, res) => res.json({ ok: true, route: 'orders' }));
 // إنشاء طلب جديد
 router.post('/', async (req, res) => {
     try {
-        // فحص وجود البيانات
-        if (!req.body) {
+        // فحص وجود البيانات مع تشخيص مفصل
+        console.log('🔍 Order Request debugging:');
+        console.log('- Content-Type:', req.headers['content-type']);
+        console.log('- Body exists:', !!req.body);
+        console.log('- Body keys:', req.body ? Object.keys(req.body) : 'No body');
+        console.log('- Raw body:', req.body);
+
+        if (!req.body || Object.keys(req.body).length === 0) {
             return res.status(400).json({ 
                 message: 'لم يتم استلام البيانات بشكل صحيح',
-                error: 'Request body is undefined'
+                error: 'Request body is undefined or empty',
+                debug: {
+                    contentType: req.headers['content-type'],
+                    bodyExists: !!req.body,
+                    bodyKeys: req.body ? Object.keys(req.body) : []
+                }
             });
         }
 
@@ -379,11 +390,23 @@ router.get('/track/:phone', async (req, res) => {
 // إنشاء طلب بيع سيارة
 router.post('/sell-car', upload.array('images', 10), async (req, res) => {
     try {
-        // فحص وجود البيانات
-        if (!req.body) {
+        // فحص وجود البيانات مع تشخيص مفصل
+        console.log('🔍 Sell Car Request debugging:');
+        console.log('- Content-Type:', req.headers['content-type']);
+        console.log('- Body exists:', !!req.body);
+        console.log('- Body keys:', req.body ? Object.keys(req.body) : 'No body');
+        console.log('- Files:', req.files ? req.files.length : 0);
+
+        if (!req.body || Object.keys(req.body).length === 0) {
             return res.status(400).json({ 
                 message: 'لم يتم استلام البيانات بشكل صحيح',
-                error: 'Request body is undefined'
+                error: 'Request body is undefined or empty',
+                debug: {
+                    contentType: req.headers['content-type'],
+                    bodyExists: !!req.body,
+                    bodyKeys: req.body ? Object.keys(req.body) : [],
+                    filesCount: req.files ? req.files.length : 0
+                }
             });
         }
 

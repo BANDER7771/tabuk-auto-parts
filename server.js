@@ -133,25 +133,27 @@ app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', authLimiter);
 
 // ============================================
-// Middleware العام
+// Middleware العام - يجب أن يكون قبل CORS
 // ============================================
 // زيادة حد البيانات
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// middleware للتحقق من Content-Type
-app.use((req, res, next) => {
-    if (req.method === 'POST' || req.method === 'PUT') {
-        if (!req.headers['content-type']) {
-            return res.status(400).json({ 
-                message: 'Content-Type header is required',
-                error: 'Missing Content-Type header'
-            });
-        }
-    }
-    next();
-});
+// Serve static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use(express.static('public'));
+
+// Middleware للتشخيص (فقط في التطوير)
+if (process.env.NODE_ENV !== 'production') {
+    app.use((req, res, next) => {
+        console.log(`📥 ${req.method} ${req.path}`);
+        console.log('📋 Headers:', req.headers);
+        if (req.body && Object.keys(req.body).length > 0) {
+            console.log('📦 Body:', req.body);
+        }
+        next();
+    });
+}
 
 // ============================================
 // إنشاء مجلد uploads تلقائياً
@@ -248,10 +250,7 @@ app.use('/api/orders', require('./routes/orders'));
 app.use('/api/shops', require('./routes/shops'));
 app.use('/api/users', require('./routes/users'));
 
-// ============================================
-// Serve static files
-// ============================================
-app.use(express.static('public'));
+// Static files already configured above
 
 // ============================================
 // معالجة الأخطاء الموحدة

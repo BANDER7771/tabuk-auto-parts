@@ -216,8 +216,7 @@ if (MONGODB_URI) {
         socketTimeoutMS: 10000,
         retryWrites: true,
         w: 'majority',
-        maxPoolSize: 10,
-        bufferMaxEntries: 0
+        maxPoolSize: 10
     })
     .then(() => {
         console.log('✅ تم الاتصال بقاعدة البيانات MongoDB');

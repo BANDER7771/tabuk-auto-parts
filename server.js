@@ -127,50 +127,59 @@ if (!fs.existsSync(uploadsDir)) {
 // ============================================
 // اتصال محسن بقاعدة البيانات
 // ============================================
-const MONGODB_URI = process.env.MONGODB_URI;
+const MONGODB_URI = process.env.MONGODB_URI || process.env.DATABASE_URL || process.env.MONGO_URL;
+
 if (!MONGODB_URI) {
-    console.error('❌ MONGODB_URI غير محدد في ملف .env');
-    console.error('💡 يرجى إنشاء ملف .env وإضافة MONGODB_URI');
-    process.exit(1);
+    console.error('❌ متغير قاعدة البيانات غير محدد');
+    console.error('💡 يرجى إضافة أحد المتغيرات التالية:');
+    console.error('   - MONGODB_URI');
+    console.error('   - DATABASE_URL');
+    console.error('   - MONGO_URL');
+    console.error('🌐 البيئة الحالية:', process.env.NODE_ENV || 'development');
+    console.error('🔧 المنصة:', process.env.RAILWAY_ENVIRONMENT ? 'Railway' : (process.env.RENDER ? 'Render' : 'Local'));
+    
+    // في بيئة الإنتاج، لا نوقف الخادم بل نستخدم نظام احتياطي
+    if (process.env.NODE_ENV === 'production') {
+        console.warn('⚠️ سيتم تشغيل الخادم بدون قاعدة بيانات (وضع احتياطي)');
+    } else {
+        process.exit(1);
+    }
 }
 
-mongoose.connect(MONGODB_URI, {
-    serverSelectionTimeoutMS: 30000,
-    socketTimeoutMS: 45000,
-    retryWrites: true,
-    w: 'majority',
-    ssl: true,
-    sslValidate: false,
-    tlsAllowInvalidCertificates: true,
-    tlsAllowInvalidHostnames: true
-})
-.then(() => {
-    console.log('✅ تم الاتصال بقاعدة البيانات MongoDB Atlas');
-    console.log('🌐 قاعدة البيانات جاهزة ودائمة');
-})
-.catch(err => {
-    console.error('❌ خطأ في الاتصال بقاعدة البيانات:', err.message);
-    
-    // معالجة أخطاء SSL/TLS
-    if (err.code === 'ERR_SSL_TLSV1_ALERT_INTERNAL_ERROR' || 
-        err.message.includes('SSL') || 
-        err.message.includes('TLS')) {
-        console.error('🔒 خطأ SSL/TLS - تحقق من إعدادات MongoDB Atlas');
-        console.error('💡 تأكد من أن IP Address مُضاف في Network Access');
-        console.error('💡 تأكد من أن المستخدم له صلاحيات كافية');
-    }
-    
-    // إعادة محاولة الاتصال بعد 5 ثواني
-    setTimeout(() => {
-        console.log('🔄 إعادة محاولة الاتصال...');
-        mongoose.connect(MONGODB_URI, {
-            serverSelectionTimeoutMS: 30000,
-            socketTimeoutMS: 45000,
-            retryWrites: true,
-            w: 'majority'
-        });
-    }, 5000);
-});
+// محاولة الاتصال بقاعدة البيانات فقط إذا كان MONGODB_URI متاحاً
+if (MONGODB_URI) {
+    mongoose.connect(MONGODB_URI, {
+        serverSelectionTimeoutMS: 30000,
+        socketTimeoutMS: 45000,
+        retryWrites: true,
+        w: 'majority',
+        ssl: true,
+        sslValidate: false,
+        tlsAllowInvalidCertificates: true,
+        tlsAllowInvalidHostnames: true
+    })
+    .then(() => {
+        console.log('✅ تم الاتصال بقاعدة البيانات MongoDB');
+        console.log('🌐 قاعدة البيانات جاهزة ودائمة');
+        console.log('🔗 الرابط:', MONGODB_URI.replace(/\/\/.*:.*@/, '//***:***@')); // إخفاء كلمة المرور
+    })
+    .catch(err => {
+        console.error('❌ خطأ في الاتصال بقاعدة البيانات:', err.message);
+        
+        // معالجة أخطاء SSL/TLS
+        if (err.code === 'ERR_SSL_TLSV1_ALERT_INTERNAL_ERROR' || 
+            err.message.includes('SSL') || 
+            err.message.includes('TLS')) {
+            console.error('🔒 خطأ SSL/TLS - تحقق من إعدادات MongoDB Atlas');
+            console.error('💡 تأكد من أن IP Address مُضاف في Network Access');
+            console.error('💡 تأكد من أن المستخدم له صلاحيات كافية');
+        }
+        
+        console.warn('⚠️ سيتم تشغيل الخادم في الوضع الاحتياطي (بدون قاعدة بيانات)');
+    });
+} else {
+    console.warn('⚠️ لا يوجد رابط قاعدة بيانات - سيتم تشغيل الخادم في الوضع الاحتياطي');
+}
 
 // معالجة انقطاع الاتصال
 mongoose.connection.on('disconnected', () => {

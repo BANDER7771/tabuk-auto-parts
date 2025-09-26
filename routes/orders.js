@@ -1,6 +1,5 @@
 const router = require('express').Router();
 const Order = require('../models/Order');
-const { sendNewOrderNotification, sendOrderStatusUpdate } = require('../config/email');
 const { sendWhatsAppNotification } = require('../config/whatsapp');
 const upload = require('../middleware/upload');
 
@@ -116,12 +115,11 @@ router.post('/', async (req, res) => {
             }
         }
 
-        // إرسال إشعارات للإدارة
+        // إرسال إشعار واتساب فقط
         const notificationData = {
             orderNumber: order.orderNumber,
             customerName: order.customerName,
             customerPhone: order.customerPhone,
-            customerEmail: order.customerEmail,
             orderType: 'طلب قطع غيار',
             carMake: order.carInfo.make,
             carModel: order.carInfo.model,
@@ -129,13 +127,6 @@ router.post('/', async (req, res) => {
             description: order.items[0].partName,
             createdAt: order.createdAt
         };
-
-        // إرسال إشعار إيميل
-        try {
-            await sendNewOrderNotification(notificationData);
-        } catch (emailError) {
-            console.error('خطأ في إرسال إشعار الإيميل:', emailError);
-        }
 
         // إرسال إشعار واتساب
         try {
@@ -230,11 +221,18 @@ router.put('/admin/:id/status', async (req, res) => {
 
         await order.save();
 
-        // إرسال إشعار للعميل
+        // إرسال إشعار واتساب للإدارة عن تحديث الحالة
         try {
-            await sendOrderStatusUpdate(order, status);
-        } catch (emailError) {
-            console.error('خطأ في إرسال إشعار تحديث الحالة:', emailError);
+            await sendWhatsAppNotification({
+                orderNumber: order.orderNumber,
+                customerName: order.customerName,
+                customerPhone: order.customerPhone,
+                orderType: 'تحديث حالة الطلب',
+                description: `تم تحديث حالة الطلب إلى: ${status}`,
+                createdAt: new Date()
+            });
+        } catch (whatsappError) {
+            console.error('خطأ في إرسال إشعار واتساب لتحديث الحالة:', whatsappError);
         }
 
         res.json({
@@ -517,12 +515,11 @@ router.post('/sell-car', upload.array('images', 10), async (req, res) => {
             }
         }
 
-        // إرسال إشعارات للإدارة
+        // إرسال إشعار واتساب فقط
         const notificationData = {
             orderNumber: order.orderNumber,
             customerName: order.customerName,
             customerPhone: order.customerPhone,
-            customerEmail: order.customerEmail,
             orderType: 'طلب بيع سيارة',
             carMake: order.carInfo.make,
             carModel: order.carInfo.model,
@@ -530,13 +527,6 @@ router.post('/sell-car', upload.array('images', 10), async (req, res) => {
             description: order.items[0].partName,
             createdAt: order.createdAt
         };
-
-        // إرسال إشعار إيميل
-        try {
-            await sendNewOrderNotification(notificationData);
-        } catch (emailError) {
-            console.error('خطأ في إرسال إشعار الإيميل:', emailError);
-        }
 
         // إرسال إشعار واتساب
         try {

@@ -19,7 +19,22 @@ const sendWhatsAppNotification = async (orderData) => {
         return;
     }
 
-    const message = `
+    let message;
+    
+    if (orderData.orderType === 'تحديث حالة الطلب') {
+        message = `
+🔄 *تحديث حالة طلب - تشاليح تبوك*
+
+📋 *رقم الطلب:* ${orderData.orderNumber}
+👤 *العميل:* ${orderData.customerName}
+📱 *الجوال:* ${orderData.customerPhone}
+
+📊 *التحديث:* ${orderData.description}
+
+📅 *وقت التحديث:* ${new Date(orderData.createdAt).toLocaleString('ar-SA')}
+        `.trim();
+    } else {
+        message = `
 🚨 *طلب جديد - تشاليح تبوك*
 
 📋 *رقم الطلب:* ${orderData.orderNumber}
@@ -33,7 +48,8 @@ ${orderData.description}
 📅 *تاريخ الطلب:* ${new Date(orderData.createdAt).toLocaleString('ar-SA')}
 
 ⚡ *يرجى المتابعة مع العميل في أقرب وقت*
-    `.trim();
+        `.trim();
+    }
 
     // إرسال لكل رقم إدارة
     for (const phoneNumber of ADMIN_WHATSAPP_NUMBERS) {
@@ -65,16 +81,20 @@ const sendToWhatsApp = async (phoneNumber, message) => {
             return response.data;
         }
         
-        // الطريقة 2: استخدام Twilio (مدفوع)
+        // الطريقة 2: استخدام Twilio (الأفضل والأسرع)
         if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
             const twilio = require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
             
+            console.log(`📞 إرسال Twilio واتساب إلى: ${phoneNumber}`);
+            
             const result = await twilio.messages.create({
-                from: `whatsapp:${process.env.TWILIO_WHATSAPP_NUMBER}`,
-                to: `whatsapp:${phoneNumber}`,
+                from: 'whatsapp:+14155238886',
+                to: `whatsapp:+${phoneNumber}`,
                 body: message
             });
-            console.log(`✅ تم إرسال واتساب Twilio إلى: ${phoneNumber}`);
+            
+            console.log(`✅ تم إرسال واتساب Twilio بنجاح!`);
+            console.log(`📊 Message SID: ${result.sid}`);
             return result;
         }
         

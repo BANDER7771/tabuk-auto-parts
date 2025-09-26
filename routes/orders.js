@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const Order = require('../models/Order');
 const { sendNewOrderNotification, sendOrderStatusUpdate } = require('../config/email');
+const upload = require('../middleware/upload');
 
 // فحص صحة الخدمة
 router.get('/health', (req, res) => res.json({ ok: true, route: 'orders' }));
@@ -314,7 +315,7 @@ router.get('/track/:phone', async (req, res) => {
 });
 
 // إنشاء طلب بيع سيارة
-router.post('/sell-car', async (req, res) => {
+router.post('/sell-car', upload.array('images', 10), async (req, res) => {
     try {
         // فحص وجود البيانات
         if (!req.body) {
@@ -331,10 +332,24 @@ router.post('/sell-car', async (req, res) => {
             carModel,
             carYear,
             condition,
+            mileage,
+            transmission,
+            description,
+            city,
             sellReason,
             violations,
-            notes
+            expectedPrice
         } = req.body;
+
+        // معالجة الصور المرفوعة
+        const images = req.files ? req.files.map(file => {
+            // إذا كان يستخدم Cloudinary، استخدم الرابط الكامل
+            if (file.path && file.path.includes('cloudinary')) {
+                return file.path;
+            }
+            // إذا كان تخزين محلي، استخدم اسم الملف
+            return file.filename || file.originalname;
+        }) : [];
 
         // فحص البيانات المطلوبة
         if (!fullName || !phone || !carMake || !carModel || !carYear) {
@@ -350,23 +365,27 @@ router.post('/sell-car', async (req, res) => {
             customerPhone: phone,
             items: [{
                 partName: `سيارة ${carMake} ${carModel} ${carYear}`,
-                quantity: 1
+                quantity: 1,
+                images: images
             }],
             carInfo: {
                 make: carMake,
                 model: carModel,
-                year: carYear,
-                condition: condition
+                year: parseInt(carYear),
+                condition: condition,
+                mileage: mileage ? parseInt(mileage) : null,
+                transmission: transmission
             },
-            notes: `حالة السيارة: ${condition}${sellReason ? `\nسبب البيع: ${sellReason}` : ''}${violations ? `\nالمخالفات: ${violations}` : ''}${notes ? `\nملاحظات: ${notes}` : ''}`,
+            notes: `حالة السيارة: ${condition}${mileage ? `\nالكيلومترات: ${mileage}` : ''}${transmission ? `\nنوع الجير: ${transmission}` : ''}${sellReason ? `\nسبب البيع: ${sellReason}` : ''}${violations ? `\nالمخالفات: ${violations}` : ''}${description ? `\nوصف إضافي: ${description}` : ''}${expectedPrice ? `\nالسعر المتوقع: ${expectedPrice} ريال` : ''}`,
             shippingAddress: {
                 name: fullName,
                 phone: phone,
-                city: 'تبوك',
+                city: city || 'تبوك',
                 details: 'طلب بيع سيارة'
             },
-            totalAmount: 0, // سيتم تحديده بعد التقييم
-            status: 'pending'
+            totalAmount: expectedPrice ? parseInt(expectedPrice) : 0,
+            status: 'pending',
+            images: images
         });
 
         await order.save();

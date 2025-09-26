@@ -124,6 +124,11 @@
             </div>
 
             <div class="form-group">
+                <label>الاسم الكامل</label>
+                <input type="text" id="fullName" placeholder="أدخل اسمك الكامل" required>
+            </div>
+
+            <div class="form-group">
                 <label>رقم الجوال</label>
                 <input type="tel" id="phone" pattern="05[0-9]{8}" placeholder="05XXXXXXXX" required>
             </div>
@@ -163,32 +168,52 @@
             e.preventDefault();
             
             const requestData = {
+                fullName: document.getElementById('fullName')?.value || 'غير محدد',
+                phone: document.getElementById('phone').value,
                 carMake: document.getElementById('carMake').value,
                 carModel: document.getElementById('carModel').value,
-                carYear: document.getElementById('carYear').value,
-                partName: document.getElementById('partName').value,
-                details: document.getElementById('details').value,
-                phone: document.getElementById('phone').value,
-                userId: JSON.parse(localStorage.getItem('user') || '{}').id
+                carYear: parseInt(document.getElementById('carYear').value),
+                partDetails: document.getElementById('partName').value,
+                notes: document.getElementById('details').value,
+                city: 'تبوك'
             };
 
-            // هنا يتم إرسال الطلب للسيرفر
-            alert('تم استلام طلبك بنجاح! سنتواصل معك قريباً على الرقم المسجل.');
-            
-            // حفظ الطلب محلياً
-            let requests = JSON.parse(localStorage.getItem('partRequests') || '[]');
-            requests.push({
-                ...requestData,
-                id: Date.now(),
-                date: new Date().toISOString(),
-                status: 'pending'
-            });
-            localStorage.setItem('partRequests', JSON.stringify(requests));
-            
-            // العودة للصفحة الرئيسية
-            setTimeout(() => {
-                window.location.href = 'index.html';
-            }, 2000);
+            try {
+                // إرسال الطلب للسيرفر
+                const response = await fetch('/api/orders', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    alert(`تم استلام طلبك بنجاح!\nرقم الطلب: ${result.id}\nسنتواصل معك قريباً على الرقم المسجل.`);
+                    
+                    // العودة للصفحة الرئيسية
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 2000);
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.message || 'حدث خطأ في إرسال الطلب');
+                }
+            } catch (error) {
+                console.error('Error submitting request:', error);
+                alert('حدث خطأ في إرسال الطلب. يرجى المحاولة مرة أخرى.');
+                
+                // حفظ الطلب محلياً كنسخة احتياطية
+                let requests = JSON.parse(localStorage.getItem('partRequests') || '[]');
+                requests.push({
+                    ...requestData,
+                    id: Date.now(),
+                    date: new Date().toISOString(),
+                    status: 'pending_offline'
+                });
+                localStorage.setItem('partRequests', JSON.stringify(requests));
+            }
         }
     </script>
 </body>

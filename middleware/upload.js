@@ -1,7 +1,18 @@
 const multer = require('multer');
 const path = require('path');
 
-const storage = multer.diskStorage({
+// استيراد إعداد Cloudinary
+let cloudinaryUpload;
+try {
+    const { upload: cloudinaryUploadConfig } = require('../config/cloudinary');
+    cloudinaryUpload = cloudinaryUploadConfig;
+} catch (error) {
+    console.warn('⚠️ Cloudinary غير متاح، سيتم استخدام التخزين المحلي');
+    cloudinaryUpload = null;
+}
+
+// إعداد التخزين المحلي كبديل
+const localStorage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, 'uploads/');
     },
@@ -23,10 +34,14 @@ const fileFilter = (req, file, cb) => {
     }
 };
 
-const upload = multer({
-    storage,
-    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+// إعداد multer للتخزين المحلي
+const localUpload = multer({
+    storage: localStorage,
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
     fileFilter
 });
+
+// استخدام Cloudinary إذا كان متاحاً، وإلا استخدام التخزين المحلي
+const upload = cloudinaryUpload || localUpload;
 
 module.exports = upload;

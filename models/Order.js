@@ -23,7 +23,10 @@ const orderSchema = new mongoose.Schema({
         make: String,
         model: String,
         year: Number,
-        vin: String
+        vin: String,
+        condition: String,
+        mileage: Number,
+        transmission: String
     },
     // القطع المطلوبة
     items: [{
@@ -36,7 +39,8 @@ const orderSchema = new mongoose.Schema({
             type: Number,
             default: 1
         },
-        price: Number
+        price: Number,
+        images: [String] // صور القطعة أو السيارة
     }],
     totalAmount: {
         type: Number,
@@ -72,6 +76,7 @@ const orderSchema = new mongoose.Schema({
     },
     trackingNumber: String,
     notes: String,
+    images: [String], // صور الطلب (للسيارات المباعة)
     timeline: [{
         status: String,
         date: Date,

@@ -112,14 +112,21 @@ app.use((req, res, next) => {
 // Rate Limiting
 // ============================================
 
-// حماية عامة
+// حماية عامة مع إعدادات trust proxy محسنة
 const generalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 دقيقة
     max: 100, // حد أقصى 100 طلب
     message: 'تم تجاوز الحد المسموح من الطلبات، حاول مرة أخرى لاحقاً',
     standardHeaders: true,
     legacyHeaders: false,
-    trustProxy: true
+    // إعداد trust proxy آمن للإنتاج
+    trustProxy: process.env.NODE_ENV === 'production' ? ['127.0.0.1', 'loopback', 'linklocal', 'uniquelocal'] : false,
+    keyGenerator: (req) => {
+        // استخدام IP الحقيقي في الإنتاج أو IP المحلي في التطوير
+        return process.env.NODE_ENV === 'production' 
+            ? req.ip || req.connection.remoteAddress 
+            : req.ip;
+    }
 });
 
 // حماية تسجيل الدخول
@@ -130,7 +137,12 @@ const authLimiter = rateLimit({
     message: 'محاولات دخول كثيرة، حاول بعد 15 دقيقة',
     standardHeaders: true,
     legacyHeaders: false,
-    trustProxy: true
+    trustProxy: process.env.NODE_ENV === 'production' ? ['127.0.0.1', 'loopback', 'linklocal', 'uniquelocal'] : false,
+    keyGenerator: (req) => {
+        return process.env.NODE_ENV === 'production' 
+            ? req.ip || req.connection.remoteAddress 
+            : req.ip;
+    }
 });
 
 // تطبيق Rate Limiting

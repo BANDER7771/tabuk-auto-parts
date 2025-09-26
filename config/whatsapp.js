@@ -9,8 +9,13 @@ const ADMIN_WHATSAPP_NUMBERS = [
 
 // إرسال رسالة واتساب باستخدام WhatsApp Business API أو خدمة خارجية
 const sendWhatsAppNotification = async (orderData) => {
+    console.log('🔍 WhatsApp Debug - بدء إرسال الإشعار');
+    console.log('📱 أرقام الإدارة:', ADMIN_WHATSAPP_NUMBERS);
+    console.log('🔑 API Key متوفر:', !!process.env.CALLMEBOT_API_KEY);
+    
     if (ADMIN_WHATSAPP_NUMBERS.length === 0) {
         console.log('⚠️ لا توجد أرقام واتساب مُعرفة للإدارة');
+        console.log('🔧 تحقق من متغير ADMIN_WHATSAPP_1 في Railway');
         return;
     }
 
@@ -51,8 +56,12 @@ const sendToWhatsApp = async (phoneNumber, message) => {
             
             const url = `https://api.callmebot.com/whatsapp.php?phone=${cleanPhone}&text=${encodeURIComponent(message)}&apikey=${apiKey}`;
             
-            const response = await axios.get(url);
+            console.log(`📞 محاولة إرسال واتساب إلى: ${phoneNumber}`);
+            console.log(`🔗 URL: ${url.substring(0, 80)}...`);
+            
+            const response = await axios.get(url, { timeout: 10000 });
             console.log(`✅ تم إرسال واتساب تلقائي إلى: ${phoneNumber}`);
+            console.log(`📊 استجابة CallMeBot:`, response.status, response.statusText);
             return response.data;
         }
         

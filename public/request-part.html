@@ -155,13 +155,25 @@
             const make = document.getElementById('carMake').value;
             const modelSelect = document.getElementById('carModel');
             
-            modelSelect.innerHTML = '<option value="">اختر الموديل</option>';
+            // تحسين الأداء باستخدام DocumentFragment
+            const fragment = document.createDocumentFragment();
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = 'اختر الموديل';
+            fragment.appendChild(defaultOption);
             
             if (make && models[make]) {
                 models[make].forEach(model => {
-                    modelSelect.innerHTML += `<option value="${model}">${model}</option>`;
+                    const option = document.createElement('option');
+                    option.value = model;
+                    option.textContent = model;
+                    fragment.appendChild(option);
                 });
             }
+            
+            // تحديث واحد بدلاً من تحديثات متعددة
+            modelSelect.innerHTML = '';
+            modelSelect.appendChild(fragment);
         }
 
         async function submitPartRequest(e) {

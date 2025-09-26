@@ -254,6 +254,18 @@ mongoose.connection.on('reconnected', () => {
 // Routes - مع المصادقة
 // ============================================
 
+// Health check endpoint لـ Railway
+app.get('/health', (req, res) => {
+    res.status(200).json({
+        status: 'OK',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        environment: process.env.NODE_ENV,
+        database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+        port: process.env.PORT || 3000
+    });
+});
+
 // Route للتحقق من CORS
 app.get('/api/test-cors', (req, res) => {
     res.json({
@@ -311,7 +323,27 @@ app.use((req, res) => {
 // ============================================
 // تشغيل الخادم
 // ============================================
-const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => {
+const PORT = process.env.PORT || 3000;
+
+const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 السيرفر يعمل على البورت ${PORT}`);
+    console.log(`🌐 البيئة: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`🔧 المنصة: ${process.env.RAILWAY_ENVIRONMENT ? 'Railway' : 'Local'}`);
+});
+
+// معالجة إشارات النظام
+process.on('SIGTERM', () => {
+    console.log('📡 تم استلام SIGTERM - إغلاق الخادم بأمان...');
+    server.close(() => {
+        console.log('✅ تم إغلاق الخادم بنجاح');
+        process.exit(0);
+    });
+});
+
+process.on('SIGINT', () => {
+    console.log('📡 تم استلام SIGINT - إغلاق الخادم بأمان...');
+    server.close(() => {
+        console.log('✅ تم إغلاق الخادم بنجاح');
+        process.exit(0);
+    });
 });

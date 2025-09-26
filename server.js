@@ -138,7 +138,11 @@ mongoose.connect(MONGODB_URI, {
     serverSelectionTimeoutMS: 30000,
     socketTimeoutMS: 45000,
     retryWrites: true,
-    w: 'majority'
+    w: 'majority',
+    ssl: true,
+    sslValidate: false,
+    tlsAllowInvalidCertificates: true,
+    tlsAllowInvalidHostnames: true
 })
 .then(() => {
     console.log('✅ تم الاتصال بقاعدة البيانات MongoDB Atlas');

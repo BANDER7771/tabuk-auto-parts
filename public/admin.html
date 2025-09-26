@@ -741,7 +741,28 @@
                 const response = await fetch('/api/orders/admin');
                 if (response.ok) {
                     const data = await response.json();
-                    currentOrders = data || [];
+                    
+                    // التحقق من نوع البيانات المستلمة
+                    if (data.orders && Array.isArray(data.orders)) {
+                        // البيانات الجديدة مع الطلبات الاحتياطية
+                        currentOrders = [...(data.orders || []), ...(data.backupOrders || [])];
+                        
+                        // عرض تحذير إذا كانت هناك طلبات احتياطية
+                        if (data.backupOrders && data.backupOrders.length > 0) {
+                            console.warn(`⚠️ يوجد ${data.backupOrders.length} طلب محفوظ في الملف الاحتياطي`);
+                            showNotification(`تحذير: يوجد ${data.backupOrders.length} طلب محفوظ احتياطياً بسبب مشكلة في قاعدة البيانات`, 'warning');
+                        }
+                        
+                        // عرض حالة قاعدة البيانات
+                        console.log(`📊 حالة قاعدة البيانات: ${data.dbStatus}`);
+                        console.log(`📋 إجمالي الطلبات: ${data.totalOrders}`);
+                        
+                    } else if (Array.isArray(data)) {
+                        // البيانات القديمة (مصفوفة مباشرة)
+                        currentOrders = data;
+                    } else {
+                        currentOrders = [];
+                    }
                 } else {
                     console.warn('Failed to load orders from API');
                     currentOrders = [];
@@ -756,6 +777,7 @@
                 filteredOrders = [];
                 updateStats();
                 renderOrders();
+                showNotification('خطأ في جلب الطلبات', 'error');
             }
         }
 

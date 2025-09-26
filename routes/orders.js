@@ -72,7 +72,37 @@ router.post('/', async (req, res) => {
             status: 'pending'
         });
 
-        await order.save();
+        try {
+            await order.save();
+            console.log('✅ تم حفظ الطلب في قاعدة البيانات:', order.orderNumber);
+        } catch (dbError) {
+            console.error('❌ خطأ في حفظ الطلب في قاعدة البيانات:', dbError.message);
+            
+            // حفظ الطلب في ملف محلي كبديل
+            const fs = require('fs');
+            const path = require('path');
+            
+            try {
+                const ordersFile = path.join(__dirname, '../backup_orders.json');
+                let backupOrders = [];
+                
+                if (fs.existsSync(ordersFile)) {
+                    const data = fs.readFileSync(ordersFile, 'utf8');
+                    backupOrders = JSON.parse(data);
+                }
+                
+                backupOrders.push({
+                    ...order.toObject(),
+                    savedAt: new Date(),
+                    source: 'backup_due_to_db_error'
+                });
+                
+                fs.writeFileSync(ordersFile, JSON.stringify(backupOrders, null, 2));
+                console.log('✅ تم حفظ الطلب في الملف الاحتياطي');
+            } catch (fileError) {
+                console.error('❌ خطأ في حفظ الطلب في الملف الاحتياطي:', fileError.message);
+            }
+        }
 
         // إرسال إشعار للادارة
         try {
@@ -95,7 +125,12 @@ router.post('/', async (req, res) => {
         res.status(201).json({
             message: 'تم استلام طلبك بنجاح',
             id: order.orderNumber,
-            order
+            order: {
+                orderNumber: order.orderNumber,
+                customerName: order.customerName,
+                status: order.status,
+                createdAt: order.createdAt
+            }
         });
     } catch (error) {
         res.status(500).json({ 
@@ -108,11 +143,38 @@ router.post('/', async (req, res) => {
 // الحصول على جميع الطلبات (للوحة الإدارة)
 router.get('/admin', async (req, res) => {
     try {
-        const orders = await Order.find()
-            .sort({ createdAt: -1 })
-            .populate('items.partId');
+        let orders = [];
+        let backupOrders = [];
         
-        res.json(orders);
+        // محاولة جلب الطلبات من قاعدة البيانات
+        try {
+            orders = await Order.find()
+                .sort({ createdAt: -1 })
+                .populate('items.partId');
+        } catch (dbError) {
+            console.error('خطأ في جلب الطلبات من قاعدة البيانات:', dbError.message);
+        }
+        
+        // جلب الطلبات الاحتياطية من الملف
+        const fs = require('fs');
+        const path = require('path');
+        const backupFile = path.join(__dirname, '../backup_orders.json');
+        
+        if (fs.existsSync(backupFile)) {
+            try {
+                const data = fs.readFileSync(backupFile, 'utf8');
+                backupOrders = JSON.parse(data);
+            } catch (fileError) {
+                console.error('خطأ في قراءة الطلبات الاحتياطية:', fileError.message);
+            }
+        }
+        
+        res.json({
+            orders: orders,
+            backupOrders: backupOrders,
+            totalOrders: orders.length + backupOrders.length,
+            dbStatus: orders.length > 0 ? 'connected' : 'disconnected'
+        });
     } catch (error) {
         res.status(500).json({ 
             message: 'خطأ في جلب الطلبات', 
@@ -388,7 +450,38 @@ router.post('/sell-car', upload.array('images', 10), async (req, res) => {
             images: images
         });
 
-        await order.save();
+        try {
+            await order.save();
+            console.log('✅ تم حفظ طلب بيع السيارة في قاعدة البيانات:', order.orderNumber);
+        } catch (dbError) {
+            console.error('❌ خطأ في حفظ طلب بيع السيارة في قاعدة البيانات:', dbError.message);
+            
+            // حفظ الطلب في ملف محلي كبديل
+            const fs = require('fs');
+            const path = require('path');
+            
+            try {
+                const ordersFile = path.join(__dirname, '../backup_orders.json');
+                let backupOrders = [];
+                
+                if (fs.existsSync(ordersFile)) {
+                    const data = fs.readFileSync(ordersFile, 'utf8');
+                    backupOrders = JSON.parse(data);
+                }
+                
+                backupOrders.push({
+                    ...order.toObject(),
+                    savedAt: new Date(),
+                    source: 'backup_due_to_db_error',
+                    type: 'sell-car'
+                });
+                
+                fs.writeFileSync(ordersFile, JSON.stringify(backupOrders, null, 2));
+                console.log('✅ تم حفظ طلب بيع السيارة في الملف الاحتياطي');
+            } catch (fileError) {
+                console.error('❌ خطأ في حفظ طلب بيع السيارة في الملف الاحتياطي:', fileError.message);
+            }
+        }
 
         // إرسال إشعار للادارة
         try {
@@ -411,7 +504,12 @@ router.post('/sell-car', upload.array('images', 10), async (req, res) => {
         res.status(201).json({
             message: 'تم استلام طلب بيع السيارة بنجاح',
             orderNumber: order.orderNumber,
-            order
+            order: {
+                orderNumber: order.orderNumber,
+                customerName: order.customerName,
+                status: order.status,
+                createdAt: order.createdAt
+            }
         });
     } catch (error) {
         res.status(500).json({ 

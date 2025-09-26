@@ -87,7 +87,7 @@
 <body>
     <div class="container">
         <h1>🔧 اطلب قطعتك</h1>
-        <form onsubmit="submitPartRequest(event)">
+        <form onsubmit="submitPartRequest(event)" id="partRequestForm">
             <div class="form-group">
                 <label>نوع السيارة</label>
                 <select id="carMake" required onchange="updateModels()">
@@ -166,6 +166,12 @@
 
         async function submitPartRequest(e) {
             e.preventDefault();
+            
+            // منع الإرسال الافتراضي للنموذج
+            const form = document.getElementById('partRequestForm');
+            if (form) {
+                form.preventDefault = true;
+            }
             
             const requestData = {
                 fullName: document.getElementById('fullName')?.value || 'غير محدد',

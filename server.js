@@ -13,6 +13,9 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 const app = express();
 
+// إعداد trust proxy للعمل مع Railway و Render
+app.set('trust proxy', true);
+
 // ============================================
 // تثبيت الحزم الجديدة المطلوبة
 // ============================================
@@ -138,6 +141,20 @@ app.use('/api/auth/register', authLimiter);
 // زيادة حد البيانات
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// إضافة middleware لمعالجة multipart/form-data للطلبات العادية (بدون ملفات)
+const multer = require('multer');
+const textOnlyUpload = multer();
+app.use('/api/orders', (req, res, next) => {
+    // إذا كان Content-Type هو multipart/form-data ولكن لا يحتوي على ملفات
+    if (req.headers['content-type'] && req.headers['content-type'].includes('multipart/form-data')) {
+        // للطلبات التي لا تحتوي على ملفات، استخدم multer بدون تخزين
+        if (req.path === '/' && req.method === 'POST') {
+            return textOnlyUpload.none()(req, res, next);
+        }
+    }
+    next();
+});
 
 // Serve static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

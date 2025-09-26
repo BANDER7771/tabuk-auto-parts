@@ -119,7 +119,10 @@ app.use((req, res, next) => {
 const generalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 دقيقة
     max: 100, // حد أقصى 100 طلب
-    message: 'تم تجاوز الحد المسموح من الطلبات، حاول مرة أخرى لاحقاً'
+    message: 'تم تجاوز الحد المسموح من الطلبات، حاول مرة أخرى لاحقاً',
+    standardHeaders: true,
+    legacyHeaders: false,
+    trustProxy: true
 });
 
 // حماية تسجيل الدخول
@@ -127,7 +130,10 @@ const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 5, // 5 محاولات كحد أقصى
     skipSuccessfulRequests: true,
-    message: 'محاولات دخول كثيرة، حاول بعد 15 دقيقة'
+    message: 'محاولات دخول كثيرة، حاول بعد 15 دقيقة',
+    standardHeaders: true,
+    legacyHeaders: false,
+    trustProxy: true
 });
 
 // تطبيق Rate Limiting
@@ -209,11 +215,7 @@ if (MONGODB_URI) {
         serverSelectionTimeoutMS: 30000,
         socketTimeoutMS: 45000,
         retryWrites: true,
-        w: 'majority',
-        ssl: true,
-        sslValidate: false,
-        tlsAllowInvalidCertificates: true,
-        tlsAllowInvalidHostnames: true
+        w: 'majority'
     })
     .then(() => {
         console.log('✅ تم الاتصال بقاعدة البيانات MongoDB');

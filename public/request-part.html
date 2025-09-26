@@ -185,6 +185,12 @@
             };
 
             try {
+                // إظهار loading
+                const submitBtn = document.querySelector('.btn');
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = 'جاري الإرسال...';
+                submitBtn.disabled = true;
+                
                 // إرسال الطلب للسيرفر
                 const response = await fetch('/api/orders', {
                     method: 'POST',
@@ -221,6 +227,11 @@
                     status: 'pending_offline'
                 });
                 localStorage.setItem('partRequests', JSON.stringify(requests));
+            } finally {
+                // إعادة تفعيل الزر
+                const submitBtn = document.querySelector('.btn');
+                submitBtn.textContent = 'إرسال الطلب';
+                submitBtn.disabled = false;
             }
         }
     </script>

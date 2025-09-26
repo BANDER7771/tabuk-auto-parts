@@ -21,10 +21,17 @@ const sendNewOrderNotification = async (orderData) => {
     try {
         const transporter = createTransporter();
         
+        // إيميلات الإدارة المتعددة
+        const adminEmails = [
+            process.env.ADMIN_EMAIL_1,
+            process.env.ADMIN_EMAIL_2,
+            process.env.EMAIL_USER // كنسخة احتياطية
+        ].filter(email => email);
+        
         const mailOptions = {
-            from: `"تبوك قطع غيار" <${process.env.EMAIL_USER}>`,
-            to: process.env.ADMIN_EMAIL || process.env.EMAIL_USER,
-            subject: `طلب جديد #${orderData.orderNumber} - ${orderData.customerName}`,
+            from: `"🚗 تشاليح تبوك" <${process.env.EMAIL_USER}>`,
+            to: adminEmails.join(', '),
+            subject: `🚨 طلب جديد #${orderData.orderNumber} - ${orderData.customerName}`,
             html: `
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                     <div style="background: #2c3e50; color: white; padding: 20px; text-align: center;">

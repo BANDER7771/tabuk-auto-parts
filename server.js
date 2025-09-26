@@ -212,10 +212,12 @@ if (!MONGODB_URI) {
 // محاولة الاتصال بقاعدة البيانات فقط إذا كان MONGODB_URI متاحاً
 if (MONGODB_URI) {
     mongoose.connect(MONGODB_URI, {
-        serverSelectionTimeoutMS: 30000,
-        socketTimeoutMS: 45000,
+        serverSelectionTimeoutMS: 5000,
+        socketTimeoutMS: 10000,
         retryWrites: true,
-        w: 'majority'
+        w: 'majority',
+        maxPoolSize: 10,
+        bufferMaxEntries: 0
     })
     .then(() => {
         console.log('✅ تم الاتصال بقاعدة البيانات MongoDB');

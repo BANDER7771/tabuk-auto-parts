@@ -738,7 +738,12 @@
 
         async function loadOrders() {
             try {
-                const response = await fetch('/api/orders/admin');
+                const response = await fetch('/api/orders/admin', {
+                    credentials: 'same-origin',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
                 if (response.ok) {
                     const data = await response.json();
                     

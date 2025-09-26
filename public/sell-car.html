@@ -665,6 +665,7 @@
                 // Send real API request
                 const response = await fetch('/api/orders/sell-car', {
                     method: 'POST',
+                    credentials: 'same-origin',
                     body: formData
                 });
 

@@ -40,20 +40,28 @@ const corsOptions = {
         const allowedOrigins = [
             'http://localhost:3000',
             'http://localhost:5000',
+            'http://localhost:10000',
             'https://tabuk-auto-parts.onrender.com',
             'https://www.tabuk-auto-parts.onrender.com',
             'http://tabuk-auto-parts.onrender.com',
-            'http://www.tabuk-auto-parts.onrender.com'
+            'http://www.tabuk-auto-parts.onrender.com',
+            // إضافة نطاقات Railway
+            'https://tabuk-auto-parts-production.up.railway.app',
+            'https://www.tabuk-auto-parts-production.up.railway.app',
+            'http://tabuk-auto-parts-production.up.railway.app',
+            'http://www.tabuk-auto-parts-production.up.railway.app'
         ];
         
-        // السماح للطلبات بدون origin (مثل Postman)
+        // السماح للطلبات بدون origin (مثل Postman أو same-origin)
         if (!origin) {
             return callback(null, true);
         }
         
-        // السماح لجميع subdomains من onrender.com في الإنتاج
-        if (process.env.NODE_ENV === 'production' && origin.includes('.onrender.com')) {
-            return callback(null, true);
+        // السماح لجميع subdomains من onrender.com و railway.app في الإنتاج
+        if (process.env.NODE_ENV === 'production') {
+            if (origin.includes('.onrender.com') || origin.includes('.railway.app')) {
+                return callback(null, true);
+            }
         }
         
         // التحقق من القائمة المسموحة
@@ -61,14 +69,44 @@ const corsOptions = {
             callback(null, true);
         } else {
             console.log('❌ CORS Error - Origin not allowed:', origin);
+            console.log('🔍 Current origin:', origin);
+            console.log('✅ Allowed origins:', allowedOrigins);
+            // في الإنتاج، نسمح بالطلب حتى لو لم يكن في القائمة (للتجربة)
+            if (process.env.NODE_ENV === 'production') {
+                console.log('⚠️ Allowing request in production mode');
+                return callback(null, true);
+            }
             callback(new Error('Not allowed by CORS'));
         }
     },
     credentials: true,
-    optionsSuccessStatus: 200
+    optionsSuccessStatus: 200,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 };
 
 app.use(cors(corsOptions));
+
+// إضافة headers CORS إضافية
+app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    
+    // السماح لجميع النطاقات في الإنتاج (حل مؤقت)
+    if (process.env.NODE_ENV === 'production') {
+        res.header('Access-Control-Allow-Origin', origin || '*');
+    }
+    
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    
+    // التعامل مع preflight requests
+    if (req.method === 'OPTIONS') {
+        res.sendStatus(200);
+    } else {
+        next();
+    }
+});
 
 // ============================================
 // Rate Limiting
@@ -193,6 +231,17 @@ mongoose.connection.on('reconnected', () => {
 // ============================================
 // Routes - مع المصادقة
 // ============================================
+
+// Route للتحقق من CORS
+app.get('/api/test-cors', (req, res) => {
+    res.json({
+        message: 'CORS is working!',
+        origin: req.headers.origin,
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV
+    });
+});
+
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/parts', require('./routes/parts'));
 app.use('/api/orders', require('./routes/orders'));

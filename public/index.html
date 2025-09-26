@@ -92,16 +92,22 @@
 
         .beta-badge {
             background: linear-gradient(135deg, #ff6b35, #f7931e);
-            color: white;
-            font-size: 0.7rem;
+            color: white !important;
+            font-size: 0.65rem;
             font-weight: 700;
-            padding: 0.2rem 0.6rem;
+            padding: 0.25rem 0.5rem;
             border-radius: 12px;
             margin-right: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            display: inline-block;
+            line-height: 1;
+            vertical-align: middle;
+            position: relative;
+            top: -2px;
             box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
             animation: pulse-beta 2s infinite;
+            -webkit-text-fill-color: white !important;
+            background-clip: padding-box !important;
+            -webkit-background-clip: padding-box !important;
         }
 
         @keyframes pulse-beta {

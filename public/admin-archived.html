@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الطلبات المؤرشفة - قطع تبوك</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --success: #00c853;
+            --warning: #ff6f00;
+            --danger: #d32f2f;
+            --info: #2196f3;
+            --dark: #1a1a1a;
+            --light: #f8f9fa;
+            --border: #e0e0e0;
+            --shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .admin-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-title h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .beta-badge {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.3rem 0.6rem;
+            border-radius: 12px;
+            display: inline-block;
+            line-height: 1;
+            vertical-align: middle;
+            animation: pulse-beta 2s infinite;
+        }
+
+        @keyframes pulse-beta {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 4px 15px rgba(255, 107, 53, 0.5);
+            }
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.7rem 1.2rem;
+            border-radius: 8px;
+            border: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-light {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+        }
+
+        .btn-light:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #b71c1c;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #00a843;
+        }
+
+        /* Info Section */
+        .info-section {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .info-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .info-content h2 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .info-content p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .info-stats {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        /* Orders Section */
+        .orders-section {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .orders-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .orders-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .orders-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .orders-count {
+            background: var(--light);
+            color: #666;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .orders-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .orders-table th,
+        .orders-table td {
+            padding: 1rem 1.5rem;
+            text-align: right;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .orders-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #555;
+            font-size: 0.9rem;
+            position: sticky;
+            top: 0;
+        }
+
+        .orders-table tbody tr {
+            transition: background-color 0.2s;
+            cursor: pointer;
+        }
+
+        .orders-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-align: center;
+            min-width: 80px;
+            display: inline-block;
+        }
+
+        .status-archived {
+            background: #e0e0e0;
+            color: #555;
+        }
+
+        .status-cancelled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-delivered {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #666;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f0f0f0;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .info-card {
+                flex-direction: column;
+                text-align: center;
+                gap: 1.5rem;
+            }
+
+            .info-stats {
+                width: 100%;
+                justify-content: space-around;
+            }
+
+            .orders-section {
+                padding: 0 1rem;
+            }
+
+            .orders-table {
+                font-size: 0.85rem;
+            }
+
+            .orders-table th,
+            .orders-table td {
+                padding: 0.8rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="admin-header">
+        <div class="header-content">
+            <div class="header-title">
+                <span>📦</span>
+                <h1>الطلبات المؤرشفة</h1>
+                <span class="beta-badge">تجريبي</span>
+            </div>
+            <div class="header-actions">
+                <a href="admin.html" class="btn btn-light">
+                    <span>🔙</span>
+                    <span>العودة للطلبات النشطة</span>
+                </a>
+                <button class="btn btn-light" onclick="refreshData()">
+                    <span>🔄</span>
+                    <span>تحديث</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Info Section -->
+    <section class="info-section">
+        <div class="info-card">
+            <div class="info-content">
+                <h2>الطلبات المؤرشفة</h2>
+                <p>هنا يمكنك مراجعة جميع الطلبات التي تم أرشفتها أو إلغاؤها</p>
+            </div>
+            <div class="info-stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="totalArchived">0</div>
+                    <div class="stat-label">إجمالي المؤرشف</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="cancelledCount">0</div>
+                    <div class="stat-label">ملغي</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="deliveredCount">0</div>
+                    <div class="stat-label">مكتمل</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Orders Section -->
+    <section class="orders-section">
+        <div class="orders-card">
+            <div class="orders-header">
+                <h2 class="orders-title">قائمة الطلبات المؤرشفة</h2>
+                <span class="orders-count" id="ordersCount">0 طلب</span>
+            </div>
+            
+            <div id="ordersContent">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>جاري تحميل الطلبات المؤرشفة...</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // فحص كلمة المرور
+        function checkAdminPassword() {
+            const savedPassword = localStorage.getItem('adminPassword');
+            if (savedPassword !== '8899') {
+                const password = prompt('أدخل كلمة مرور الإدارة:');
+                if (password === '8899') {
+                    localStorage.setItem('adminPassword', '8899');
+                    return true;
+                } else {
+                    alert('كلمة مرور خاطئة!');
+                    window.location.href = 'index.html';
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // التحقق من كلمة المرور عند تحميل الصفحة
+        if (!checkAdminPassword()) {
+            throw new Error('Unauthorized access');
+        }
+
+        let archivedOrders = [];
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadArchivedOrders();
+        });
+
+        async function loadArchivedOrders() {
+            try {
+                const response = await fetch('/api/orders/admin/archived', {
+                    credentials: 'same-origin',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    archivedOrders = data.archivedOrders || [];
+                } else {
+                    console.warn('Failed to load archived orders from API');
+                    archivedOrders = [];
+                }
+                
+                updateStats();
+                renderOrders();
+            } catch (error) {
+                console.error('Error loading archived orders:', error);
+                archivedOrders = [];
+                updateStats();
+                renderOrders();
+            }
+        }
+
+        function updateStats() {
+            const totalArchived = archivedOrders.length;
+            const cancelledCount = archivedOrders.filter(o => o.status === 'cancelled').length;
+            const deliveredCount = archivedOrders.filter(o => o.status === 'delivered').length;
+
+            document.getElementById('totalArchived').textContent = totalArchived;
+            document.getElementById('cancelledCount').textContent = cancelledCount;
+            document.getElementById('deliveredCount').textContent = deliveredCount;
+        }
+
+        function renderOrders() {
+            const container = document.getElementById('ordersContent');
+            const count = document.getElementById('ordersCount');
+            
+            count.textContent = `${archivedOrders.length} طلب`;
+
+            if (archivedOrders.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📦</div>
+                        <h3>لا توجد طلبات مؤرشفة</h3>
+                        <p>لم يتم أرشفة أي طلبات بعد</p>
+                        <a href="admin.html" class="btn btn-primary" style="margin-top: 1rem;">
+                            العودة للطلبات النشطة
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+
+            const tableHTML = `
+                <table class="orders-table">
+                    <thead>
+                        <tr>
+                            <th>رقم الطلب</th>
+                            <th>العميل</th>
+                            <th>الجوال</th>
+                            <th>السيارة</th>
+                            <th>القطعة</th>
+                            <th>الحالة</th>
+                            <th>تاريخ الأرشفة</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${archivedOrders.map(order => `
+                            <tr>
+                                <td><strong>${order.orderNumber}</strong></td>
+                                <td>${order.customerName}</td>
+                                <td>${order.customerPhone}</td>
+                                <td>${order.carInfo?.make || ''} ${order.carInfo?.model || ''} ${order.carInfo?.year || ''}</td>
+                                <td>${order.items?.[0]?.partName || 'غير محدد'}</td>
+                                <td>
+                                    <span class="status-badge ${order.status === 'cancelled' ? 'status-cancelled' : order.status === 'delivered' ? 'status-delivered' : 'status-archived'}">
+                                        ${getStatusText(order.status)}
+                                    </span>
+                                </td>
+                                <td>${formatDate(order.archivedAt || order.createdAt)}</td>
+                                <td>
+                                    <div style="display: flex; gap: 0.5rem;">
+                                        <button class="btn btn-success" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="restoreOrder('${order._id}')">
+                                            استرجاع
+                                        </button>
+                                        <button class="btn btn-danger" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="deleteOrder('${order._id}')">
+                                            حذف نهائي
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            container.innerHTML = tableHTML;
+        }
+
+        function getStatusText(status) {
+            const statusMap = {
+                'pending': 'جديد',
+                'confirmed': 'مؤكد',
+                'processing': 'قيد المعالجة',
+                'shipped': 'في الطريق',
+                'delivered': 'تم التسليم',
+                'cancelled': 'ملغي',
+                'archived': 'مؤرشف'
+            };
+            return statusMap[status] || status;
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-GB', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            });
+        }
+
+        async function restoreOrder(orderId) {
+            if (!confirm('هل أنت متأكد من استرجاع هذا الطلب؟')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/orders/admin/${orderId}/restore`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    alert('تم استرجاع الطلب بنجاح');
+                    loadArchivedOrders();
+                } else {
+                    alert('فشل في استرجاع الطلب');
+                }
+            } catch (error) {
+                console.error('Error restoring order:', error);
+                alert('حدث خطأ في استرجاع الطلب');
+            }
+        }
+
+        async function deleteOrder(orderId) {
+            if (!confirm('هل أنت متأكد من حذف هذا الطلب نهائياً؟ لا يمكن التراجع عن هذا الإجراء!')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/orders/admin/${orderId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    alert('تم حذف الطلب نهائياً');
+                    loadArchivedOrders();
+                } else {
+                    alert('فشل في حذف الطلب');
+                }
+            } catch (error) {
+                console.error('Error deleting order:', error);
+                alert('حدث خطأ في حذف الطلب');
+            }
+        }
+
+        function refreshData() {
+            document.getElementById('ordersContent').innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>جاري تحديث البيانات...</p>
+                </div>
+            `;
+            setTimeout(loadArchivedOrders, 1000);
+        }
+    </script>
+</body>
+</html>

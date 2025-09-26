@@ -463,6 +463,40 @@ router.put('/admin/:id/archive', async (req, res) => {
     }
 });
 
+// استرجاع طلب مؤرشف (للإدارة فقط)
+router.put('/admin/:id/restore', async (req, res) => {
+    try {
+        const order = await Order.findById(req.params.id);
+
+        if (!order) {
+            return res.status(404).json({ 
+                message: 'الطلب غير موجود' 
+            });
+        }
+
+        // إزالة حقل archived
+        order.archived = false;
+        order.archivedAt = undefined;
+        order.timeline.push({
+            status: 'restored',
+            date: new Date(),
+            description: 'تم استرجاع الطلب من الأرشيف'
+        });
+
+        await order.save();
+
+        res.json({ 
+            message: 'تم استرجاع الطلب بنجاح',
+            order
+        });
+    } catch (error) {
+        res.status(500).json({ 
+            message: 'خطأ في استرجاع الطلب', 
+            error: error.message 
+        });
+    }
+});
+
 // تتبع الطلب بالهاتف
 router.get('/track/:phone', async (req, res) => {
     try {

@@ -82,6 +82,52 @@
             margin-bottom: 1rem;
             position: relative;
             z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .logo-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo-icon {
+            width: 45px;
+            height: 45px;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .beta-badge {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.3rem 0.6rem;
+            border-radius: 12px;
+            display: inline-block;
+            line-height: 1;
+            vertical-align: middle;
+            animation: pulse-beta 2s infinite;
+        }
+
+        @keyframes pulse-beta {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 4px 15px rgba(255, 107, 53, 0.5);
+            }
         }
 
         .form-header p {
@@ -726,8 +772,14 @@
     <div class="container">
         <!-- Form Header -->
         <div class="form-header">
-            <h1>🔧 طلب قطعة غيار</h1>
-            <p>املأ النموذج التالي وسنوفر لك القطعة المطلوبة بأفضل سعر</p>
+            <h1>
+                <div class="logo-badge">
+                    <div class="logo-icon">🔧</div>
+                    <span>طلب قطعة غيار</span>
+                    <span class="beta-badge">تجريبي</span>
+                </div>
+            </h1>
+            <p>قطع تبوك - املأ النموذج التالي وسنوفر لك القطعة المطلوبة بأفضل سعر</p>
             <div class="progress-bar">
                 <div class="progress-fill" id="progressBar"></div>
             </div>

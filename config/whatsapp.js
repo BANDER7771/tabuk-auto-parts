@@ -12,10 +12,26 @@ const sendWhatsAppNotification = async (orderData) => {
     console.log('🔍 WhatsApp Debug - بدء إرسال الإشعار');
     console.log('📱 أرقام الإدارة:', ADMIN_WHATSAPP_NUMBERS);
     console.log('🔑 API Key متوفر:', !!process.env.CALLMEBOT_API_KEY);
+    console.log('🌐 متغيرات البيئة المتاحة:', {
+        ADMIN_WHATSAPP_1: !!process.env.ADMIN_WHATSAPP_1,
+        ADMIN_WHATSAPP_2: !!process.env.ADMIN_WHATSAPP_2,
+        CALLMEBOT_API_KEY: !!process.env.CALLMEBOT_API_KEY,
+        TWILIO_ACCOUNT_SID: !!process.env.TWILIO_ACCOUNT_SID,
+        TWILIO_AUTH_TOKEN: !!process.env.TWILIO_AUTH_TOKEN
+    });
     
     if (ADMIN_WHATSAPP_NUMBERS.length === 0) {
         console.log('⚠️ لا توجد أرقام واتساب مُعرفة للإدارة');
-        console.log('🔧 تحقق من متغير ADMIN_WHATSAPP_1 في Railway');
+        console.log('🔧 يرجى إضافة متغير ADMIN_WHATSAPP_1 في إعدادات البيئة');
+        console.log('📝 مثال: ADMIN_WHATSAPP_1=966555123456');
+        
+        // إرسال إشعار بديل عبر console للتطوير
+        console.log('📧 إشعار بديل - تفاصيل الطلب:');
+        console.log('- رقم الطلب:', orderData.orderNumber);
+        console.log('- العميل:', orderData.customerName);
+        console.log('- الجوال:', orderData.customerPhone);
+        console.log('- نوع الطلب:', orderData.orderType);
+        console.log('- الوصف:', orderData.description);
         return;
     }
 
@@ -113,6 +129,16 @@ const sendToWhatsApp = async (phoneNumber, message) => {
         console.log(message);
         console.log(`🔗 رابط الإرسال: https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`);
         
+        // الطريقة 5: إشعار بريد إلكتروني كبديل
+        if (process.env.ADMIN_EMAIL) {
+            try {
+                await sendEmailNotification(process.env.ADMIN_EMAIL, message);
+                console.log(`📧 تم إرسال إشعار بريد إلكتروني إلى: ${process.env.ADMIN_EMAIL}`);
+            } catch (emailError) {
+                console.log('⚠️ فشل في إرسال البريد الإلكتروني:', emailError.message);
+            }
+        }
+        
         // محاولة إرسال تلقائي باستخدام webhook بسيط
         try {
             const webhookUrl = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${encodeURIComponent(message)}`;
@@ -123,6 +149,47 @@ const sendToWhatsApp = async (phoneNumber, message) => {
         
     } catch (error) {
         console.error(`❌ خطأ في إرسال واتساب إلى ${phoneNumber}:`, error.message);
+        throw error;
+    }
+};
+
+// دالة إرسال إشعار بريد إلكتروني كبديل
+const sendEmailNotification = async (email, message) => {
+    try {
+        // استخدام nodemailer إذا كان متاحاً
+        if (process.env.EMAIL_HOST && process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+            const nodemailer = require('nodemailer');
+            
+            const transporter = nodemailer.createTransporter({
+                host: process.env.EMAIL_HOST,
+                port: process.env.EMAIL_PORT || 587,
+                secure: false,
+                auth: {
+                    user: process.env.EMAIL_USER,
+                    pass: process.env.EMAIL_PASS
+                }
+            });
+
+            await transporter.sendMail({
+                from: process.env.EMAIL_USER,
+                to: email,
+                subject: 'إشعار طلب جديد - قطع تبوك',
+                text: message,
+                html: `<div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6;">
+                    <h2 style="color: #667eea;">قطع تبوك</h2>
+                    <pre style="background: #f5f5f5; padding: 15px; border-radius: 5px; white-space: pre-wrap;">${message}</pre>
+                </div>`
+            });
+            
+            return true;
+        }
+        
+        // استخدام خدمة EmailJS أو أي خدمة أخرى
+        console.log('📧 لا توجد إعدادات بريد إلكتروني مُعرفة');
+        return false;
+        
+    } catch (error) {
+        console.error('❌ خطأ في إرسال البريد الإلكتروني:', error.message);
         throw error;
     }
 };

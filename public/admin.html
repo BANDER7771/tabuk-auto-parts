@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة إدارة الطلبات - تشاليح تبوك</title>
+    <title>لوحة إدارة الطلبات - قطع تبوك</title>
     <style>
         * {
             margin: 0;
@@ -897,9 +897,17 @@
                                 </td>
                                 <td>${formatDate(order.createdAt)}</td>
                                 <td onclick="event.stopPropagation()">
-                                    <button class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="openOrderModal('${order._id}')">
-                                        عرض
-                                    </button>
+                                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                        <button class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="openOrderModal('${order._id}')">
+                                            عرض
+                                        </button>
+                                        <button class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; background: #ff9800; color: white;" onclick="archiveOrder('${order._id}', event)">
+                                            أرشفة
+                                        </button>
+                                        <button class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; background: #f44336; color: white;" onclick="deleteOrder('${order._id}', event)">
+                                            حذف
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         `).join('')}
@@ -1154,6 +1162,57 @@
             } catch (error) {
                 console.error('Error updating order:', error);
                 alert('حدث خطأ في تحديث حالة الطلب');
+            }
+        }
+
+        async function archiveOrder(orderId, event) {
+            event.stopPropagation();
+            
+            if (!confirm('هل أنت متأكد من أرشفة هذا الطلب؟')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/orders/admin/${orderId}/archive`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    alert('تم أرشفة الطلب بنجاح');
+                    loadOrders(); // إعادة تحميل الطلبات
+                } else {
+                    alert('فشل في أرشفة الطلب');
+                }
+            } catch (error) {
+                console.error('Error archiving order:', error);
+                alert('حدث خطأ في أرشفة الطلب');
+            }
+        }
+
+        async function deleteOrder(orderId, event) {
+            event.stopPropagation();
+            
+            if (!confirm('هل أنت متأكد من حذف هذا الطلب نهائياً؟ لا يمكن التراجع عن هذا الإجراء!')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/orders/admin/${orderId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    alert('تم حذف الطلب نهائياً');
+                    loadOrders(); // إعادة تحميل الطلبات
+                } else {
+                    alert('فشل في حذف الطلب');
+                }
+            } catch (error) {
+                console.error('Error deleting order:', error);
+                alert('حدث خطأ في حذف الطلب');
             }
         }
 

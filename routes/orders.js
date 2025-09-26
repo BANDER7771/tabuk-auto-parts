@@ -159,9 +159,9 @@ router.get('/admin', async (req, res) => {
         let orders = [];
         let backupOrders = [];
         
-        // محاولة جلب الطلبات من قاعدة البيانات
+        // محاولة جلب الطلبات من قاعدة البيانات (استثناء المؤرشفة)
         try {
-            orders = await Order.find()
+            orders = await Order.find({ archived: { $ne: true } })
                 .sort({ createdAt: -1 })
                 .populate('items.partId');
         } catch (dbError) {
@@ -191,6 +191,33 @@ router.get('/admin', async (req, res) => {
     } catch (error) {
         res.status(500).json({ 
             message: 'خطأ في جلب الطلبات', 
+            error: error.message 
+        });
+    }
+});
+
+// الحصول على الطلبات المؤرشفة (للوحة الإدارة)
+router.get('/admin/archived', async (req, res) => {
+    try {
+        let archivedOrders = [];
+        
+        // محاولة جلب الطلبات المؤرشفة من قاعدة البيانات
+        try {
+            archivedOrders = await Order.find({ archived: true })
+                .sort({ archivedAt: -1 })
+                .populate('items.partId');
+        } catch (dbError) {
+            console.error('خطأ في جلب الطلبات المؤرشفة من قاعدة البيانات:', dbError.message);
+        }
+        
+        res.json({
+            archivedOrders: archivedOrders,
+            totalArchived: archivedOrders.length,
+            dbStatus: archivedOrders.length > 0 ? 'connected' : 'disconnected'
+        });
+    } catch (error) {
+        res.status(500).json({ 
+            message: 'خطأ في جلب الطلبات المؤرشفة', 
             error: error.message 
         });
     }
@@ -373,6 +400,64 @@ router.delete('/:orderNumber', async (req, res) => {
     } catch (error) {
         res.status(500).json({ 
             message: 'خطأ في إلغاء الطلب', 
+            error: error.message 
+        });
+    }
+});
+
+// حذف طلب نهائياً (للإدارة فقط)
+router.delete('/admin/:id', async (req, res) => {
+    try {
+        const order = await Order.findById(req.params.id);
+
+        if (!order) {
+            return res.status(404).json({ 
+                message: 'الطلب غير موجود' 
+            });
+        }
+
+        await Order.findByIdAndDelete(req.params.id);
+
+        res.json({ 
+            message: 'تم حذف الطلب نهائياً' 
+        });
+    } catch (error) {
+        res.status(500).json({ 
+            message: 'خطأ في حذف الطلب', 
+            error: error.message 
+        });
+    }
+});
+
+// أرشفة طلب (للإدارة فقط)
+router.put('/admin/:id/archive', async (req, res) => {
+    try {
+        const order = await Order.findById(req.params.id);
+
+        if (!order) {
+            return res.status(404).json({ 
+                message: 'الطلب غير موجود' 
+            });
+        }
+
+        // إضافة حقل archived إلى الطلب
+        order.archived = true;
+        order.archivedAt = new Date();
+        order.timeline.push({
+            status: 'archived',
+            date: new Date(),
+            description: 'تم أرشفة الطلب'
+        });
+
+        await order.save();
+
+        res.json({ 
+            message: 'تم أرشفة الطلب بنجاح',
+            order
+        });
+    } catch (error) {
+        res.status(500).json({ 
+            message: 'خطأ في أرشفة الطلب', 
             error: error.message 
         });
     }

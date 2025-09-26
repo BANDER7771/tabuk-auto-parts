@@ -56,6 +56,15 @@ const orderSchema = new mongoose.Schema({
         enum: ['normal', 'rush'],
         default: 'normal'
     },
+    deliveryOption: {
+        type: String,
+        enum: ['free', 'standard', 'express'],
+        default: 'free'
+    },
+    deliveryFee: {
+        type: Number,
+        default: 0
+    },
     paymentMethod: {
         type: String,
         enum: ['cash', 'card', 'transfer', 'tamara', 'tabby'],

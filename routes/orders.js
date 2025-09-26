@@ -37,6 +37,7 @@ router.post('/', async (req, res) => {
             vin,
             partDetails,
             urgency,
+            delivery,
             notes,
             email,
             city
@@ -52,6 +53,23 @@ router.post('/', async (req, res) => {
 
         // إنشاء رقم طلب فريد
         const orderNumber = 'ORD-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4).toUpperCase();
+
+        // حساب رسوم التوصيل
+        let deliveryFee = 0;
+        const deliveryOption = delivery || 'free';
+        
+        switch (deliveryOption) {
+            case 'express':
+                deliveryFee = 50;
+                break;
+            case 'standard':
+                deliveryFee = 20;
+                break;
+            case 'free':
+            default:
+                deliveryFee = 0;
+                break;
+        }
 
         // إنشاء طلب جديد
         const order = new Order({
@@ -70,6 +88,8 @@ router.post('/', async (req, res) => {
                 vin: vin
             },
             urgency: urgency || 'normal',
+            deliveryOption: deliveryOption,
+            deliveryFee: deliveryFee,
             notes: notes,
             shippingAddress: {
                 name: fullName,
@@ -79,7 +99,7 @@ router.post('/', async (req, res) => {
                 street: '',
                 details: notes
             },
-            totalAmount: 0, // سيتم تحديده لاحقاً
+            totalAmount: deliveryFee, // رسوم التوصيل + سعر القطعة (سيتم تحديده لاحقاً)
             status: 'pending'
         });
 
@@ -116,6 +136,10 @@ router.post('/', async (req, res) => {
         }
 
         // إرسال إشعار واتساب فقط
+        const deliveryText = deliveryOption === 'express' ? 'مستعجل (1-2 ساعة) - 50 ريال' : 
+                           deliveryOption === 'standard' ? 'عادي (2-5 ساعات) - 20 ريال' : 
+                           'مجاني (5-24 ساعة)';
+        
         const notificationData = {
             orderNumber: order.orderNumber,
             customerName: order.customerName,
@@ -124,7 +148,7 @@ router.post('/', async (req, res) => {
             carMake: order.carInfo.make,
             carModel: order.carInfo.model,
             carYear: order.carInfo.year,
-            description: order.items[0].partName,
+            description: `${order.items[0].partName}\nالتوصيل: ${deliveryText}`,
             createdAt: order.createdAt
         };
 

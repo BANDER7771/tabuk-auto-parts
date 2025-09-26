@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>طلب قطعة غيار - قطع تبوك</title>
+    <title>طلب قطعة غيار - تشاليح تبوك</title>
     <style>
         * {
             margin: 0;
@@ -750,6 +750,70 @@
             }
         }
 
+        /* Delivery Options Styles */
+        .delivery-options {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .delivery-option {
+            position: relative;
+        }
+
+        .delivery-option input[type="radio"] {
+            display: none;
+        }
+
+        .delivery-label {
+            display: block;
+            padding: 1.5rem;
+            border: 2px solid var(--border);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .delivery-option input[type="radio"]:checked + .delivery-label {
+            border-color: var(--primary);
+            background: rgba(102, 126, 234, 0.05);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+        }
+
+        .delivery-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .delivery-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #333;
+        }
+
+        .delivery-price {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+
+        .delivery-time {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .delivery-option input[type="radio"]:checked + .delivery-label .delivery-title {
+            color: var(--primary);
+        }
+
+        .delivery-option input[type="radio"]:checked + .delivery-label .delivery-time {
+            color: var(--primary);
+            opacity: 0.8;
+        }
+
         /* Animations */
         .pulse {
             animation: pulse 2s infinite;
@@ -779,7 +843,7 @@
                     <span class="beta-badge">تجريبي</span>
                 </div>
             </h1>
-            <p>قطع تبوك - املأ النموذج التالي وسنوفر لك القطعة المطلوبة بأفضل سعر</p>
+            <p>تشاليح تبوك - املأ النموذج التالي وسنوفر لك القطعة المطلوبة بأفضل سعر</p>
             <div class="progress-bar">
                 <div class="progress-fill" id="progressBar"></div>
             </div>
@@ -832,11 +896,11 @@
                         <div class="form-group">
                             <label>
                                 <span class="required">*</span>
-                                موديل السيارة
+                                فئة السيارة
                             </label>
                             <input type="text" name="carModel" id="carModel" required 
                                    placeholder="مثال: كامري، ألتيما، سوناتا...">
-                            <div class="error-message">الرجاء إدخال موديل السيارة</div>
+                            <div class="error-message">الرجاء إدخال فئة السيارة</div>
                         </div>
 
                         <div class="form-group">
@@ -917,15 +981,37 @@
                         </div>
 
                         <div class="form-group full-width">
-                            <label>الأولوية</label>
-                            <div class="radio-group">
-                                <div class="radio-option">
-                                    <input type="radio" name="urgency" id="normal" value="normal" checked>
-                                    <label for="normal" class="radio-label">عادي (2-3 أيام)</label>
+                            <label>خيارات التوصيل</label>
+                            <div class="delivery-options">
+                                <div class="delivery-option">
+                                    <input type="radio" name="delivery" id="free" value="free" checked>
+                                    <label for="free" class="delivery-label">
+                                        <div class="delivery-header">
+                                            <span class="delivery-title">توصيل مجاني</span>
+                                            <span class="delivery-price">0 ريال</span>
+                                        </div>
+                                        <div class="delivery-time">من 5 ساعات إلى 24 ساعة</div>
+                                    </label>
                                 </div>
-                                <div class="radio-option">
-                                    <input type="radio" name="urgency" id="urgent" value="urgent">
-                                    <label for="urgent" class="radio-label">مستعجل (24 ساعة)</label>
+                                <div class="delivery-option">
+                                    <input type="radio" name="delivery" id="standard" value="standard">
+                                    <label for="standard" class="delivery-label">
+                                        <div class="delivery-header">
+                                            <span class="delivery-title">توصيل عادي</span>
+                                            <span class="delivery-price">20 ريال</span>
+                                        </div>
+                                        <div class="delivery-time">من ساعتين إلى 5 ساعات</div>
+                                    </label>
+                                </div>
+                                <div class="delivery-option">
+                                    <input type="radio" name="delivery" id="express" value="express">
+                                    <label for="express" class="delivery-label">
+                                        <div class="delivery-header">
+                                            <span class="delivery-title">توصيل مستعجل</span>
+                                            <span class="delivery-price">50 ريال</span>
+                                        </div>
+                                        <div class="delivery-time">من ساعة إلى ساعتين</div>
+                                    </label>
                                 </div>
                             </div>
                         </div>
@@ -959,8 +1045,8 @@
                             <span class="summary-value" id="summaryPhone">-</span>
                         </div>
                         <div class="summary-item">
-                            <span class="summary-label">الأولوية:</span>
-                            <span class="summary-value" id="summaryUrgency">عادي</span>
+                            <span class="summary-label">التوصيل:</span>
+                            <span class="summary-value" id="summaryDelivery">مجاني (5-24 ساعة)</span>
                         </div>
                     </div>
 
@@ -970,7 +1056,7 @@
                             <span>شروط الخدمة</span>
                         </div>
                         <div class="info-card-content">
-                            بإرسال هذا الطلب، أوافق على أن يتم التواصل معي من قبل فريق قطع تبوك لتوفير القطعة المطلوبة
+                            بإرسال هذا الطلب، أوافق على أن يتم التواصل معي من قبل فريق تشاليح تبوك لتوفير القطعة المطلوبة
                         </div>
                     </div>
                 </div>
@@ -1130,15 +1216,30 @@
             const partDetails = document.getElementById('partDetails').value || '-';
             const name = document.getElementById('fullName').value || '-';
             const phone = document.getElementById('phone').value || '-';
-            const urgencyElement = document.querySelector('input[name="urgency"]:checked');
-            const urgency = urgencyElement ? urgencyElement.nextElementSibling.textContent : '-';
+            const deliveryElement = document.querySelector('input[name="delivery"]:checked');
+            
+            let deliveryText = 'مجاني (5-24 ساعة)';
+            if (deliveryElement) {
+                switch (deliveryElement.value) {
+                    case 'express':
+                        deliveryText = 'مستعجل (1-2 ساعة) - 50 ريال';
+                        break;
+                    case 'standard':
+                        deliveryText = 'عادي (2-5 ساعات) - 20 ريال';
+                        break;
+                    case 'free':
+                    default:
+                        deliveryText = 'مجاني (5-24 ساعة)';
+                        break;
+                }
+            }
             
             document.getElementById('summarycar').textContent = `${make} ${model}`;
             document.getElementById('summaryYear').textContent = year;
             document.getElementById('summaryPart').textContent = partDetails.substring(0, 100) + (partDetails.length > 100 ? '...' : '');
             document.getElementById('summaryName').textContent = name;
             document.getElementById('summaryPhone').textContent = phone;
-            document.getElementById('summaryUrgency').textContent = urgency;
+            document.getElementById('summaryDelivery').textContent = deliveryText;
         }
 
         // Handle file upload
@@ -1293,6 +1394,11 @@
                     }, 1000);
                 }
             }
+        });
+
+        // Add event listeners for delivery options
+        document.querySelectorAll('input[name="delivery"]').forEach(radio => {
+            radio.addEventListener('change', updateSummary);
         });
 
         // Initialize

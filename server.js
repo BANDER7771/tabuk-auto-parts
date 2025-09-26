@@ -8,9 +8,6 @@ const fs = require('fs');
 // تحميل المتغيرات البيئية
 dotenv.config();
 
-// فرض TLS 1.2 لـ MongoDB
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-
 const app = express();
 
 // إعداد trust proxy للعمل مع Railway و Render

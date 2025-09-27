@@ -840,7 +840,7 @@
                 <div class="logo-badge">
                     <div class="logo-icon">🔧</div>
                     <span>طلب قطعة غيار</span>
-                    <span class="beta-badge">تجريبي</span>
+                    <span class="beta-badge">إطلاق تجريبي</span>
                 </div>
             </h1>
             <p>تشاليح تبوك - املأ النموذج التالي وسنوفر لك القطعة المطلوبة بأفضل سعر</p>
@@ -853,14 +853,10 @@
         <div class="form-steps">
             <div class="step active" data-step="1">
                 <span class="step-number">1</span>
-                <span>معلومات أساسية</span>
+                <span>معلومات الطلب</span>
             </div>
             <div class="step" data-step="2">
                 <span class="step-number">2</span>
-                <span>تفاصيل الطلب</span>
-            </div>
-            <div class="step" data-step="3">
-                <span class="step-number">3</span>
                 <span>إرسال الطلب</span>
             </div>
         </div>
@@ -886,34 +882,28 @@
                         <div class="form-group">
                             <label>
                                 <span class="required">*</span>
-                                اسم السيارة (الماركة)
+                                اسم السيارة وفئتها
                             </label>
-                            <input type="text" name="carMake" id="carMake" required 
-                                   placeholder="مثال: تويوتا، نيسان، هيونداي...">
-                            <div class="error-message">الرجاء إدخال اسم السيارة</div>
+                            <input type="text" name="carNameCategory" id="carNameCategory" required 
+                                   placeholder="مثال: تويوتا كامري، هوندا أكورد، نيسان ألتيما...">
+                            <div class="error-message">الرجاء إدخال اسم السيارة وفئتها</div>
                         </div>
 
                         <div class="form-group">
                             <label>
                                 <span class="required">*</span>
-                                فئة السيارة
+                                موديل السيارة
                             </label>
-                            <input type="text" name="carModel" id="carModel" required 
-                                   placeholder="مثال: كامري، ألتيما، سوناتا...">
-                            <div class="error-message">الرجاء إدخال فئة السيارة</div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>سنة الصنع</label>
-                            <input type="number" name="carYear" id="carYear" 
+                            <input type="number" name="carYear" id="carYear" required
                                    min="1990" max="2030" 
-                                   placeholder="مثال: 2020 (اختياري)">
+                                   placeholder="مثال: 2020">
+                            <div class="error-message">الرجاء إدخال موديل السيارة</div>
                         </div>
 
                         <div class="form-group">
                             <label>
                                 <span class="required">*</span>
-                                الاسم الكامل
+                                اسمك
                             </label>
                             <input type="text" name="fullName" id="fullName" required 
                                    placeholder="أدخل اسمك الكامل">
@@ -923,103 +913,39 @@
                         <div class="form-group">
                             <label>
                                 <span class="required">*</span>
-                                رقم الجوال
+                                رقمك
                             </label>
                             <input type="tel" name="phone" id="phone" required 
                                    placeholder="05XXXXXXXX" pattern="05[0-9]{8}" maxlength="10">
                             <div class="error-message">الرجاء إدخال رقم جوال صحيح</div>
                         </div>
 
-                        <div class="form-group">
-                            <label>المدينة</label>
-                            <div class="custom-select">
-                                <select name="city" id="city">
-                                    <option value="tabuk">تبوك</option>
-                                    <option value="riyadh">الرياض</option>
-                                    <option value="jeddah">جدة</option>
-                                    <option value="dammam">الدمام</option>
-                                    <option value="makkah">مكة</option>
-                                    <option value="madinah">المدينة</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Step 2: Part Details -->
-                <div class="form-section" data-section="2">
-                    <h2 class="section-title">تفاصيل الطلب</h2>
-
-                    <div class="form-grid">
                         <div class="form-group full-width">
                             <label>
                                 <span class="required">*</span>
-                                القطعة المطلوبة بالتفصيل
+                                تفاصيل القطعة
                             </label>
                             <textarea name="partDetails" id="partDetails" required
-                                      placeholder="اكتب اسم القطعة بالتفصيل مثل:&#10;- رديتر كامري 2020&#10;- كمبريسر مكيف نيسان ألتيما&#10;- طرمبة بنزين هيونداي سوناتا&#10;- مرايا جانبية يمين&#10;- فانوس خلفي شمال"
-                                      style="min-height: 120px;"></textarea>
-                            <div class="error-message">الرجاء وصف القطعة المطلوبة بالتفصيل</div>
+                                      placeholder="اكتب تفاصيل القطعة المطلوبة..."
+                                      style="min-height: 100px;"></textarea>
+                            <div class="error-message">الرجاء وصف القطعة المطلوبة</div>
                         </div>
 
                         <div class="form-group full-width">
-                            <label>صور القطعة (اختياري)</label>
+                            <label>صورة القطعة (اختياري)</label>
                             <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
                                 <div class="upload-icon">📷</div>
-                                <div class="upload-text">انقر لرفع الصور أو اسحب الملفات هنا</div>
-                                <div class="upload-hint">صور القطعة المطلوبة أو موقعها في السيارة (اختياري)</div>
+                                <div class="upload-text">انقر لرفع صورة أو اسحب الملف هنا</div>
+                                <div class="upload-hint">صورة القطعة المطلوبة (اختياري)</div>
                             </div>
-                            <input type="file" id="fileInput" accept="image/*" multiple style="display: none;">
+                            <input type="file" id="fileInput" accept="image/*" style="display: none;">
                             <div class="image-preview" id="imagePreview"></div>
-                        </div>
-
-                        <div class="form-group full-width">
-                            <label>ملاحظات إضافية</label>
-                            <textarea name="notes" id="notes" 
-                                      placeholder="أي معلومات إضافية تود إخبارنا بها... (اختياري)"
-                                      style="min-height: 80px;"></textarea>
-                        </div>
-
-                        <div class="form-group full-width">
-                            <label>خيارات التوصيل</label>
-                            <div class="delivery-options">
-                                <div class="delivery-option">
-                                    <input type="radio" name="delivery" id="free" value="free" checked>
-                                    <label for="free" class="delivery-label">
-                                        <div class="delivery-header">
-                                            <span class="delivery-title">توصيل مجاني</span>
-                                            <span class="delivery-price">0 ريال</span>
-                                        </div>
-                                        <div class="delivery-time">من 5 ساعات إلى 24 ساعة</div>
-                                    </label>
-                                </div>
-                                <div class="delivery-option">
-                                    <input type="radio" name="delivery" id="standard" value="standard">
-                                    <label for="standard" class="delivery-label">
-                                        <div class="delivery-header">
-                                            <span class="delivery-title">توصيل عادي</span>
-                                            <span class="delivery-price">20 ريال</span>
-                                        </div>
-                                        <div class="delivery-time">من ساعتين إلى 5 ساعات</div>
-                                    </label>
-                                </div>
-                                <div class="delivery-option">
-                                    <input type="radio" name="delivery" id="express" value="express">
-                                    <label for="express" class="delivery-label">
-                                        <div class="delivery-header">
-                                            <span class="delivery-title">توصيل مستعجل</span>
-                                            <span class="delivery-price">50 ريال</span>
-                                        </div>
-                                        <div class="delivery-time">من ساعة إلى ساعتين</div>
-                                    </label>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Step 3: Submit -->
-                <div class="form-section" data-section="3">
+                <!-- Step 2: Submit -->
+                <div class="form-section" data-section="2">
                     <h2 class="section-title">إرسال الطلب</h2>
 
                     <div class="summary-section">
@@ -1029,7 +955,7 @@
                             <span class="summary-value" id="summarycar">-</span>
                         </div>
                         <div class="summary-item">
-                            <span class="summary-label">السنة:</span>
+                            <span class="summary-label">الموديل:</span>
                             <span class="summary-value" id="summaryYear">-</span>
                         </div>
                         <div class="summary-item">
@@ -1043,10 +969,6 @@
                         <div class="summary-item">
                             <span class="summary-label">الجوال:</span>
                             <span class="summary-value" id="summaryPhone">-</span>
-                        </div>
-                        <div class="summary-item">
-                            <span class="summary-label">التوصيل:</span>
-                            <span class="summary-value" id="summaryDelivery">مجاني (5-24 ساعة)</span>
                         </div>
                     </div>
 
@@ -1103,7 +1025,7 @@
         };
 
         let currentStep = 1;
-        const totalSteps = 3;
+        const totalSteps = 2;
 
         // No longer needed since we simplified to text inputs
 
@@ -1210,43 +1132,24 @@
 
         // Update summary
         function updateSummary() {
-            const make = document.getElementById('carMake').value || '-';
-            const model = document.getElementById('carModel').value || '-';
+            const carNameCategory = document.getElementById('carNameCategory').value || '-';
             const year = document.getElementById('carYear').value || '-';
             const partDetails = document.getElementById('partDetails').value || '-';
             const name = document.getElementById('fullName').value || '-';
             const phone = document.getElementById('phone').value || '-';
-            const deliveryElement = document.querySelector('input[name="delivery"]:checked');
             
-            let deliveryText = 'مجاني (5-24 ساعة)';
-            if (deliveryElement) {
-                switch (deliveryElement.value) {
-                    case 'express':
-                        deliveryText = 'مستعجل (1-2 ساعة) - 50 ريال';
-                        break;
-                    case 'standard':
-                        deliveryText = 'عادي (2-5 ساعات) - 20 ريال';
-                        break;
-                    case 'free':
-                    default:
-                        deliveryText = 'مجاني (5-24 ساعة)';
-                        break;
-                }
-            }
-            
-            document.getElementById('summarycar').textContent = `${make} ${model}`;
+            document.getElementById('summarycar').textContent = carNameCategory;
             document.getElementById('summaryYear').textContent = year;
             document.getElementById('summaryPart').textContent = partDetails.substring(0, 100) + (partDetails.length > 100 ? '...' : '');
             document.getElementById('summaryName').textContent = name;
             document.getElementById('summaryPhone').textContent = phone;
-            document.getElementById('summaryDelivery').textContent = deliveryText;
         }
 
         // Handle file upload
         const fileInput = document.getElementById('fileInput');
         const uploadArea = document.getElementById('uploadArea');
         const imagePreview = document.getElementById('imagePreview');
-        let uploadedFiles = [];
+        let uploadedFile = null;
 
         fileInput.addEventListener('change', handleFileUpload);
         uploadArea.addEventListener('dragover', (e) => {
@@ -1267,52 +1170,40 @@
         }
 
         function handleFiles(files) {
-            Array.from(files).forEach(file => {
-                if (uploadedFiles.length >= 5) {
-                    alert('يمكنك رفع 5 صور كحد أقصى');
-                    return;
-                }
-                
-                if (!file.type.startsWith('image/')) {
-                    alert('يرجى رفع ملفات صور فقط');
-                    return;
-                }
-                
-                if (file.size > 5 * 1024 * 1024) {
-                    alert('حجم الصورة يجب أن يكون أقل من 5MB');
-                    return;
-                }
-                
-                uploadedFiles.push(file);
-                displayImage(file, uploadedFiles.length - 1);
-            });
+            const file = files[0];
+            if (!file) return;
+            
+            if (!file.type.startsWith('image/')) {
+                alert('يرجى رفع ملف صورة فقط');
+                return;
+            }
+            
+            if (file.size > 5 * 1024 * 1024) {
+                alert('حجم الصورة يجب أن يكون أقل من 5MB');
+                return;
+            }
+            
+            uploadedFile = file;
+            displayImage(file);
         }
 
-        function displayImage(file, index) {
+        function displayImage(file) {
             const reader = new FileReader();
             reader.onload = (e) => {
-                const previewItem = document.createElement('div');
-                previewItem.className = 'preview-item';
-                previewItem.dataset.index = index;
-                previewItem.innerHTML = `
-                    <img src="${e.target.result}" alt="Preview">
-                    <span class="remove-image" onclick="removeImage(${index})">×</span>
+                imagePreview.innerHTML = `
+                    <div class="preview-item">
+                        <img src="${e.target.result}" alt="Preview">
+                        <span class="remove-image" onclick="removeImage()">×</span>
+                    </div>
                 `;
-                imagePreview.appendChild(previewItem);
             };
             reader.readAsDataURL(file);
         }
 
-        function removeImage(index) {
-            uploadedFiles.splice(index, 1);
-            updateImagePreview();
-        }
-
-        function updateImagePreview() {
+        function removeImage() {
+            uploadedFile = null;
             imagePreview.innerHTML = '';
-            uploadedFiles.forEach((file, index) => {
-                displayImage(file, index);
-            });
+            fileInput.value = '';
         }
 
         // Handle form submission
@@ -1328,12 +1219,18 @@
             document.getElementById('loadingOverlay').classList.add('active');
             
             // Prepare form data
-            const formData = new FormData(e.target);
+            const formData = new FormData();
+            formData.append('carNameCategory', document.getElementById('carNameCategory').value);
+            formData.append('carYear', document.getElementById('carYear').value);
+            formData.append('fullName', document.getElementById('fullName').value);
+            formData.append('phone', document.getElementById('phone').value);
+            formData.append('partDetails', document.getElementById('partDetails').value);
+            formData.append('city', 'تبوك');
             
-            // Add uploaded files
-            uploadedFiles.forEach(file => {
-                formData.append('images', file);
-            });
+            // Add uploaded file if exists
+            if (uploadedFile) {
+                formData.append('partImage', uploadedFile);
+            }
             
             try {
                 // Send real API request
@@ -1396,10 +1293,12 @@
             }
         });
 
-        // Add event listeners for delivery options
-        document.querySelectorAll('input[name="delivery"]').forEach(radio => {
-            radio.addEventListener('change', updateSummary);
-        });
+        // Add event listeners for form fields to update summary
+        document.getElementById('carNameCategory').addEventListener('input', updateSummary);
+        document.getElementById('carYear').addEventListener('input', updateSummary);
+        document.getElementById('fullName').addEventListener('input', updateSummary);
+        document.getElementById('phone').addEventListener('input', updateSummary);
+        document.getElementById('partDetails').addEventListener('input', updateSummary);
 
         // Initialize
         updateProgressBar();

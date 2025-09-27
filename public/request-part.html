@@ -89,48 +89,36 @@
         <h1>🔧 اطلب قطعتك</h1>
         <form onsubmit="submitPartRequest(event)" id="partRequestForm">
             <div class="form-group">
-                <label>نوع السيارة</label>
-                <select id="carMake" required onchange="updateModels()">
-                    <option value="">اختر الماركة</option>
-                    <option value="toyota">تويوتا</option>
-                    <option value="honda">هوندا</option>
-                    <option value="nissan">نيسان</option>
-                    <option value="mazda">مازدا</option>
-                    <option value="hyundai">هيونداي</option>
-                    <option value="kia">كيا</option>
-                </select>
+                <label>اسم السيارة وفئتها</label>
+                <input type="text" id="carNameCategory" placeholder="مثال: تويوتا كامري، هوندا أكورد، نيسان ألتيما..." required>
             </div>
 
             <div class="form-group">
-                <label>الموديل</label>
-                <select id="carModel" required>
-                    <option value="">اختر الموديل</option>
-                </select>
+                <label>موديل السيارة</label>
+                <input type="number" id="carYear" min="1990" max="2024" placeholder="مثال: 2020" required>
             </div>
 
             <div class="form-group">
-                <label>السنة</label>
-                <input type="number" id="carYear" min="1990" max="2024" required>
-            </div>
-
-            <div class="form-group">
-                <label>القطعة المطلوبة</label>
-                <input type="text" id="partName" placeholder="مثال: مكيف، محرك، جير..." required>
-            </div>
-
-            <div class="form-group">
-                <label>تفاصيل إضافية</label>
-                <textarea id="details" placeholder="اكتب أي تفاصيل إضافية عن القطعة المطلوبة..."></textarea>
-            </div>
-
-            <div class="form-group">
-                <label>الاسم الكامل</label>
+                <label>اسمك</label>
                 <input type="text" id="fullName" placeholder="أدخل اسمك الكامل" required>
             </div>
 
             <div class="form-group">
-                <label>رقم الجوال</label>
+                <label>رقمك</label>
                 <input type="tel" id="phone" pattern="05[0-9]{8}" placeholder="05XXXXXXXX" required>
+            </div>
+
+            <div class="form-group">
+                <label>تفاصيل القطعة</label>
+                <textarea id="partDetails" placeholder="اكتب تفاصيل القطعة المطلوبة..." required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>صورة القطعة (اختياري)</label>
+                <input type="file" id="partImage" accept="image/*" onchange="previewImage(this)">
+                <div id="imagePreview" style="margin-top: 10px; display: none;">
+                    <img id="previewImg" style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 2px solid #e0e0e0;">
+                </div>
             </div>
 
             <button type="submit" class="btn">إرسال الطلب</button>
@@ -142,38 +130,22 @@
     </div>
 
     <script>
-        const models = {
-            toyota: ['كامري', 'كورولا', 'هايلوكس', 'لاندكروزر', 'برادو', 'يارس'],
-            honda: ['أكورد', 'سيفيك', 'بايلوت', 'CR-V'],
-            nissan: ['ألتيما', 'صني', 'باترول', 'ماكسيما'],
-            mazda: ['3', '6', 'CX-5', 'CX-9'],
-            hyundai: ['سوناتا', 'النترا', 'توسان', 'أكسنت'],
-            kia: ['أوبتيما', 'سيراتو', 'سبورتاج', 'كرنفال']
-        };
-
-        function updateModels() {
-            const make = document.getElementById('carMake').value;
-            const modelSelect = document.getElementById('carModel');
+        function previewImage(input) {
+            const preview = document.getElementById('imagePreview');
+            const previewImg = document.getElementById('previewImg');
             
-            // تحسين الأداء باستخدام DocumentFragment
-            const fragment = document.createDocumentFragment();
-            const defaultOption = document.createElement('option');
-            defaultOption.value = '';
-            defaultOption.textContent = 'اختر الموديل';
-            fragment.appendChild(defaultOption);
-            
-            if (make && models[make]) {
-                models[make].forEach(model => {
-                    const option = document.createElement('option');
-                    option.value = model;
-                    option.textContent = model;
-                    fragment.appendChild(option);
-                });
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                
+                reader.readAsDataURL(input.files[0]);
+            } else {
+                preview.style.display = 'none';
             }
-            
-            // تحديث واحد بدلاً من تحديثات متعددة
-            modelSelect.innerHTML = '';
-            modelSelect.appendChild(fragment);
         }
 
         async function submitPartRequest(e) {
@@ -185,16 +157,20 @@
                 form.preventDefault = true;
             }
             
-            const requestData = {
-                fullName: document.getElementById('fullName')?.value || 'غير محدد',
-                phone: document.getElementById('phone').value,
-                carMake: document.getElementById('carMake').value,
-                carModel: document.getElementById('carModel').value,
-                carYear: parseInt(document.getElementById('carYear').value),
-                partDetails: document.getElementById('partName').value,
-                notes: document.getElementById('details').value,
-                city: 'تبوك'
-            };
+            // إنشاء FormData لدعم رفع الصور
+            const formData = new FormData();
+            formData.append('fullName', document.getElementById('fullName').value);
+            formData.append('phone', document.getElementById('phone').value);
+            formData.append('carNameCategory', document.getElementById('carNameCategory').value);
+            formData.append('carYear', document.getElementById('carYear').value);
+            formData.append('partDetails', document.getElementById('partDetails').value);
+            formData.append('city', 'تبوك');
+            
+            // إضافة الصورة إذا تم اختيارها
+            const partImage = document.getElementById('partImage');
+            if (partImage.files && partImage.files[0]) {
+                formData.append('partImage', partImage.files[0]);
+            }
 
             try {
                 // إظهار loading
@@ -206,17 +182,13 @@
                 // إرسال الطلب للسيرفر
                 const response = await fetch('/api/orders', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    credentials: 'same-origin',
-                    body: JSON.stringify(requestData)
+                    body: formData,
+                    credentials: 'same-origin'
                 });
 
                 if (response.ok) {
                     const result = await response.json();
-                    alert(`تم استلام طلبك بنجاح!\nرقم الطلب: ${result.id}\nسنتواصل معك قريباً على الرقم المسجل.`);
+                    alert(`تم استلام طلبك بنجاح!\nرقم الطلب: ${result.orderNumber || result.id}\nسنتواصل معك قريباً على الرقم المسجل.`);
                     
                     // العودة للصفحة الرئيسية
                     setTimeout(() => {
@@ -230,10 +202,15 @@
                 console.error('Error submitting request:', error);
                 alert('حدث خطأ في إرسال الطلب. يرجى المحاولة مرة أخرى.');
                 
-                // حفظ الطلب محلياً كنسخة احتياطية
+                // حفظ الطلب محلياً كنسخة احتياطية (بدون الصورة)
                 let requests = JSON.parse(localStorage.getItem('partRequests') || '[]');
                 requests.push({
-                    ...requestData,
+                    fullName: document.getElementById('fullName').value,
+                    phone: document.getElementById('phone').value,
+                    carNameCategory: document.getElementById('carNameCategory').value,
+                    carYear: document.getElementById('carYear').value,
+                    partDetails: document.getElementById('partDetails').value,
+                    city: 'تبوك',
                     id: Date.now(),
                     date: new Date().toISOString(),
                     status: 'pending_offline'

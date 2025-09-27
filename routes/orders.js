@@ -7,13 +7,14 @@ const upload = require('../middleware/upload');
 router.get('/health', (req, res) => res.json({ ok: true, route: 'orders' }));
 
 // إنشاء طلب جديد
-router.post('/', async (req, res) => {
+router.post('/', upload.single('partImage'), async (req, res) => {
     try {
         // فحص وجود البيانات مع تشخيص مفصل
         console.log('🔍 Order Request debugging:');
         console.log('- Content-Type:', req.headers['content-type']);
         console.log('- Body exists:', !!req.body);
         console.log('- Body keys:', req.body ? Object.keys(req.body) : 'No body');
+        console.log('- File uploaded:', !!req.file);
         console.log('- Raw body:', req.body);
 
         if (!req.body || Object.keys(req.body).length === 0) {
@@ -31,10 +32,8 @@ router.post('/', async (req, res) => {
         const {
             fullName,
             phone,
-            carMake,
-            carModel,
+            carNameCategory,
             carYear,
-            vin,
             partDetails,
             urgency,
             delivery,
@@ -43,11 +42,11 @@ router.post('/', async (req, res) => {
             city
         } = req.body;
 
-        // فحص البيانات المطلوبة
-        if (!fullName || !phone || !carMake || !carModel || !partDetails) {
+        // فحص البيانات المطلوبة (البيانات المبسطة الجديدة)
+        if (!fullName || !phone || !carNameCategory || !carYear || !partDetails) {
             return res.status(400).json({ 
                 message: 'البيانات المطلوبة مفقودة',
-                required: ['fullName', 'phone', 'carMake', 'carModel', 'partDetails']
+                required: ['fullName', 'phone', 'carNameCategory', 'carYear', 'partDetails']
             });
         }
 
@@ -71,6 +70,11 @@ router.post('/', async (req, res) => {
                 break;
         }
 
+        // تحليل اسم السيارة وفئتها
+        const carParts = carNameCategory.split(' ');
+        const carMake = carParts[0] || carNameCategory;
+        const carModel = carParts.slice(1).join(' ') || 'غير محدد';
+
         // إنشاء طلب جديد
         const order = new Order({
             orderNumber: orderNumber,
@@ -79,13 +83,14 @@ router.post('/', async (req, res) => {
             customerEmail: email,
             items: [{
                 partName: partDetails,
-                quantity: 1
+                quantity: 1,
+                imageUrl: req.file ? `/uploads/${req.file.filename}` : null
             }],
             carInfo: {
                 make: carMake,
                 model: carModel,
-                year: carYear,
-                vin: vin
+                year: parseInt(carYear),
+                fullName: carNameCategory // حفظ الاسم الكامل كما أدخله المستخدم
             },
             urgency: urgency || 'normal',
             deliveryOption: deliveryOption,
@@ -148,8 +153,10 @@ router.post('/', async (req, res) => {
             carMake: order.carInfo.make,
             carModel: order.carInfo.model,
             carYear: order.carInfo.year,
-            description: `${order.items[0].partName}\nالتوصيل: ${deliveryText}`,
-            createdAt: order.createdAt
+            carFullName: order.carInfo.fullName,
+            description: `${order.items[0].partName}\nالتوصيل: ${deliveryText}${req.file ? '\n📷 يحتوي على صورة' : ''}`,
+            createdAt: order.createdAt,
+            hasImage: !!req.file
         };
 
         // إرسال إشعار واتساب

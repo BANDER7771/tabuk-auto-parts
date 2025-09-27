@@ -290,6 +290,7 @@ app.use('/api/parts', require('./routes/parts'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/shops', require('./routes/shops'));
 app.use('/api/users', require('./routes/users'));
+app.use('/api/admin', require('./routes/admin'));
 
 // Static files already configured above
 

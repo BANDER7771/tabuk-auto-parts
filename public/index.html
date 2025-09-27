@@ -76,6 +76,14 @@
             color: white;
             font-size: 1.2rem;
             position: relative;
+            overflow: hidden;
+        }
+
+        .logo-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 8px;
         }
 
         .logo-icon::after {
@@ -1116,9 +1124,12 @@
     <nav>
         <div class="nav-container">
             <div class="logo">
-                <div class="logo-icon">🔧</div>
+                <div class="logo-icon" id="logoIcon">
+                    <img id="brandLogo" src="/uploads/brand-logo.png" alt="شعار تشاليح تبوك" style="display: none;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <span id="defaultIcon" style="display: block;">🔧</span>
+                </div>
                 <span>تشاليح تبوك</span>
-                <span class="beta-badge">تجريبي</span>
+                <span class="beta-badge">إطلاق تجريبي</span>
             </div>
             <ul class="nav-menu" id="navMenu">
                 <li><a href="#home">الرئيسية</a></li>
@@ -1567,6 +1578,29 @@
                 navMenu.classList.remove('active');
             }
         });
+
+        // Load brand logo
+        async function loadBrandLogo() {
+            try {
+                const response = await fetch('/api/admin/brand-image');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.exists) {
+                        const brandLogo = document.getElementById('brandLogo');
+                        const defaultIcon = document.getElementById('defaultIcon');
+                        
+                        brandLogo.src = data.imageUrl + '?t=' + Date.now();
+                        brandLogo.style.display = 'block';
+                        defaultIcon.style.display = 'none';
+                    }
+                }
+            } catch (error) {
+                console.log('Could not load brand logo, using default icon');
+            }
+        }
+
+        // Load brand logo on page load
+        document.addEventListener('DOMContentLoaded', loadBrandLogo);
 
         // Animate elements on scroll
         const observerOptions = {

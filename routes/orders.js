@@ -62,7 +62,7 @@ router.post('/', upload.single('partImage'), async (req, res) => {
                 deliveryFee = 50;
                 break;
             case 'standard':
-                deliveryFee = 20;
+                deliveryFee = 25;
                 break;
             case 'free':
             default:
@@ -142,8 +142,8 @@ router.post('/', upload.single('partImage'), async (req, res) => {
 
         // إرسال إشعار واتساب فقط
         const deliveryText = deliveryOption === 'express' ? 'مستعجل (1-2 ساعة) - 50 ريال' : 
-                           deliveryOption === 'standard' ? 'عادي (2-5 ساعات) - 20 ريال' : 
-                           'مجاني (5-24 ساعة)';
+                           deliveryOption === 'standard' ? 'سريع (3-5 ساعات) - 25 ريال' : 
+                           'عادي (12-24 ساعة) - مجاني';
         
         const notificationData = {
             orderNumber: order.orderNumber,

@@ -941,6 +941,42 @@
                             <input type="file" id="fileInput" accept="image/*" style="display: none;">
                             <div class="image-preview" id="imagePreview"></div>
                         </div>
+
+                        <div class="form-group full-width">
+                            <label>خيارات التوصيل</label>
+                            <div class="delivery-options">
+                                <div class="delivery-option">
+                                    <input type="radio" name="delivery" id="free" value="free" checked>
+                                    <label for="free" class="delivery-label">
+                                        <div class="delivery-header">
+                                            <span class="delivery-title">توصيل عادي</span>
+                                            <span class="delivery-price">مجاني</span>
+                                        </div>
+                                        <div class="delivery-time">من 12 ساعة إلى 24 ساعة</div>
+                                    </label>
+                                </div>
+                                <div class="delivery-option">
+                                    <input type="radio" name="delivery" id="standard" value="standard">
+                                    <label for="standard" class="delivery-label">
+                                        <div class="delivery-header">
+                                            <span class="delivery-title">توصيل سريع</span>
+                                            <span class="delivery-price">25 ريال</span>
+                                        </div>
+                                        <div class="delivery-time">من 3 ساعات إلى 5 ساعات</div>
+                                    </label>
+                                </div>
+                                <div class="delivery-option">
+                                    <input type="radio" name="delivery" id="express" value="express">
+                                    <label for="express" class="delivery-label">
+                                        <div class="delivery-header">
+                                            <span class="delivery-title">توصيل مستعجل</span>
+                                            <span class="delivery-price">50 ريال</span>
+                                        </div>
+                                        <div class="delivery-time">من ساعة إلى ساعتين</div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -969,6 +1005,10 @@
                         <div class="summary-item">
                             <span class="summary-label">الجوال:</span>
                             <span class="summary-value" id="summaryPhone">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">التوصيل:</span>
+                            <span class="summary-value" id="summaryDelivery">عادي - مجاني (12-24 ساعة)</span>
                         </div>
                     </div>
 
@@ -1137,12 +1177,30 @@
             const partDetails = document.getElementById('partDetails').value || '-';
             const name = document.getElementById('fullName').value || '-';
             const phone = document.getElementById('phone').value || '-';
+            const deliveryElement = document.querySelector('input[name="delivery"]:checked');
+            
+            let deliveryText = 'عادي - مجاني (12-24 ساعة)';
+            if (deliveryElement) {
+                switch (deliveryElement.value) {
+                    case 'express':
+                        deliveryText = 'مستعجل - 50 ريال (1-2 ساعة)';
+                        break;
+                    case 'standard':
+                        deliveryText = 'سريع - 25 ريال (3-5 ساعات)';
+                        break;
+                    case 'free':
+                    default:
+                        deliveryText = 'عادي - مجاني (12-24 ساعة)';
+                        break;
+                }
+            }
             
             document.getElementById('summarycar').textContent = carNameCategory;
             document.getElementById('summaryYear').textContent = year;
             document.getElementById('summaryPart').textContent = partDetails.substring(0, 100) + (partDetails.length > 100 ? '...' : '');
             document.getElementById('summaryName').textContent = name;
             document.getElementById('summaryPhone').textContent = phone;
+            document.getElementById('summaryDelivery').textContent = deliveryText;
         }
 
         // Handle file upload
@@ -1227,6 +1285,12 @@
             formData.append('partDetails', document.getElementById('partDetails').value);
             formData.append('city', 'تبوك');
             
+            // Add delivery option
+            const deliveryElement = document.querySelector('input[name="delivery"]:checked');
+            if (deliveryElement) {
+                formData.append('delivery', deliveryElement.value);
+            }
+            
             // Add uploaded file if exists
             if (uploadedFile) {
                 formData.append('partImage', uploadedFile);
@@ -1299,6 +1363,11 @@
         document.getElementById('fullName').addEventListener('input', updateSummary);
         document.getElementById('phone').addEventListener('input', updateSummary);
         document.getElementById('partDetails').addEventListener('input', updateSummary);
+        
+        // Add event listeners for delivery options
+        document.querySelectorAll('input[name="delivery"]').forEach(radio => {
+            radio.addEventListener('change', updateSummary);
+        });
 
         // Initialize
         updateProgressBar();

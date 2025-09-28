@@ -2,6 +2,7 @@ const router = require('express').Router();
 const Order = require('../models/Order');
 const { sendWhatsAppNotification } = require('../config/whatsapp');
 const upload = require('../middleware/upload');
+// تم إزالة استيراد البريد الإلكتروني - نستخدم الواتساب فقط
 
 // فحص صحة الخدمة
 router.get('/health', (req, res) => res.json({ ok: true, route: 'orders' }));

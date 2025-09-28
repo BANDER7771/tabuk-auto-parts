@@ -3,8 +3,8 @@ const axios = require('axios');
 
 // أرقام الواتساب للإدارة
 const ADMIN_WHATSAPP_NUMBERS = [
-    process.env.ADMIN_WHATSAPP_1, // الرقم الأول
-    process.env.ADMIN_WHATSAPP_2  // الرقم الثاني
+    process.env.ADMIN_WHATSAPP_1 || '966545376792', // الرقم من Railway
+    process.env.ADMIN_WHATSAPP_2  // الرقم الثاني (اختياري)
 ].filter(number => number);
 
 // إرسال رسالة واتساب باستخدام WhatsApp Business API أو خدمة خارجية
@@ -103,9 +103,12 @@ const sendToWhatsApp = async (phoneNumber, message) => {
             
             console.log(`📞 إرسال Twilio واتساب إلى: ${phoneNumber}`);
             
+            // تنظيف رقم الهاتف - إزالة + إذا كان موجود
+            const cleanPhone = phoneNumber.replace(/^\+/, '');
+            
             const result = await twilio.messages.create({
-                from: 'whatsapp:+14155238886',
-                to: `whatsapp:+${phoneNumber}`,
+                from: 'whatsapp:+14155238886', // رقم Twilio الافتراضي للواتساب
+                to: `whatsapp:+${cleanPhone}`,
                 body: message
             });
             
@@ -129,15 +132,7 @@ const sendToWhatsApp = async (phoneNumber, message) => {
         console.log(message);
         console.log(`🔗 رابط الإرسال: https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`);
         
-        // الطريقة 5: إشعار بريد إلكتروني كبديل
-        if (process.env.ADMIN_EMAIL) {
-            try {
-                await sendEmailNotification(process.env.ADMIN_EMAIL, message);
-                console.log(`📧 تم إرسال إشعار بريد إلكتروني إلى: ${process.env.ADMIN_EMAIL}`);
-            } catch (emailError) {
-                console.log('⚠️ فشل في إرسال البريد الإلكتروني:', emailError.message);
-            }
-        }
+        // لا نحتاج إشعارات بريد إلكتروني - تم إزالتها
         
         // محاولة إرسال تلقائي باستخدام webhook بسيط
         try {
@@ -153,46 +148,7 @@ const sendToWhatsApp = async (phoneNumber, message) => {
     }
 };
 
-// دالة إرسال إشعار بريد إلكتروني كبديل
-const sendEmailNotification = async (email, message) => {
-    try {
-        // استخدام nodemailer إذا كان متاحاً
-        if (process.env.EMAIL_HOST && process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-            const nodemailer = require('nodemailer');
-            
-            const transporter = nodemailer.createTransporter({
-                host: process.env.EMAIL_HOST,
-                port: process.env.EMAIL_PORT || 587,
-                secure: false,
-                auth: {
-                    user: process.env.EMAIL_USER,
-                    pass: process.env.EMAIL_PASS
-                }
-            });
-
-            await transporter.sendMail({
-                from: process.env.EMAIL_USER,
-                to: email,
-                subject: 'إشعار طلب جديد - قطع تبوك',
-                text: message,
-                html: `<div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6;">
-                    <h2 style="color: #667eea;">قطع تبوك</h2>
-                    <pre style="background: #f5f5f5; padding: 15px; border-radius: 5px; white-space: pre-wrap;">${message}</pre>
-                </div>`
-            });
-            
-            return true;
-        }
-        
-        // استخدام خدمة EmailJS أو أي خدمة أخرى
-        console.log('📧 لا توجد إعدادات بريد إلكتروني مُعرفة');
-        return false;
-        
-    } catch (error) {
-        console.error('❌ خطأ في إرسال البريد الإلكتروني:', error.message);
-        throw error;
-    }
-};
+// تم إزالة دالة البريد الإلكتروني - نستخدم الواتساب فقط
 
 module.exports = {
     sendWhatsAppNotification

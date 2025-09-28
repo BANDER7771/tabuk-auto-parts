@@ -87,7 +87,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// إضافة headers CORS إضافية
+// إضافة headers CORS إضافية مع دعم UTF-8
 app.use((req, res, next) => {
     const origin = req.headers.origin;
     
@@ -99,6 +99,9 @@ app.use((req, res, next) => {
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
     res.header('Access-Control-Allow-Credentials', 'true');
+    
+    // إضافة دعم UTF-8 للنصوص العربية
+    res.header('Content-Type', 'application/json; charset=utf-8');
     
     // التعامل مع preflight requests
     if (req.method === 'OPTIONS') {
@@ -153,9 +156,18 @@ app.use('/api/auth/register', authLimiter);
 // ============================================
 // Middleware العام - يجب أن يكون قبل CORS
 // ============================================
-// زيادة حد البيانات
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+// زيادة حد البيانات مع دعم UTF-8 للنصوص العربية
+app.use(express.json({ 
+    limit: '10mb',
+    verify: (req, res, buf) => {
+        req.rawBody = buf.toString('utf8');
+    }
+}));
+app.use(express.urlencoded({ 
+    extended: true, 
+    limit: '10mb',
+    parameterLimit: 50000
+}));
 
 // إضافة middleware لمعالجة multipart/form-data للطلبات العادية (بدون ملفات)
 const multer = require('multer');

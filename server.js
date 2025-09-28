@@ -100,8 +100,10 @@ app.use((req, res, next) => {
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
     res.header('Access-Control-Allow-Credentials', 'true');
     
-    // إضافة دعم UTF-8 للنصوص العربية
-    res.header('Content-Type', 'application/json; charset=utf-8');
+    // تعيين Content-Type فقط للـ API responses وليس للملفات الثابتة
+    if (req.path.startsWith('/api/')) {
+        res.header('Content-Type', 'application/json; charset=utf-8');
+    }
     
     // التعامل مع preflight requests
     if (req.method === 'OPTIONS') {
@@ -175,9 +177,24 @@ app.use('/api/orders', (req, res, next) => {
     next();
 });
 
-// Serve static files
+// Serve static files مع إعدادات صحيحة
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public'), {
+    setHeaders: (res, path) => {
+        // تعيين Content-Type الصحيح للملفات HTML
+        if (path.endsWith('.html')) {
+            res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        }
+        // تعيين Content-Type للملفات CSS
+        if (path.endsWith('.css')) {
+            res.setHeader('Content-Type', 'text/css; charset=utf-8');
+        }
+        // تعيين Content-Type للملفات JavaScript
+        if (path.endsWith('.js')) {
+            res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+        }
+    }
+}));
 
 // Middleware للتشخيص (فقط في التطوير)
 if (process.env.NODE_ENV !== 'production') {
@@ -295,6 +312,20 @@ app.use('/api/orders', require('./routes/orders'));
 app.use('/api/shops', require('./routes/shops'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/admin', require('./routes/admin'));
+
+// Route للصفحة الرئيسية
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Routes للصفحات الأخرى
+app.get('/request', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'request.html'));
+});
+
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
 
 // Static files already configured above
 

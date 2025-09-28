@@ -17,7 +17,9 @@ const sendWhatsAppNotification = async (orderData) => {
         ADMIN_WHATSAPP_2: !!process.env.ADMIN_WHATSAPP_2,
         CALLMEBOT_API_KEY: !!process.env.CALLMEBOT_API_KEY,
         TWILIO_ACCOUNT_SID: !!process.env.TWILIO_ACCOUNT_SID,
-        TWILIO_AUTH_TOKEN: !!process.env.TWILIO_AUTH_TOKEN
+        TWILIO_AUTH_TOKEN: !!process.env.TWILIO_AUTH_TOKEN,
+        NODE_ENV: process.env.NODE_ENV,
+        RAILWAY_ENVIRONMENT: !!process.env.RAILWAY_ENVIRONMENT
     });
     
     if (ADMIN_WHATSAPP_NUMBERS.length === 0) {

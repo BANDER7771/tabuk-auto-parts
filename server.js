@@ -122,13 +122,10 @@ const generalLimiter = rateLimit({
     message: 'تم تجاوز الحد المسموح من الطلبات، حاول مرة أخرى لاحقاً',
     standardHeaders: true,
     legacyHeaders: false,
-    // إعداد trust proxy آمن للإنتاج
-    trustProxy: process.env.NODE_ENV === 'production' ? ['127.0.0.1', 'loopback', 'linklocal', 'uniquelocal'] : false,
-    keyGenerator: (req) => {
-        // استخدام IP الحقيقي في الإنتاج أو IP المحلي في التطوير
-        return process.env.NODE_ENV === 'production' 
-            ? req.ip || req.connection.remoteAddress 
-            : req.ip;
+    // إزالة keyGenerator المخصص لتجنب مشكلة IPv6
+    skip: (req) => {
+        // تخطي rate limiting للـ health checks
+        return req.path === '/health' || req.path === '/api/test-cors';
     }
 });
 
@@ -139,13 +136,8 @@ const authLimiter = rateLimit({
     skipSuccessfulRequests: true,
     message: 'محاولات دخول كثيرة، حاول بعد 15 دقيقة',
     standardHeaders: true,
-    legacyHeaders: false,
-    trustProxy: process.env.NODE_ENV === 'production' ? ['127.0.0.1', 'loopback', 'linklocal', 'uniquelocal'] : false,
-    keyGenerator: (req) => {
-        return process.env.NODE_ENV === 'production' 
-            ? req.ip || req.connection.remoteAddress 
-            : req.ip;
-    }
+    legacyHeaders: false
+    // إزالة keyGenerator المخصص لتجنب مشكلة IPv6
 });
 
 // تطبيق Rate Limiting

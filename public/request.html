@@ -1099,6 +1099,95 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
+        // التحقق من جميع البيانات الإجبارية
+        function validateAllRequiredFields() {
+            let isValid = true;
+            let firstErrorField = null;
+            
+            // قائمة الحقول الإجبارية
+            const requiredFields = [
+                { id: 'carNameCategory', name: 'اسم السيارة وفئتها' },
+                { id: 'carYear', name: 'موديل السيارة' },
+                { id: 'fullName', name: 'الاسم' },
+                { id: 'phone', name: 'رقم الجوال' },
+                { id: 'partDetails', name: 'تفاصيل القطعة' }
+            ];
+            
+            requiredFields.forEach(fieldInfo => {
+                const field = document.getElementById(fieldInfo.id);
+                const formGroup = field.closest('.form-group');
+                const errorMsg = formGroup.querySelector('.error-message');
+                
+                if (!field.value.trim()) {
+                    formGroup.classList.add('error');
+                    if (errorMsg) {
+                        errorMsg.textContent = `الرجاء إدخال ${fieldInfo.name}`;
+                        errorMsg.classList.add('show');
+                    }
+                    isValid = false;
+                    if (!firstErrorField) firstErrorField = field;
+                } else {
+                    formGroup.classList.remove('error');
+                    if (errorMsg) errorMsg.classList.remove('show');
+                }
+            });
+            
+            // التحقق من صحة رقم الجوال
+            const phone = document.getElementById('phone');
+            const phoneRegex = /^05[0-9]{8}$/;
+            if (phone.value && !phoneRegex.test(phone.value)) {
+                const formGroup = phone.closest('.form-group');
+                const errorMsg = formGroup.querySelector('.error-message');
+                formGroup.classList.add('error');
+                if (errorMsg) {
+                    errorMsg.textContent = 'الرجاء إدخال رقم جوال صحيح (مثال: 0555123456)';
+                    errorMsg.classList.add('show');
+                }
+                isValid = false;
+                if (!firstErrorField) firstErrorField = phone;
+            }
+            
+            // التحقق من صحة سنة السيارة
+            const carYear = document.getElementById('carYear');
+            const currentYear = new Date().getFullYear();
+            if (carYear.value && (carYear.value < 1990 || carYear.value > currentYear + 1)) {
+                const formGroup = carYear.closest('.form-group');
+                const errorMsg = formGroup.querySelector('.error-message');
+                formGroup.classList.add('error');
+                if (errorMsg) {
+                    errorMsg.textContent = `الرجاء إدخال سنة صحيحة (1990-${currentYear + 1})`;
+                    errorMsg.classList.add('show');
+                }
+                isValid = false;
+                if (!firstErrorField) firstErrorField = carYear;
+            }
+            
+            // إذا كان هناك خطأ، انتقل إلى الخطوة الأولى والحقل الخاطئ
+            if (!isValid) {
+                if (currentStep !== 1) {
+                    currentStep = 1;
+                    document.querySelectorAll('.form-section').forEach(section => {
+                        section.classList.remove('active');
+                    });
+                    document.querySelector('.form-section[data-section="1"]').classList.add('active');
+                    updateStepIndicators();
+                    updateButtons();
+                    updateProgressBar();
+                }
+                
+                // التركيز على أول حقل خاطئ
+                if (firstErrorField) {
+                    firstErrorField.focus();
+                    firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                
+                // عرض رسالة تنبيه
+                alert('الرجاء إكمال جميع البيانات المطلوبة قبل إرسال الطلب');
+            }
+            
+            return isValid;
+        }
+
         // Validate current step
         function validateStep(step) {
             let isValid = true;
@@ -1268,6 +1357,11 @@
         document.getElementById('partRequestForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
+            // التحقق من جميع البيانات الإجبارية قبل الإرسال
+            if (!validateAllRequiredFields()) {
+                return;
+            }
+            
             // Validate last step
             if (!validateStep(currentStep)) {
                 return;
@@ -1344,15 +1438,35 @@
                 console.error('Error submitting order:', error);
                 document.getElementById('loadingOverlay').classList.remove('active');
                 
-                // Show error message with retry option
-                const errorMessage = error.message || 'حدث خطأ في إرسال الطلب';
-                const shouldRetry = confirm(`${errorMessage}\n\nهل تريد المحاولة مرة أخرى؟`);
+                // تحسين رسائل الخطأ
+                let errorMessage = 'حدث خطأ في إرسال الطلب';
                 
-                if (shouldRetry) {
-                    // Retry submission
-                    setTimeout(() => {
-                        document.getElementById('partRequestForm').dispatchEvent(new Event('submit'));
-                    }, 1000);
+                if (error.message) {
+                    if (error.message.includes('Unexpected end of form')) {
+                        errorMessage = 'خطأ في إرسال البيانات. الرجاء التأكد من ملء جميع الحقول المطلوبة والمحاولة مرة أخرى.';
+                    } else if (error.message.includes('Network')) {
+                        errorMessage = 'خطأ في الاتصال بالخادم. الرجاء التحقق من الاتصال بالإنترنت والمحاولة مرة أخرى.';
+                    } else if (error.message.includes('500')) {
+                        errorMessage = 'خطأ في الخادم. الرجاء المحاولة مرة أخرى بعد قليل.';
+                    } else {
+                        errorMessage = error.message;
+                    }
+                }
+                
+                // عرض رسالة خطأ واضحة
+                alert(`❌ ${errorMessage}\n\n💡 نصائح:\n• تأكد من ملء جميع الحقول المطلوبة\n• تأكد من صحة رقم الجوال\n• تأكد من الاتصال بالإنترنت`);
+                
+                // العودة إلى الخطوة الأولى للمراجعة
+                if (currentStep !== 1) {
+                    currentStep = 1;
+                    document.querySelectorAll('.form-section').forEach(section => {
+                        section.classList.remove('active');
+                    });
+                    document.querySelector('.form-section[data-section="1"]').classList.add('active');
+                    updateStepIndicators();
+                    updateButtons();
+                    updateProgressBar();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
             }
         });

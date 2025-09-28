@@ -15,17 +15,30 @@ router.post('/', upload.single('partImage'), async (req, res) => {
         console.log('- Content-Type:', req.headers['content-type']);
         console.log('- Body exists:', !!req.body);
         console.log('- Body keys:', req.body ? Object.keys(req.body) : 'No body');
-        console.log('- File uploaded:', !!req.file);
-        console.log('- Raw body:', req.body);
+        console.log('- Files:', req.files ? req.files.length : 0);
+        console.log('- File (single):', !!req.file);
+        
+        // معالجة البيانات من multer إذا كانت في req.files
+        if (req.files && req.files.length > 0) {
+            req.files.forEach(file => {
+                if (file.fieldname && file.buffer === undefined) {
+                    // هذا حقل نصي وليس ملف
+                    req.body[file.fieldname] = file.originalname || file.value || '';
+                }
+            });
+        }
+        
+        console.log('- Processed body:', req.body);
 
         if (!req.body || Object.keys(req.body).length === 0) {
             return res.status(400).json({ 
-                message: 'لم يتم استلام البيانات بشكل صحيح',
+                message: 'لم يتم استلام البيانات بشكل صحيح. الرجاء التأكد من ملء جميع الحقول المطلوبة.',
                 error: 'Request body is undefined or empty',
                 debug: {
                     contentType: req.headers['content-type'],
                     bodyExists: !!req.body,
-                    bodyKeys: req.body ? Object.keys(req.body) : []
+                    bodyKeys: req.body ? Object.keys(req.body) : [],
+                    filesCount: req.files ? req.files.length : 0
                 }
             });
         }

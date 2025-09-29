@@ -10,8 +10,24 @@ dotenv.config();
 
 const app = express();
 
-// إعداد trust proxy للعمل مع Railway و Render
-app.set('trust proxy', true);
+// إعداد trust proxy آمن للعمل مع Railway و Render
+// بدلاً من true، نحدد عدد proxy hops المتوقعة
+try {
+    if (process.env.NODE_ENV === 'production') {
+        // في الإنتاج، نثق في proxy واحد فقط (Railway/Render)
+        app.set('trust proxy', 1);
+        console.log('✅ تم تفعيل trust proxy للإنتاج (1 hop)');
+    } else {
+        // في التطوير، لا نثق في أي proxy
+        app.set('trust proxy', false);
+        console.log('✅ تم إلغاء trust proxy للتطوير');
+    }
+} catch (trustProxyError) {
+    console.error('❌ خطأ في إعداد trust proxy:', trustProxyError.message);
+    // استخدام إعداد آمن كبديل
+    app.set('trust proxy', false);
+    console.warn('⚠️ تم استخدام إعداد trust proxy آمن كبديل');
+}
 
 // ============================================
 // تثبيت الحزم الجديدة المطلوبة
@@ -117,14 +133,36 @@ app.use((req, res, next) => {
 // Rate Limiting
 // ============================================
 
-// حماية عامة مع إعدادات trust proxy محسنة
+// حماية عامة مع إعدادات trust proxy آمنة
 const generalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 دقيقة
     max: 100, // حد أقصى 100 طلب
     message: 'تم تجاوز الحد المسموح من الطلبات، حاول مرة أخرى لاحقاً',
     standardHeaders: true,
     legacyHeaders: false,
-    // إزالة keyGenerator المخصص لتجنب مشكلة IPv6
+    // إعداد keyGenerator آمن للعمل مع trust proxy
+    keyGenerator: (req) => {
+        // في بيئة الإنتاج، استخدم X-Forwarded-For بحذر
+        if (process.env.NODE_ENV === 'production') {
+            // التحقق من وجود proxy headers موثوقة
+            const forwardedFor = req.headers['x-forwarded-for'];
+            const realIP = req.headers['x-real-ip'];
+            
+            // استخدام أول IP في X-Forwarded-For (الأكثر أماناً)
+            if (forwardedFor && typeof forwardedFor === 'string') {
+                const firstIP = forwardedFor.split(',')[0].trim();
+                return firstIP;
+            }
+            
+            // استخدام X-Real-IP كبديل
+            if (realIP && typeof realIP === 'string') {
+                return realIP.trim();
+            }
+        }
+        
+        // في التطوير أو كبديل، استخدم IP المباشر
+        return req.ip || req.connection.remoteAddress || 'unknown';
+    },
     skip: (req) => {
         // تخطي rate limiting للـ health checks
         return req.path === '/health' || req.path === '/api/test-cors';
@@ -138,14 +176,37 @@ const authLimiter = rateLimit({
     skipSuccessfulRequests: true,
     message: 'محاولات دخول كثيرة، حاول بعد 15 دقيقة',
     standardHeaders: true,
-    legacyHeaders: false
-    // إزالة keyGenerator المخصص لتجنب مشكلة IPv6
+    legacyHeaders: false,
+    // نفس keyGenerator الآمن
+    keyGenerator: (req) => {
+        if (process.env.NODE_ENV === 'production') {
+            const forwardedFor = req.headers['x-forwarded-for'];
+            const realIP = req.headers['x-real-ip'];
+            
+            if (forwardedFor && typeof forwardedFor === 'string') {
+                const firstIP = forwardedFor.split(',')[0].trim();
+                return firstIP;
+            }
+            
+            if (realIP && typeof realIP === 'string') {
+                return realIP.trim();
+            }
+        }
+        
+        return req.ip || req.connection.remoteAddress || 'unknown';
+    }
 });
 
-// تطبيق Rate Limiting
-app.use('/api/', generalLimiter);
-app.use('/api/auth/login', authLimiter);
-app.use('/api/auth/register', authLimiter);
+// تطبيق Rate Limiting مع معالجة الأخطاء
+try {
+    app.use('/api/', generalLimiter);
+    app.use('/api/auth/login', authLimiter);
+    app.use('/api/auth/register', authLimiter);
+    console.log('✅ تم تطبيق Rate Limiting بنجاح');
+} catch (rateLimitError) {
+    console.error('❌ خطأ في تطبيق Rate Limiting:', rateLimitError.message);
+    console.warn('⚠️ سيتم تشغيل الخادم بدون Rate Limiting');
+}
 
 // ============================================
 // Middleware العام - يجب أن يكون قبل CORS
@@ -324,6 +385,15 @@ app.get('/admin', (req, res) => {
 // Global Error Handler
 app.use((err, req, res, next) => {
     console.error('Error:', err.stack);
+    
+    // معالجة أخطاء Rate Limiting
+    if (err.code === 'ERR_ERL_PERMISSIVE_TRUST_PROXY') {
+        console.error('❌ Trust proxy configuration error:', err.message);
+        return res.status(500).json({ 
+            message: 'خطأ في إعدادات الخادم',
+            error: 'Server configuration error'
+        });
+    }
     
     // معالجة أخطاء Multer
     if (err.code === 'LIMIT_FILE_SIZE') {

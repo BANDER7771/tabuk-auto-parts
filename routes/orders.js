@@ -7,38 +7,59 @@ const upload = require('../middleware/upload');
 // فحص صحة الخدمة
 router.get('/health', (req, res) => res.json({ ok: true, route: 'orders' }));
 
-// إنشاء طلب جديد
-router.post('/', upload.single('partImage'), async (req, res) => {
+// إنشاء طلب جديد مع معالجة أخطاء multer
+router.post('/', (req, res, next) => {
+    upload.single('partImage')(req, res, (err) => {
+        if (err) {
+            console.error('Multer error:', err);
+            if (err.message && err.message.includes('Unexpected end of form')) {
+                return res.status(400).json({
+                    message: 'خطأ في إرسال النموذج. الرجاء التأكد من ملء جميع الحقول والمحاولة مرة أخرى.',
+                    error: 'Form submission error'
+                });
+            }
+            if (err.code === 'LIMIT_FILE_SIZE') {
+                return res.status(400).json({
+                    message: 'حجم الملف كبير جداً. الحد الأقصى 10MB.',
+                    error: 'File too large'
+                });
+            }
+            return res.status(400).json({
+                message: 'خطأ في رفع الملف: ' + err.message,
+                error: err.code || 'Upload error'
+            });
+        }
+        next();
+    });
+}, async (req, res) => {
     try {
         // فحص وجود البيانات مع تشخيص مفصل
         console.log('🔍 Order Request debugging:');
         console.log('- Content-Type:', req.headers['content-type']);
         console.log('- Body exists:', !!req.body);
         console.log('- Body keys:', req.body ? Object.keys(req.body) : 'No body');
-        console.log('- Files:', req.files ? req.files.length : 0);
         console.log('- File (single):', !!req.file);
-        
-        // معالجة البيانات من multer إذا كانت في req.files
-        if (req.files && req.files.length > 0) {
-            req.files.forEach(file => {
-                if (file.fieldname && file.buffer === undefined) {
-                    // هذا حقل نصي وليس ملف
-                    req.body[file.fieldname] = file.originalname || file.value || '';
-                }
-            });
-        }
-        
-        console.log('- Processed body:', req.body);
+        console.log('- Raw body:', req.body);
 
-        if (!req.body || Object.keys(req.body).length === 0) {
+        // التحقق من وجود البيانات الأساسية بدلاً من فحص req.body فارغ
+        const hasRequiredData = req.body && (
+            req.body.fullName || 
+            req.body.phone || 
+            req.body.carNameCategory || 
+            req.body.carYear || 
+            req.body.partDetails
+        );
+
+        if (!hasRequiredData) {
+            console.log('❌ لا توجد بيانات مطلوبة في الطلب');
             return res.status(400).json({ 
                 message: 'لم يتم استلام البيانات بشكل صحيح. الرجاء التأكد من ملء جميع الحقول المطلوبة.',
-                error: 'Request body is undefined or empty',
+                error: 'Required fields missing',
                 debug: {
                     contentType: req.headers['content-type'],
                     bodyExists: !!req.body,
                     bodyKeys: req.body ? Object.keys(req.body) : [],
-                    filesCount: req.files ? req.files.length : 0
+                    hasFile: !!req.file
                 }
             });
         }
@@ -182,6 +203,7 @@ router.post('/', upload.single('partImage'), async (req, res) => {
 
         res.status(201).json({
             message: 'تم استلام طلبك بنجاح',
+            orderNumber: order.orderNumber,
             id: order.orderNumber,
             order: {
                 orderNumber: order.orderNumber,
@@ -191,8 +213,32 @@ router.post('/', upload.single('partImage'), async (req, res) => {
             }
         });
     } catch (error) {
+        console.error('❌ خطأ في إنشاء الطلب:', error);
+        
+        // معالجة أخطاء multer المحددة
+        if (error.message && error.message.includes('Unexpected end of form')) {
+            return res.status(400).json({ 
+                message: 'خطأ في إرسال النموذج. الرجاء التأكد من ملء جميع الحقول والمحاولة مرة أخرى.',
+                error: 'Form submission error'
+            });
+        }
+        
+        if (error.code === 'LIMIT_FILE_SIZE') {
+            return res.status(400).json({ 
+                message: 'حجم الملف كبير جداً. الحد الأقصى 10MB.',
+                error: 'File too large'
+            });
+        }
+        
+        if (error.code === 'LIMIT_UNEXPECTED_FILE') {
+            return res.status(400).json({ 
+                message: 'نوع الملف غير مدعوم. يُسمح فقط بملفات الصور.',
+                error: 'Invalid file type'
+            });
+        }
+        
         res.status(500).json({ 
-            message: 'خطأ في إنشاء الطلب', 
+            message: 'خطأ في إنشاء الطلب. الرجاء المحاولة مرة أخرى.', 
             error: error.message 
         });
     }

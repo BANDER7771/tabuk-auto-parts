@@ -163,25 +163,7 @@ app.use(express.urlencoded({
     parameterLimit: 50000
 }));
 
-// إضافة middleware لمعالجة multipart/form-data بشكل صحيح
-const multer = require('multer');
-const textOnlyUpload = multer({
-    limits: {
-        fileSize: 10 * 1024 * 1024, // 10MB
-        fieldSize: 1024 * 1024, // 1MB per field
-        fields: 20 // max 20 fields
-    }
-});
-
-// معالجة multipart/form-data للطلبات
-app.use('/api/orders', (req, res, next) => {
-    // إذا كان Content-Type هو multipart/form-data
-    if (req.headers['content-type'] && req.headers['content-type'].includes('multipart/form-data')) {
-        // استخدم multer لمعالجة البيانات
-        return textOnlyUpload.any()(req, res, next);
-    }
-    next();
-});
+// إزالة middleware المتضارب - سيتم التعامل مع multipart في routes/orders.js
 
 // Serve static files مع إعدادات صحيحة
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

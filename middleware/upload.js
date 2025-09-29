@@ -34,11 +34,26 @@ const fileFilter = (req, file, cb) => {
     }
 };
 
-// إعداد multer للتخزين المحلي
+// إعداد multer للتخزين المحلي مع معالجة أفضل للأخطاء
 const localUpload = multer({
     storage: localStorage,
-    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
-    fileFilter
+    limits: { 
+        fileSize: 10 * 1024 * 1024, // 10MB
+        fieldSize: 1024 * 1024, // 1MB per field
+        fields: 20 // max 20 fields
+    },
+    fileFilter,
+    // معالجة أخطاء multer
+    onError: (err, next) => {
+        console.error('Multer error:', err);
+        if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+            return next(new Error('ملف غير متوقع'));
+        }
+        if (err.message && err.message.includes('Unexpected end of form')) {
+            return next(new Error('خطأ في إرسال النموذج. الرجاء المحاولة مرة أخرى.'));
+        }
+        next(err);
+    }
 });
 
 // استخدام Cloudinary إذا كان متاحاً، وإلا استخدام التخزين المحلي

@@ -1370,24 +1370,44 @@
             // Show loading
             document.getElementById('loadingOverlay').classList.add('active');
             
-            // Prepare form data
+            // Prepare form data مع التحقق من البيانات
             const formData = new FormData();
-            formData.append('carNameCategory', document.getElementById('carNameCategory').value);
-            formData.append('carYear', document.getElementById('carYear').value);
-            formData.append('fullName', document.getElementById('fullName').value);
-            formData.append('phone', document.getElementById('phone').value);
-            formData.append('partDetails', document.getElementById('partDetails').value);
+            
+            // التحقق من البيانات قبل الإضافة
+            const carNameCategory = document.getElementById('carNameCategory').value.trim();
+            const carYear = document.getElementById('carYear').value.trim();
+            const fullName = document.getElementById('fullName').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const partDetails = document.getElementById('partDetails').value.trim();
+            
+            if (!carNameCategory || !carYear || !fullName || !phone || !partDetails) {
+                throw new Error('جميع الحقول المطلوبة يجب أن تكون مملوءة');
+            }
+            
+            formData.append('carNameCategory', carNameCategory);
+            formData.append('carYear', carYear);
+            formData.append('fullName', fullName);
+            formData.append('phone', phone);
+            formData.append('partDetails', partDetails);
             formData.append('city', 'تبوك');
             
             // Add delivery option
             const deliveryElement = document.querySelector('input[name="delivery"]:checked');
             if (deliveryElement) {
                 formData.append('delivery', deliveryElement.value);
+            } else {
+                formData.append('delivery', 'free'); // قيمة افتراضية
             }
             
             // Add uploaded file if exists
             if (uploadedFile) {
                 formData.append('partImage', uploadedFile);
+            }
+            
+            // طباعة البيانات للتشخيص
+            console.log('📤 إرسال البيانات:');
+            for (let [key, value] of formData.entries()) {
+                console.log(`- ${key}:`, value);
             }
             
             try {
@@ -1442,19 +1462,23 @@
                 let errorMessage = 'حدث خطأ في إرسال الطلب';
                 
                 if (error.message) {
-                    if (error.message.includes('Unexpected end of form')) {
-                        errorMessage = 'خطأ في إرسال البيانات. الرجاء التأكد من ملء جميع الحقول المطلوبة والمحاولة مرة أخرى.';
-                    } else if (error.message.includes('Network')) {
+                    if (error.message.includes('جميع الحقول المطلوبة يجب أن تكون مملوءة')) {
+                        errorMessage = 'الرجاء ملء جميع الحقول المطلوبة قبل الإرسال';
+                    } else if (error.message.includes('Unexpected end of form') || error.message.includes('Form submission error')) {
+                        errorMessage = 'خطأ في إرسال النموذج. الرجاء التأكد من ملء جميع الحقول والمحاولة مرة أخرى.';
+                    } else if (error.message.includes('Network') || error.message.includes('Failed to fetch')) {
                         errorMessage = 'خطأ في الاتصال بالخادم. الرجاء التحقق من الاتصال بالإنترنت والمحاولة مرة أخرى.';
                     } else if (error.message.includes('500')) {
                         errorMessage = 'خطأ في الخادم. الرجاء المحاولة مرة أخرى بعد قليل.';
+                    } else if (error.message.includes('File too large')) {
+                        errorMessage = 'حجم الصورة كبير جداً. الرجاء اختيار صورة أصغر من 10MB.';
                     } else {
                         errorMessage = error.message;
                     }
                 }
                 
                 // عرض رسالة خطأ واضحة
-                alert(`❌ ${errorMessage}\n\n💡 نصائح:\n• تأكد من ملء جميع الحقول المطلوبة\n• تأكد من صحة رقم الجوال\n• تأكد من الاتصال بالإنترنت`);
+                alert(`❌ ${errorMessage}\n\n💡 نصائح:\n• تأكد من ملء جميع الحقول المطلوبة\n• تأكد من صحة رقم الجوال (مثال: 0555123456)\n• تأكد من أن حجم الصورة أقل من 10MB\n• تأكد من الاتصال بالإنترنت`);
                 
                 // العودة إلى الخطوة الأولى للمراجعة
                 if (currentStep !== 1) {

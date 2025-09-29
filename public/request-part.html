@@ -157,19 +157,38 @@
                 form.preventDefault = true;
             }
             
-            // إنشاء FormData لدعم رفع الصور
+            // إنشاء FormData لدعم رفع الصور مع التحقق من البيانات
             const formData = new FormData();
-            formData.append('fullName', document.getElementById('fullName').value);
-            formData.append('phone', document.getElementById('phone').value);
-            formData.append('carNameCategory', document.getElementById('carNameCategory').value);
-            formData.append('carYear', document.getElementById('carYear').value);
-            formData.append('partDetails', document.getElementById('partDetails').value);
+            
+            // التحقق من البيانات قبل الإضافة
+            const fullName = document.getElementById('fullName').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const carNameCategory = document.getElementById('carNameCategory').value.trim();
+            const carYear = document.getElementById('carYear').value.trim();
+            const partDetails = document.getElementById('partDetails').value.trim();
+            
+            if (!fullName || !phone || !carNameCategory || !carYear || !partDetails) {
+                alert('الرجاء ملء جميع الحقول المطلوبة');
+                return;
+            }
+            
+            formData.append('fullName', fullName);
+            formData.append('phone', phone);
+            formData.append('carNameCategory', carNameCategory);
+            formData.append('carYear', carYear);
+            formData.append('partDetails', partDetails);
             formData.append('city', 'تبوك');
             
             // إضافة الصورة إذا تم اختيارها
             const partImage = document.getElementById('partImage');
             if (partImage.files && partImage.files[0]) {
                 formData.append('partImage', partImage.files[0]);
+            }
+            
+            // طباعة البيانات للتشخيص
+            console.log('📤 إرسال البيانات:');
+            for (let [key, value] of formData.entries()) {
+                console.log(`- ${key}:`, value);
             }
 
             try {
@@ -200,7 +219,23 @@
                 }
             } catch (error) {
                 console.error('Error submitting request:', error);
-                alert('حدث خطأ في إرسال الطلب. يرجى المحاولة مرة أخرى.');
+                
+                // تحسين رسائل الخطأ
+                let errorMessage = 'حدث خطأ في إرسال الطلب';
+                
+                if (error.message) {
+                    if (error.message.includes('Form submission error') || error.message.includes('Unexpected end of form')) {
+                        errorMessage = 'خطأ في إرسال النموذج. الرجاء التأكد من ملء جميع الحقول والمحاولة مرة أخرى.';
+                    } else if (error.message.includes('Network') || error.message.includes('Failed to fetch')) {
+                        errorMessage = 'خطأ في الاتصال بالخادم. الرجاء التحقق من الاتصال بالإنترنت والمحاولة مرة أخرى.';
+                    } else if (error.message.includes('File too large')) {
+                        errorMessage = 'حجم الصورة كبير جداً. الرجاء اختيار صورة أصغر من 10MB.';
+                    } else {
+                        errorMessage = error.message;
+                    }
+                }
+                
+                alert(`❌ ${errorMessage}\n\n💡 نصائح:\n• تأكد من ملء جميع الحقول المطلوبة\n• تأكد من صحة رقم الجوال (مثال: 0555123456)\n• تأكد من أن حجم الصورة أقل من 10MB`);
                 
                 // حفظ الطلب محلياً كنسخة احتياطية (بدون الصورة)
                 let requests = JSON.parse(localStorage.getItem('partRequests') || '[]');

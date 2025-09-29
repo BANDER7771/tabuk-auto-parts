@@ -35,8 +35,31 @@ try {
 // يجب تشغيل: npm install express-rate-limit compression helmet
 
 const rateLimit = require('express-rate-limit');
+const { ipKeyGenerator } = rateLimit;
 const compression = require('compression');
 const helmet = require('helmet');
+
+const getClientIp = (req) => {
+    if (Array.isArray(req.ips) && req.ips.length > 0) {
+        return req.ips[0];
+    }
+    return req.ip || req.socket?.remoteAddress || req.connection?.remoteAddress;
+};
+
+const RATE_LIMIT_IPV6_SUBNET = 56;
+
+const rateLimitKeyGenerator = (req) => {
+    const clientIp = getClientIp(req);
+    try {
+        return ipKeyGenerator(clientIp, RATE_LIMIT_IPV6_SUBNET);
+    } catch (error) {
+        console.error('⚠️ Rate limit ipKeyGenerator error:', {
+            clientIp,
+            message: error.message
+        });
+        return ipKeyGenerator('127.0.0.1', false);
+    }
+};
 
 // ============================================
 // إعدادات الأمان والحماية
@@ -140,29 +163,7 @@ const generalLimiter = rateLimit({
     message: 'تم تجاوز الحد المسموح من الطلبات، حاول مرة أخرى لاحقاً',
     standardHeaders: true,
     legacyHeaders: false,
-    // إعداد keyGenerator آمن للعمل مع trust proxy
-    keyGenerator: (req) => {
-        // في بيئة الإنتاج، استخدم X-Forwarded-For بحذر
-        if (process.env.NODE_ENV === 'production') {
-            // التحقق من وجود proxy headers موثوقة
-            const forwardedFor = req.headers['x-forwarded-for'];
-            const realIP = req.headers['x-real-ip'];
-            
-            // استخدام أول IP في X-Forwarded-For (الأكثر أماناً)
-            if (forwardedFor && typeof forwardedFor === 'string') {
-                const firstIP = forwardedFor.split(',')[0].trim();
-                return firstIP;
-            }
-            
-            // استخدام X-Real-IP كبديل
-            if (realIP && typeof realIP === 'string') {
-                return realIP.trim();
-            }
-        }
-        
-        // في التطوير أو كبديل، استخدم IP المباشر
-        return req.ip || req.connection.remoteAddress || 'unknown';
-    },
+    keyGenerator: rateLimitKeyGenerator,
     skip: (req) => {
         // تخطي rate limiting للـ health checks
         return req.path === '/health' || req.path === '/api/test-cors';
@@ -177,24 +178,7 @@ const authLimiter = rateLimit({
     message: 'محاولات دخول كثيرة، حاول بعد 15 دقيقة',
     standardHeaders: true,
     legacyHeaders: false,
-    // نفس keyGenerator الآمن
-    keyGenerator: (req) => {
-        if (process.env.NODE_ENV === 'production') {
-            const forwardedFor = req.headers['x-forwarded-for'];
-            const realIP = req.headers['x-real-ip'];
-            
-            if (forwardedFor && typeof forwardedFor === 'string') {
-                const firstIP = forwardedFor.split(',')[0].trim();
-                return firstIP;
-            }
-            
-            if (realIP && typeof realIP === 'string') {
-                return realIP.trim();
-            }
-        }
-        
-        return req.ip || req.connection.remoteAddress || 'unknown';
-    }
+    keyGenerator: rateLimitKeyGenerator
 });
 
 // تطبيق Rate Limiting مع معالجة الأخطاء
@@ -426,7 +410,8 @@ app.use((req, res) => {
 // ============================================
 // تشغيل الخادم
 // ============================================
-const PORT = process.env.PORT || 3000;
+const DEFAULT_PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 10000;
+const PORT = DEFAULT_PORT;
 
 const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 السيرفر يعمل على البورت ${PORT}`);

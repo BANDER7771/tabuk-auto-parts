@@ -256,7 +256,7 @@ router.get('/admin', async (req, res) => {
                 .sort({ createdAt: -1 })
                 .populate('items.partId');
         } catch (dbError) {
-            console.error('خطأ في جلب الطلبات من قاعدة البيانات:', dbError.message);
+            console.error('❌ Database error in /admin:', dbError.message);
         }
         
         // جلب الطلبات الاحتياطية من الملف
@@ -269,7 +269,7 @@ router.get('/admin', async (req, res) => {
                 const data = fs.readFileSync(backupFile, 'utf8');
                 backupOrders = JSON.parse(data);
             } catch (fileError) {
-                console.error('خطأ في قراءة الطلبات الاحتياطية:', fileError.message);
+                console.error('❌ Backup file read error:', fileError.message);
             }
         }
         
@@ -280,6 +280,7 @@ router.get('/admin', async (req, res) => {
             dbStatus: orders.length > 0 ? 'connected' : 'disconnected'
         });
     } catch (error) {
+        console.error('❌ Error in GET /admin:', error);
         res.status(500).json({ 
             message: 'خطأ في جلب الطلبات', 
             error: error.message 
@@ -298,7 +299,7 @@ router.get('/admin/archived', async (req, res) => {
                 .sort({ archivedAt: -1 })
                 .populate('items.partId');
         } catch (dbError) {
-            console.error('خطأ في جلب الطلبات المؤرشفة من قاعدة البيانات:', dbError.message);
+            console.error('❌ Database error in /admin/archived:', dbError.message);
         }
         
         res.json({
@@ -307,6 +308,7 @@ router.get('/admin/archived', async (req, res) => {
             dbStatus: archivedOrders.length > 0 ? 'connected' : 'disconnected'
         });
     } catch (error) {
+        console.error('❌ Error in GET /admin/archived:', error);
         res.status(500).json({ 
             message: 'خطأ في جلب الطلبات المؤرشفة', 
             error: error.message 
@@ -319,6 +321,13 @@ router.put('/admin/:id/status', async (req, res) => {
     try {
         const { status, description } = req.body;
         
+        if (!status) {
+            return res.status(400).json({ 
+                message: 'الحالة مطلوبة',
+                error: 'Status is required'
+            });
+        }
+
         const order = await Order.findById(req.params.id);
 
         if (!order) {
@@ -338,6 +347,7 @@ router.put('/admin/:id/status', async (req, res) => {
         });
 
         await order.save();
+        console.log('✅ Order status updated:', order.orderNumber, 'to', status);
 
         // إرسال إشعار واتساب للإدارة عن تحديث الحالة
         try {
@@ -350,7 +360,7 @@ router.put('/admin/:id/status', async (req, res) => {
                 createdAt: new Date()
             });
         } catch (whatsappError) {
-            console.error('خطأ في إرسال إشعار واتساب لتحديث الحالة:', whatsappError);
+            console.error('❌ WhatsApp notification error:', whatsappError);
         }
 
         res.json({
@@ -358,24 +368,9 @@ router.put('/admin/:id/status', async (req, res) => {
             order
         });
     } catch (error) {
+        console.error('❌ Error in PUT /admin/:id/status:', error);
         res.status(500).json({ 
             message: 'خطأ في تحديث الطلب', 
-            error: error.message 
-        });
-    }
-});
-
-// تتبع الطلبات بالجوال
-router.get('/track/:phone', async (req, res) => {
-    try {
-        const orders = await Order.find({ 
-            customerPhone: req.params.phone 
-        }).sort({ createdAt: -1 });
-        
-        res.json(orders);
-    } catch (error) {
-        res.status(500).json({ 
-            message: 'خطأ في تتبع الطلبات', 
             error: error.message 
         });
     }
@@ -395,6 +390,7 @@ router.get('/', async (req, res) => {
 
         res.json(orders);
     } catch (error) {
+        console.error('❌ Error in GET /:', error);
         res.status(500).json({ 
             message: 'خطأ في جلب الطلبات', 
             error: error.message 
@@ -417,6 +413,7 @@ router.get('/:orderNumber', async (req, res) => {
 
         res.json(order);
     } catch (error) {
+        console.error('❌ Error in GET /:orderNumber:', error);
         res.status(500).json({ 
             message: 'خطأ في جلب الطلب', 
             error: error.message 
@@ -429,6 +426,13 @@ router.put('/:orderNumber/status', async (req, res) => {
     try {
         const { status, description } = req.body;
         
+        if (!status) {
+            return res.status(400).json({ 
+                message: 'الحالة مطلوبة',
+                error: 'Status is required'
+            });
+        }
+
         const order = await Order.findOne({ 
             orderNumber: req.params.orderNumber 
         });
@@ -450,12 +454,14 @@ router.put('/:orderNumber/status', async (req, res) => {
         });
 
         await order.save();
+        console.log('✅ Order status updated:', order.orderNumber, 'to', status);
 
         res.json({
             message: 'تم تحديث حالة الطلب',
             order
         });
     } catch (error) {
+        console.error('❌ Error in PUT /:orderNumber/status:', error);
         res.status(500).json({ 
             message: 'خطأ في تحديث الطلب', 
             error: error.message 
@@ -484,11 +490,13 @@ router.delete('/:orderNumber', async (req, res) => {
         });
 
         await order.save();
+        console.log('✅ Order cancelled:', order.orderNumber);
 
         res.json({ 
             message: 'تم إلغاء الطلب بنجاح' 
         });
     } catch (error) {
+        console.error('❌ Error in DELETE /:orderNumber:', error);
         res.status(500).json({ 
             message: 'خطأ في إلغاء الطلب', 
             error: error.message 
@@ -508,11 +516,13 @@ router.delete('/admin/:id', async (req, res) => {
         }
 
         await Order.findByIdAndDelete(req.params.id);
+        console.log('✅ Order permanently deleted:', order.orderNumber);
 
         res.json({ 
             message: 'تم حذف الطلب نهائياً' 
         });
     } catch (error) {
+        console.error('❌ Error in DELETE /admin/:id:', error);
         res.status(500).json({ 
             message: 'خطأ في حذف الطلب', 
             error: error.message 
@@ -541,12 +551,14 @@ router.put('/admin/:id/archive', async (req, res) => {
         });
 
         await order.save();
+        console.log('✅ Order archived:', order.orderNumber);
 
         res.json({ 
             message: 'تم أرشفة الطلب بنجاح',
             order
         });
     } catch (error) {
+        console.error('❌ Error in PUT /admin/:id/archive:', error);
         res.status(500).json({ 
             message: 'خطأ في أرشفة الطلب', 
             error: error.message 
@@ -575,12 +587,14 @@ router.put('/admin/:id/restore', async (req, res) => {
         });
 
         await order.save();
+        console.log('✅ Order restored:', order.orderNumber);
 
         res.json({ 
             message: 'تم استرجاع الطلب بنجاح',
             order
         });
     } catch (error) {
+        console.error('❌ Error in PUT /admin/:id/restore:', error);
         res.status(500).json({ 
             message: 'خطأ في استرجاع الطلب', 
             error: error.message 
@@ -599,6 +613,7 @@ router.get('/track/:phone', async (req, res) => {
 
         res.json(orders);
     } catch (error) {
+        console.error('❌ Error in GET /track/:phone:', error);
         res.status(500).json({ 
             message: 'خطأ في تتبع الطلبات', 
             error: error.message 
@@ -614,9 +629,10 @@ router.post('/sell-car', upload.array('images', 10), async (req, res) => {
         console.log('- Content-Type:', req.headers['content-type']);
         console.log('- Body exists:', !!req.body);
         console.log('- Body keys:', req.body ? Object.keys(req.body) : 'No body');
-        console.log('- Files:', req.files ? req.files.length : 0);
+        console.log('- Files (array):', req.files ? req.files.length : 0);
 
         if (!req.body || Object.keys(req.body).length === 0) {
+            console.log('❌ Empty request body received');
             return res.status(400).json({ 
                 message: 'لم يتم استلام البيانات بشكل صحيح',
                 error: 'Request body is undefined or empty',
@@ -645,6 +661,15 @@ router.post('/sell-car', upload.array('images', 10), async (req, res) => {
             expectedPrice
         } = req.body;
 
+        // فحص البيانات المطلوبة
+        if (!fullName || !phone || !carMake || !carModel || !carYear) {
+            console.log('❌ Required fields missing for sell-car');
+            return res.status(400).json({ 
+                message: 'البيانات المطلوبة مفقودة',
+                required: ['fullName', 'phone', 'carMake', 'carModel', 'carYear']
+            });
+        }
+
         // معالجة الصور المرفوعة
         const images = req.files ? req.files.map(file => {
             // إذا كان يستخدم Cloudinary، استخدم الرابط الكامل
@@ -652,16 +677,8 @@ router.post('/sell-car', upload.array('images', 10), async (req, res) => {
                 return file.path;
             }
             // إذا كان تخزين محلي، استخدم اسم الملف
-            return file.filename || file.originalname;
+            return `/uploads/${file.filename || file.originalname}`;
         }) : [];
-
-        // فحص البيانات المطلوبة
-        if (!fullName || !phone || !carMake || !carModel || !carYear) {
-            return res.status(400).json({ 
-                message: 'البيانات المطلوبة مفقودة',
-                required: ['fullName', 'phone', 'carMake', 'carModel', 'carYear']
-            });
-        }
 
         // إنشاء طلب بيع سيارة
         const order = new Order({
@@ -756,6 +773,7 @@ router.post('/sell-car', upload.array('images', 10), async (req, res) => {
             }
         });
     } catch (error) {
+        console.error('❌ Error in POST /sell-car:', error);
         res.status(500).json({ 
             message: 'خطأ في إنشاء طلب بيع السيارة', 
             error: error.message 

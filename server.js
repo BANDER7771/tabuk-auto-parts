@@ -195,6 +195,8 @@ try {
 // ============================================
 // Middleware العام - يجب أن يكون قبل CORS
 // ============================================
+// Twilio webhooks need raw body for signature validation
+app.use('/webhooks/twilio', express.raw({ type: '*/*' }));
 // زيادة حد البيانات مع دعم UTF-8 للنصوص العربية
 app.use(express.json({ 
     limit: '10mb',
@@ -316,6 +318,35 @@ mongoose.connection.on('reconnected', () => {
 // ============================================
 // Routes - مع المصادقة
 // ============================================
+
+// Twilio WhatsApp Webhooks
+app.post('/webhooks/twilio/whatsapp', (req, res) => {
+    const url = 'https://tabuk-auto-parts-production.up.railway.app/webhooks/twilio/whatsapp';
+    try {
+        console.log('📥 Received Twilio WhatsApp webhook');
+        res.sendStatus(200);
+    } catch (e) {
+        console.error('❌ Twilio WhatsApp webhook error:', e.message);
+        res.sendStatus(200);
+    }
+});
+
+app.post('/webhooks/twilio/whatsapp-fallback', (req, res) => {
+    return res.sendStatus(200);
+});
+
+app.post('/webhooks/twilio/status', (req, res) => {
+    try {
+        const params = new URLSearchParams(req.body.toString());
+        const MessageSid = params.get('MessageSid');
+        const MessageStatus = params.get('MessageStatus');
+        const To = params.get('To');
+        console.log('📡 Twilio Status Callback:', { MessageSid, MessageStatus, To });
+    } catch (err) {
+        console.error('⚠️ Twilio Status parse error:', err.message);
+    }
+    res.sendStatus(200);
+});
 
 // Health check endpoint لـ Railway
 app.get('/health', (req, res) => {

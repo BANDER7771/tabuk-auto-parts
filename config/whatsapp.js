@@ -138,16 +138,13 @@ const sendToWhatsApp = async (phoneNumber, message) => {
         }
 
         if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
-            const twilio = require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-            
+            const twilioClient = require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+            const { sendViaTwilio } = require('../utils/waSender');
+
             console.log(`📞 إرسال Twilio واتساب إلى: ${phoneNumber}`);
-            
-            const result = await twilio.messages.create({
-                from: 'whatsapp:+14155238886',
-                to: `whatsapp:+${cleanPhone}`,
-                body: message
-            });
-            
+
+            const result = await sendViaTwilio(twilioClient, cleanPhone, message);
+
             console.log(`✅ تم إرسال واتساب Twilio بنجاح!`);
             console.log(`📊 Message SID: ${result.sid}`);
             return result;

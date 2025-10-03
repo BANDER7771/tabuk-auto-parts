@@ -977,6 +977,51 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="form-group full-width">
+                            <label>
+                                <span class="required">*</span>
+                                طريقة الدفع
+                            </label>
+                            <div class="delivery-options">
+                                <div class="delivery-option">
+                                    <input type="radio" name="payment" id="cash" value="cash" checked required>
+                                    <label for="cash" class="delivery-label">
+                                        <div class="delivery-header">
+                                            <span class="delivery-title">💵 كاش</span>
+                                        </div>
+                                        <div class="delivery-desc">الدفع عند الاستلام</div>
+                                    </label>
+                                </div>
+                                <div class="delivery-option">
+                                    <input type="radio" name="payment" id="applepay" value="applepay" required>
+                                    <label for="applepay" class="delivery-label">
+                                        <div class="delivery-header">
+                                            <span class="delivery-title">🍎 أبل باي</span>
+                                        </div>
+                                        <div class="delivery-desc">الدفع عبر Apple Pay</div>
+                                    </label>
+                                </div>
+                                <div class="delivery-option">
+                                    <input type="radio" name="payment" id="tamara" value="tamara" required>
+                                    <label for="tamara" class="delivery-label">
+                                        <div class="delivery-header">
+                                            <span class="delivery-title">💳 تمارا</span>
+                                        </div>
+                                        <div class="delivery-desc">قسّم مشترياتك على 4 دفعات</div>
+                                    </label>
+                                </div>
+                                <div class="delivery-option">
+                                    <input type="radio" name="payment" id="tabby" value="tabby" required>
+                                    <label for="tabby" class="delivery-label">
+                                        <div class="delivery-header">
+                                            <span class="delivery-title">💰 تابي</span>
+                                        </div>
+                                        <div class="delivery-desc">اشتري الآن وادفع لاحقاً</div>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="error-message">الرجاء اختيار طريقة الدفع</div>
+                        </div>
                     </div>
                 </div>
 
@@ -1198,7 +1243,18 @@
                 const formGroup = field.closest('.form-group');
                 const errorMsg = formGroup.querySelector('.error-message');
                 
-                if (!field.value.trim()) {
+                if (field.type === 'radio') {
+                    const radioGroup = document.getElementsByName(field.name);
+                    const isChecked = Array.from(radioGroup).some(r => r.checked);
+                    if (!isChecked) {
+                        formGroup.classList.add('error');
+                        if (errorMsg) errorMsg.classList.add('show');
+                        isValid = false;
+                    } else {
+                        formGroup.classList.remove('error');
+                        if (errorMsg) errorMsg.classList.remove('show');
+                    }
+                } else if (!field.value.trim()) {
                     formGroup.classList.add('error');
                     if (errorMsg) errorMsg.classList.add('show');
                     isValid = false;
@@ -1389,6 +1445,8 @@
             formData.append('fullName', fullName);
             formData.append('phone', phone);
             formData.append('partDetails', partDetails);
+            const paymentMethod = document.querySelector('input[name="payment"]:checked');
+            formData.append('paymentMethod', paymentMethod ? paymentMethod.value : 'cash');
             formData.append('city', 'تبوك');
             
             // Add delivery option
@@ -1507,9 +1565,9 @@
             radio.addEventListener('change', updateSummary);
         });
 
-        // Initialize
-        updateProgressBar();
-        updateButtons();
+            // Initialize
+            updateProgressBar();
+            updateButtons();
     </script>
 </body>
 </html>

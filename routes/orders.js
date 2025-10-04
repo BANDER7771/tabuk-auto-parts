@@ -956,6 +956,147 @@ router.post('/admin/send-to-delivery', async (req, res) => {
         });
     }
 });
+router.post('/admin/send-to-delivery', async (req, res) => {
+    try {
+        const { orderIds, deliveryPhone } = req.body;
 
-module.exports = router;
+        if (!orderIds || !Array.isArray(orderIds) || orderIds.length === 0) {
+            return res.status(400).json({ 
+                message: 'يرجى تحديد طلبات للإرسال' 
+            });
+        }
+
+        const deliveryNumber = deliveryPhone || process.env.DELIVERY_WHATSAPP || '966545376792';
+        const orders = await Order.find({ _id: { $in: orderIds } });
+
+        if (orders.length === 0) {
+            return res.status(404).json({ 
+                message: 'لم يتم العثور على الطلبات المحددة' 
+            });
+        }
+
+        let message = `🚚 *طلبات جديدة للتوصيل*\n\n`;
+        message += `📦 عدد الطلبات: ${orders.length}\n`;
+        message += `📅 ${new Date().toLocaleDateString('ar-SA')}\n\n`;
+        message += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+        orders.forEach((order, index) => {
+            const deliveryText = order.deliveryOption === 'express' ? '🔥 مستعجل' : 
+                               order.deliveryOption === 'standard' ? '⚡ سريع' : '📋 عادي';
+            const hasImage = !!(order.items?.[0]?.imageUrl || order.items?.[0]?.partImage);
+
+            message += `*${index + 1}. ${order.orderNumber}*\n`;
+            message += `👤 ${order.customerName}\n`;
+            message += `📱 ${order.customerPhone}\n`;
+            message += `🚗 ${order.carInfo?.fullName || (order.carInfo?.make + ' ' + order.carInfo?.model)} ${order.carInfo?.year || ''}\n`;
+            message += `🔧 ${order.items?.[0]?.partName || 'غير محدد'}\n`;
+            message += `🚚 ${deliveryText}\n`;
+            
+            if (order.shippingAddress?.city) {
+                message += `📍 ${order.shippingAddress.city}\n`;
+            }
+            if (order.notes) {
+                message += `📝 ${order.notes}\n`;
+            }
+            if (hasImage) {
+                message += `📷 ${order.items[0].imageUrl || order.items[0].partImage}\n`;
+            }
+            message += `\n━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+        });
+
+        message += `✅ يرجى البدء بالتوصيل`;
+
+        try {
+            await sendWhatsAppNotification({
+                orderNumber: `BULK-${Date.now()}`,
+                customerName: 'المندوب',
+                customerPhone: deliveryNumber,
+                orderType: 'تحويل للتوصيل',
+                description: message,
+                createdAt: new Date()
+            });
+
+            res.json({
+                message: `تم إرسال ${orders.length} طلب للمندوب بنجاح`,
+                deliveryNumber: deliveryNumber,
+                orderCount: orders.length
+            });
+        } catch (error) {
+            console.error('خطأ في إرسال للمندوب:', error);
+            res.status(500).json({
+                message: 'فشل الإرسال للمندوب',
+                error: error.message
+            });
+        }
+    } catch (error) {
+        console.error('❌ Error in POST /admin/send-to-delivery:', error);
+        res.status(500).json({ 
+            message: 'خطأ في إرسال الطلبات للمندوب', 
+            error: error.message 
+        });
+    }
+});
+
+// تحديث السعر والضمان
+router.put('/admin/:id/pricing', async (req, res) => {
+    try {
+        const { price, warranty, warrantyDuration } = req.body;
+        const order = await Order.findById(req.params.id);
+
+        if (!order) {
+            return res.status(404).json({ message: 'الطلب غير موجود' });
+        }
+
+        if (order.items && order.items[0]) {
+            order.items[0].price = price || order.items[0].price;
+            order.items[0].warranty = warranty;
+            order.items[0].warrantyDuration = warrantyDuration;
+        }
+
+        order.totalAmount = (parseFloat(price) || 0) + (order.deliveryFee || 0);
+        
+        order.timeline.push({
+            status: 'pricing_updated',
+            date: new Date(),
+            description: `تم تحديث السعر: ${price} ريال${warranty ? ' - مع ضمان ' + warrantyDuration : ''}`
+        });
+
+        await order.save();
+
+        res.json({
+            message: 'تم تحديث السعر والضمان بنجاح',
+            order
+        });
+    } catch (error) {
+        console.error('❌ Error updating pricing:', error);
+        res.status(500).json({ 
+            message: 'خطأ في تحديث السعر', 
+            error: error.message 
+        });
+    }
+});
+
+// الحصول على الطلبات الناجحة (المكتملة)
+router.get('/admin/completed', async (req, res) => {
+    try {
+        const completedOrders = await Order.find({ 
+            status: 'delivered',
+            archived: { $ne: true }
+        })
+        .sort({ createdAt: -1 })
+        .populate('items.partId');
+
+        res.json({
+            completedOrders: completedOrders,
+            totalCompleted: completedOrders.length
+        });
+    } catch (error) {
+        console.error('❌ Error in GET /admin/completed:', error);
+        res.status(500).json({ 
+            message: 'خطأ في جلب الطلبات المكتملة', 
+            error: error.message 
+        });
+    }
+});
+
 module.exports = router;

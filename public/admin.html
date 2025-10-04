@@ -893,92 +893,100 @@
         }
 
         function renderOrders() {
-            const container = document.getElementById('ordersContent');
-            const count = document.getElementById('ordersCount');
-            
-            count.textContent = `${filteredOrders.length} طلب`;
+    const container = document.getElementById('ordersContent');
+    const count = document.getElementById('ordersCount');
+    
+    count.textContent = `${filteredOrders.length} طلب`;
 
-            if (filteredOrders.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">📦</div>
-                        <h3>لا توجد طلبات</h3>
-                        <p>لم نجد أي طلبات تطابق المعايير المحددة</p>
-                    </div>
-                `;
-                return;
-            }
+    if (filteredOrders.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">📦</div>
+                <h3>لا توجد طلبات</h3>
+                <p>لم نجد أي طلبات تطابق المعايير المحددة</p>
+            </div>
+        `;
+        return;
+    }
 
-            const tableHTML = `
-    <table class="orders-table">
-        <thead>
-            <tr>
-                <th style="width: 40px;">
-                    <input type="checkbox" class="select-all-checkbox" id="selectAll" onchange="toggleSelectAll(this)">
-                </th>
-                <th>رقم الطلب</th>
-                <th>العميل</th>
-                <th>الجوال</th>
-                <th>السيارة</th>
-                <th>القطعة</th>
-                <th>الحالة</th>
-                <th>الأولوية</th>
-                <th>التاريخ</th>
-                <th>الإجراءات</th>
-            </tr>
-        </thead>
-        <tbody>
-            ${filteredOrders.map(order => {
-                const partName = Array.isArray(order.items) && order.items[0]?.partName ? order.items[0].partName : 'غير محدد';
-                const carInfo = order.carInfo || {};
-                const carFullName = carInfo.fullName || ((carInfo.make || '') + ' ' + (carInfo.model || ''));
-                const carYear = carInfo.year || '';
-                const urgencyText = order.urgency === 'urgent' ? '🔥 مستعجل' : '📋 عادي';
-                const createdAt = order.createdAt ? new Date(order.createdAt).toLocaleDateString('ar-SA') : '';
-                return `
+    const tableHTML = `
+        <table class="orders-table">
+            <thead>
                 <tr>
-                    <td onclick="event.stopPropagation();">
-                        <input type="checkbox" class="order-checkbox" data-order-id="${order._id || ''}" onchange="updateSelectedCount()">
-                    </td>
-                    <td onclick="openOrderModal('${order._id || ''}')"><strong>${order.orderNumber || ''}</strong></td>
-                    <td onclick="openOrderModal('${order._id || ''}')">${order.customerName || ''}</td>
-                    <td onclick="event.stopPropagation();">
-                        <a href="#" class="phone-link" onclick="openWhatsAppChat('${order.customerPhone || ''}', '${order.orderNumber || ''}', '${order.customerName || ''}', '${(order.items && order.items[0] && order.items[0].partName ? order.items[0].partName.replace(/'/g, '') : '')}', '${carFullName}'); return false;">
-                            <span>📱</span>
-                            <span>${order.customerPhone || ''}</span>
-                        </a>
-                    </td>
-                    <td onclick="openOrderModal('${order._id || ''}')">${carFullName} ${carYear}</td>
-                    <td onclick="openOrderModal('${order._id || ''}')">${partName}</td>
-                    <td onclick="openOrderModal('${order._id || ''}')">
-                        <span class="status-badge status-${order.status || ''}">
-                            ${getStatusText(order.status)}
-                        </span>
-                    </td>
-                    <td onclick="openOrderModal('${order._id || ''}')">
-                        <span class="priority-${order.urgency || ''}">
-                            ${urgencyText}
-                        </span>
-                    </td>
-                    <td onclick="openOrderModal('${order._id || ''}')">${createdAt}</td>
-                    <td onclick="event.stopPropagation();">
-                        <div style="display: flex; gap: 0.5rem;">
-                            <button onclick="openOrderModal('${order._id || ''}')" style="padding: 0.4rem 0.8rem; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer;">
-                                عرض
-                            </button>
-                        </div>
-                    </td>
+                    <th style="width: 40px;">
+                        <input type="checkbox" class="select-all-checkbox" id="selectAll" onchange="toggleSelectAll(this)">
+                    </th>
+                    <th>رقم الطلب</th>
+                    <th>العميل</th>
+                    <th>الجوال</th>
+                    <th>السيارة</th>
+                    <th>القطعة</th>
+                    <th>الحالة</th>
+                    <th>الأولوية</th>
+                    <th>التاريخ</th>
+                    <th>الإجراءات</th>
                 </tr>
-                `;
-            }).join('')}
-        </tbody>
-    </table>
-            `;
+            </thead>
+            <tbody>
+                ${filteredOrders.map(order => {
+                    const partName = order.items?.[0]?.partName || 'غير محدد';
+                    const carFullName = order.carInfo?.fullName || ((order.carInfo?.make || '') + ' ' + (order.carInfo?.model || ''));
+                    const carYear = order.carInfo?.year || '';
+                    const urgencyText = order.urgency === 'urgent' ? '🔥 مستعجل' : '📋 عادي';
+                    const createdAt = order.createdAt ? new Date(order.createdAt).toLocaleDateString('ar-SA') : '';
+                    
+                    return `
+                        <tr>
+                            <td onclick="event.stopPropagation();">
+                                <input type="checkbox" class="order-checkbox" data-order-id="${order._id}" onchange="updateSelectedCount()">
+                            </td>
+                            <td onclick="openOrderModal('${order._id}')"><strong>${order.orderNumber}</strong></td>
+                            <td onclick="openOrderModal('${order._id}')">${order.customerName}</td>
+                            <td onclick="event.stopPropagation();">
+                                <a href="#" class="phone-link" onclick="openWhatsAppChat('${order.customerPhone}', '${order.orderNumber}', '${order.customerName}', '${partName.replace(/'/g, '')}', '${carFullName}'); return false;">
+                                    <span>📱</span>
+                                    <span>${order.customerPhone}</span>
+                                </a>
+                            </td>
+                            <td onclick="openOrderModal('${order._id}')">${carFullName} ${carYear}</td>
+                            <td onclick="openOrderModal('${order._id}')">${partName}</td>
+                            <td onclick="openOrderModal('${order._id}')">
+                                <span class="status-badge status-${order.status}">
+                                    ${getStatusText(order.status)}
+                                </span>
+                            </td>
+                            <td onclick="openOrderModal('${order._id}')">
+                                <span class="priority-${order.urgency}">
+                                    ${urgencyText}
+                                </span>
+                            </td>
+                            <td onclick="openOrderModal('${order._id}')">${createdAt}</td>
+                            <td onclick="event.stopPropagation();">
+                                <div style="display: flex; gap: 0.3rem; flex-wrap: wrap;">
+                                    <button onclick="openOrderModal('${order._id}')" 
+                                            style="padding: 0.3rem 0.6rem; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">
+                                        عرض
+                                    </button>
+                                    <button onclick="archiveOrder('${order._id}', event)" 
+                                            style="padding: 0.3rem 0.6rem; background: #ff9800; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">
+                                        📦
+                                    </button>
+                                    <button onclick="deleteOrder('${order._id}', event)" 
+                                            style="padding: 0.3rem 0.6rem; background: #d32f2f; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">
+                                        🗑️
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('')}
+            </tbody>
+        </table>
+    `;
 
-            container.innerHTML = tableHTML;
-            updateSelectedCount();   // << أضِف هذا السطر هنا
-        }
-
+    container.innerHTML = tableHTML;
+    updateSelectedCount();
+}
         function getStatusText(status) {
             const statusMap = {
                 'pending': 'جديد',
@@ -1059,7 +1067,6 @@
     const order = currentOrders.find(o => o._id === orderId);
     if (!order) return;
 
-    // دوال مساعدة لعرض النصوص بشكل جميل
     const getDeliveryText = (option) => {
         switch(option) {
             case 'express': return '🔥 مستعجل (1-2 ساعة)';
@@ -1132,19 +1139,13 @@
             <h4 class="detail-title">معلومات السيارة</h4>
             <div class="detail-grid">
                 <div class="detail-item">
-                    <span class="detail-label">اسم السيارة وفئتها</span>
+                    <span class="detail-label">السيارة</span>
                     <span class="detail-value">${order.carInfo?.fullName || (order.carInfo?.make + ' ' + order.carInfo?.model) || 'غير محدد'}</span>
                 </div>
                 <div class="detail-item">
-                    <span class="detail-label">موديل السيارة</span>
+                    <span class="detail-label">الموديل</span>
                     <span class="detail-value">${order.carInfo?.year || 'غير محدد'}</span>
                 </div>
-                ${order.carInfo?.vin ? `
-                <div class="detail-item">
-                    <span class="detail-label">رقم الشاسيه</span>
-                    <span class="detail-value">${order.carInfo.vin}</span>
-                </div>
-                ` : ''}
             </div>
         </div>
 
@@ -1199,37 +1200,31 @@ ${(order.items?.[0]?.imageUrl || order.items?.[0]?.partImage) ? `
             ` : ''}
         </div>
 
-        ${order.shippingAddress ? `
-        <div class="detail-section">
-            <h4 class="detail-title">معلومات التوصيل</h4>
-            <div class="detail-grid">
-                ${order.shippingAddress.city ? `
-                <div class="detail-item">
-                    <span class="detail-label">المدينة</span>
-                    <span class="detail-value">${order.shippingAddress.city}</span>
+        <div class="status-update-section">
+            <h4 class="detail-title">تحديد السعر والضمان</h4>
+            <div class="status-actions" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <div class="control-group">
+                    <label>سعر القطعة (ريال)</label>
+                    <input type="number" class="control-input" id="partPrice" placeholder="0.00" value="${order.items?.[0]?.price || ''}" step="0.01">
                 </div>
-                ` : ''}
-                ${order.shippingAddress.district ? `
-                <div class="detail-item">
-                    <span class="detail-label">الحي</span>
-                    <span class="detail-value">${order.shippingAddress.district}</span>
+                <div class="control-group">
+                    <label>الضمان</label>
+                    <select class="control-input" id="warrantyOption">
+                        <option value="">بدون ضمان</option>
+                        <option value="3months" ${order.items?.[0]?.warrantyDuration === '3 أشهر' ? 'selected' : ''}>3 أشهر</option>
+                        <option value="6months" ${order.items?.[0]?.warrantyDuration === '6 أشهر' ? 'selected' : ''}>6 أشهر</option>
+                        <option value="1year" ${order.items?.[0]?.warrantyDuration === 'سنة' ? 'selected' : ''}>سنة واحدة</option>
+                    </select>
                 </div>
-                ` : ''}
-                ${order.shippingAddress.street ? `
-                <div class="detail-item">
-                    <span class="detail-label">الشارع</span>
-                    <span class="detail-value">${order.shippingAddress.street}</span>
+                <div class="control-group">
+                    <label>&nbsp;</label>
+                    <button class="btn btn-primary" onclick="updatePricing('${order._id}')" style="width: 100%;">
+                        <span>💰</span>
+                        <span>تحديث السعر</span>
+                    </button>
                 </div>
-                ` : ''}
-                ${order.shippingAddress.details ? `
-                <div class="detail-item" style="grid-column: 1 / -1;">
-                    <span class="detail-label">تفاصيل العنوان</span>
-                    <span class="detail-value">${order.shippingAddress.details}</span>
-                </div>
-                ` : ''}
             </div>
         </div>
-        ` : ''}
 
         <div class="status-update-section">
             <h4 class="detail-title">تحديث حالة الطلب</h4>
@@ -1262,6 +1257,7 @@ ${(order.items?.[0]?.imageUrl || order.items?.[0]?.partImage) ? `
 
     document.getElementById('orderModal').classList.add('active');
 }
+
 
 
         function closeOrderModal() {
@@ -1572,6 +1568,7 @@ async function sendSelectedToWhatsApp() {
     }
 }
 
+// فتح واتساب للعميل
 function openWhatsAppChat(phone, orderNumber, customerName, partName, carName) {
     // تنظيف رقم الهاتف
     let cleanPhone = (phone || '').replace(/[^0-9]/g, '');
@@ -1595,10 +1592,316 @@ function openWhatsAppChat(phone, orderNumber, customerName, partName, carName) {
 
 شكراً لثقتك بنا - تشاليح تبوك`;
 
-    // فتح واتساب
     const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
 }
-    </script>
+// ========================================
+// أضف هذه الدوال في admin.html قبل </script> الأخير
+// ========================================
+
+// تحديث السعر والضمان
+async function updatePricing(orderId) {
+    const price = document.getElementById('partPrice').value;
+    const warrantyOption = document.getElementById('warrantyOption').value;
+    
+    if (!price || parseFloat(price) <= 0) {
+        alert('يرجى إدخال سعر صحيح');
+        return;
+    }
+    
+    const warrantyMap = {
+        '3months': '3 أشهر',
+        '6months': '6 أشهر',
+        '1year': 'سنة'
+    };
+    
+    const warrantyDuration = warrantyMap[warrantyOption] || '';
+    
+    try {
+        const response = await fetch(`/api/orders/admin/${orderId}/pricing`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                price: parseFloat(price),
+                warranty: !!warrantyOption,
+                warrantyDuration: warrantyDuration
+            })
+        });
+        
+        if (response.ok) {
+            alert(`✅ تم تحديث السعر: ${price} ريال${warrantyDuration ? '\nالضمان: ' + warrantyDuration : ''}`);
+            await loadOrders();
+            closeOrderModal();
+        } else {
+            const error = await response.json();
+            alert('❌ فشل التحديث: ' + error.message);
+        }
+    } catch (error) {
+        console.error('Error updating pricing:', error);
+        alert('حدث خطأ في تحديث السعر');
+    }
+}
+
+// إرسال للمندوب
+async function sendSelectedToDelivery() {
+    const checkboxes = document.querySelectorAll('.order-checkbox:checked');
+    const orderIds = Array.from(checkboxes).map(cb => cb.dataset.orderId);
+    
+    if (orderIds.length === 0) {
+        alert('يرجى تحديد طلبات أولاً');
+        return;
+    }
+    
+    const deliveryPhone = prompt('أدخل رقم المندوب (اتركه فارغاً للرقم الافتراضي):', '');
+    if (deliveryPhone === null) return;
+    
+    if (!confirm(`هل تريد إرسال ${orderIds.length} طلب للمندوب؟`)) {
+        return;
+    }
+    
+    const btn = document.getElementById('sendToDeliveryBtn');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span>⏳</span><span>جاري الإرسال...</span>';
+    btn.disabled = true;
+    
+    try {
+        const response = await fetch('/api/orders/admin/send-to-delivery', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({ 
+                orderIds,
+                deliveryPhone: deliveryPhone || undefined
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            alert(`✅ تم إرسال ${result.orderCount} طلب للمندوب بنجاح!\n\nرقم المندوب: ${result.deliveryNumber}`);
+            checkboxes.forEach(cb => cb.checked = false);
+            updateSelectedCount();
+        } else {
+            alert('❌ ' + result.message);
+        }
+    } catch (error) {
+        console.error('Error sending to delivery:', error);
+        alert('حدث خطأ في إرسال الطلبات للمندوب');
+    } finally {
+        btn.innerHTML = originalText;
+        updateSelectedCount();
+    }
+}
+
+// أرشفة طلب واحد
+async function archiveOrder(orderId, event) {
+    event.stopPropagation();
+    
+    if (!confirm('هل أنت متأكد من أرشفة هذا الطلب؟')) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/orders/admin/${orderId}/archive`, {
+            method: 'PUT',
+            credentials: 'same-origin'
+        });
+
+        if (response.ok) {
+            alert('✅ تم أرشفة الطلب بنجاح');
+            await loadOrders();
+        } else {
+            alert('❌ فشل في أرشفة الطلب');
+        }
+    } catch (error) {
+        console.error('Error archiving order:', error);
+        alert('حدث خطأ في أرشفة الطلب');
+    }
+}
+
+// حذف طلب واحد
+async function deleteOrder(orderId, event) {
+    event.stopPropagation();
+    
+    if (!confirm('⚠️ هل أنت متأكد من حذف هذا الطلب نهائياً؟\n\nلا يمكن التراجع عن هذا الإجراء!')) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/orders/admin/${orderId}`, {
+            method: 'DELETE',
+            credentials: 'same-origin'
+        });
+
+        if (response.ok) {
+            alert('✅ تم حذف الطلب نهائياً');
+            await loadOrders();
+        } else {
+            alert('❌ فشل في حذف الطلب');
+        }
+    } catch (error) {
+        console.error('Error deleting order:', error);
+        alert('حدث خطأ في حذف الطلب');
+    }
+}
+
+// أرشفة طلبات محددة
+async function archiveSelected() {
+    const checkboxes = document.querySelectorAll('.order-checkbox:checked');
+    const orderIds = Array.from(checkboxes).map(cb => cb.dataset.orderId);
+    
+    if (orderIds.length === 0) {
+        alert('يرجى تحديد طلبات أولاً');
+        return;
+    }
+    
+    if (!confirm(`هل تريد أرشفة ${orderIds.length} طلب؟`)) {
+        return;
+    }
+    
+    const btn = document.getElementById('archiveSelectedBtn');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span>⏳</span><span>جاري الأرشفة...</span>';
+    btn.disabled = true;
+    
+    try {
+        let successCount = 0;
+        let failCount = 0;
+        
+        for (const orderId of orderIds) {
+            try {
+                const response = await fetch(`/api/orders/admin/${orderId}/archive`, {
+                    method: 'PUT',
+                    credentials: 'same-origin'
+                });
+                
+                if (response.ok) {
+                    successCount++;
+                } else {
+                    failCount++;
+                }
+            } catch (error) {
+                failCount++;
+            }
+        }
+        
+        alert(`✅ تم أرشفة ${successCount} طلب${failCount > 0 ? `\n❌ فشل ${failCount} طلب` : ''}`);
+        await loadOrders();
+        updateSelectedCount();
+    } catch (error) {
+        console.error('Error archiving orders:', error);
+        alert('حدث خطأ في أرشفة الطلبات');
+    } finally {
+        btn.innerHTML = originalText;
+        updateSelectedCount();
+    }
+}
+
+// حذف طلبات محددة
+async function deleteSelected() {
+    const checkboxes = document.querySelectorAll('.order-checkbox:checked');
+    const orderIds = Array.from(checkboxes).map(cb => cb.dataset.orderId);
+    
+    if (orderIds.length === 0) {
+        alert('يرجى تحديد طلبات أولاً');
+        return;
+    }
+    
+    if (!confirm(`⚠️ تحذير: هل تريد حذف ${orderIds.length} طلب نهائياً؟\n\nلا يمكن التراجع عن هذا الإجراء!`)) {
+        return;
+    }
+    
+    const btn = document.getElementById('deleteSelectedBtn');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span>⏳</span><span>جاري الحذف...</span>';
+    btn.disabled = true;
+    
+    try {
+        let successCount = 0;
+        let failCount = 0;
+        
+        for (const orderId of orderIds) {
+            try {
+                const response = await fetch(`/api/orders/admin/${orderId}`, {
+                    method: 'DELETE',
+                    credentials: 'same-origin'
+                });
+                
+                if (response.ok) {
+                    successCount++;
+                } else {
+                    failCount++;
+                }
+            } catch (error) {
+                failCount++;
+            }
+        }
+        
+        alert(`✅ تم حذف ${successCount} طلب${failCount > 0 ? `\n❌ فشل ${failCount} طلب` : ''}`);
+        await loadOrders();
+        updateSelectedCount();
+    } catch (error) {
+        console.error('Error deleting orders:', error);
+        alert('حدث خطأ في حذف الطلبات');
+    } finally {
+        btn.innerHTML = originalText;
+        updateSelectedCount();
+    }
+}
+
+// تحديث عداد الطلبات المحددة
+function toggleSelectAll(checkbox) {
+    const checkboxes = document.querySelectorAll('.order-checkbox');
+    checkboxes.forEach(cb => {
+        cb.checked = checkbox.checked;
+    });
+    updateSelectedCount();
+}
+
+function updateSelectedCount() {
+    const checkboxes = document.querySelectorAll('.order-checkbox:checked');
+    const count = checkboxes.length;
+    
+    const countSpan = document.getElementById('selectedCount');
+    if (countSpan) countSpan.textContent = `${count} محدد`;
+    
+    const deliveryBtn = document.getElementById('sendToDeliveryBtn');
+    const archiveBtn = document.getElementById('archiveSelectedBtn');
+    const deleteBtn = document.getElementById('deleteSelectedBtn');
+    
+    if (deliveryBtn) deliveryBtn.disabled = count === 0;
+    if (archiveBtn) archiveBtn.disabled = count === 0;
+    if (deleteBtn) deleteBtn.disabled = count === 0;
+    
+    const allCheckboxes = document.querySelectorAll('.order-checkbox');
+    const selectAllCheckbox = document.getElementById('selectAll');
+    if (selectAllCheckbox) {
+        selectAllCheckbox.checked = count === allCheckboxes.length && count > 0;
+    }
+}
+
+// فتح واتساب للعميل
+function openWhatsAppChat(phone, orderNumber, customerName, partName, carName) {
+    const cleanPhone = phone.replace(/[^0-9]/g, '');
+    
+    const message = `مرحباً ${customerName}،
+
+بخصوص طلبك رقم: ${orderNumber}
+
+🚗 السيارة: ${carName}
+🔧 القطعة: ${partName}
+
+سنقوم بالتواصل معك قريباً لتأكيد توفر القطعة والسعر.
+
+شكراً لثقتك بنا - تشاليح تبوك`;
+
+    const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+}
+</script>
 </body>
 </html>

@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الطلبات الناجحة - تشاليح تبوك</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #4caf50;
+            --secondary: #45a049;
+            --success: #00c853;
+            --warning: #ff9800;
+            --danger: #d32f2f;
+            --dark: #1a1a1a;
+            --light: #f8f9fa;
+            --border: #e0e0e0;
+            --shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .admin-header {
+            background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-title h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.7rem 1.2rem;
+            border-radius: 8px;
+            border: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-light {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+        }
+
+        .btn-light:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .info-section {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .info-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .info-stats {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--success);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .orders-section {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .orders-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .orders-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .orders-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .orders-count {
+            background: var(--light);
+            color: #666;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .orders-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .orders-table th,
+        .orders-table td {
+            padding: 1rem 1.5rem;
+            text-align: right;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .orders-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #555;
+            font-size: 0.9rem;
+        }
+
+        .orders-table tbody tr {
+            transition: background-color 0.2s;
+        }
+
+        .orders-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .status-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #666;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f0f0f0;
+            border-top: 4px solid var(--success);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <header class="admin-header">
+        <div class="header-content">
+            <div class="header-title">
+                <span>✅</span>
+                <h1>الطلبات الناجحة</h1>
+            </div>
+            <div class="header-actions">
+                <a href="admin.html" class="btn btn-light">
+                    <span>🔙</span>
+                    <span>العودة</span>
+                </a>
+                <button class="btn btn-light" onclick="refreshData()">
+                    <span>🔄</span>
+                    <span>تحديث</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <section class="info-section">
+        <div class="info-card">
+            <div class="info-content">
+                <h2>الطلبات المكتملة بنجاح</h2>
+                <p>هنا يمكنك مراجعة جميع الطلبات التي تم تسليمها للعملاء</p>
+            </div>
+            <div class="info-stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="totalCompleted">0</div>
+                    <div class="stat-label">إجمالي الناجحة</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="thisMonth">0</div>
+                    <div class="stat-label">هذا الشهر</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="thisWeek">0</div>
+                    <div class="stat-label">هذا الأسبوع</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="orders-section">
+        <div class="orders-card">
+            <div class="orders-header">
+                <h2 class="orders-title">قائمة الطلبات الناجحة</h2>
+                <span class="orders-count" id="ordersCount">0 طلب</span>
+            </div>
+            
+            <div id="ordersContent">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>جاري تحميل الطلبات...</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // فحص كلمة المرور
+        function checkAdminPassword() {
+            const savedPassword = localStorage.getItem('adminPassword');
+            if (savedPassword !== '8899') {
+                const password = prompt('أدخل كلمة مرور الإدارة:');
+                if (password === '8899') {
+                    localStorage.setItem('adminPassword', '8899');
+                    return true;
+                } else {
+                    alert('كلمة مرور خاطئة!');
+                    window.location.href = 'index.html';
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        if (!checkAdminPassword()) {
+            throw new Error('Unauthorized access');
+        }
+
+        let completedOrders = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCompletedOrders();
+        });
+
+        async function loadCompletedOrders() {
+            try {
+                const response = await fetch('/api/orders/admin/completed', {
+                    credentials: 'same-origin'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    completedOrders = data.completedOrders || [];
+                } else {
+                    completedOrders = [];
+                }
+                
+                updateStats();
+                renderOrders();
+            } catch (error) {
+                console.error('Error loading completed orders:', error);
+                completedOrders = [];
+                updateStats();
+                renderOrders();
+            }
+        }
+
+        function updateStats() {
+            const total = completedOrders.length;
+            
+            const now = new Date();
+            const thisMonth = completedOrders.filter(o => {
+                const orderDate = new Date(o.createdAt);
+                return orderDate.getMonth() === now.getMonth() && 
+                       orderDate.getFullYear() === now.getFullYear();
+            }).length;
+            
+            const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            const thisWeek = completedOrders.filter(o => new Date(o.createdAt) >= weekAgo).length;
+
+            document.getElementById('totalCompleted').textContent = total;
+            document.getElementById('thisMonth').textContent = thisMonth;
+            document.getElementById('thisWeek').textContent = thisWeek;
+        }
+
+        function renderOrders() {
+            const container = document.getElementById('ordersContent');
+            const count = document.getElementById('ordersCount');
+            
+            count.textContent = `${completedOrders.length} طلب`;
+
+            if (completedOrders.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📦</div>
+                        <h3>لا توجد طلبات مكتملة</h3>
+                        <p>لم يتم تسليم أي طلبات بعد</p>
+                        <a href="admin.html" class="btn" style="margin-top: 1rem; background: var(--success); color: white; text-decoration: none;">
+                            العودة للطلبات النشطة
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+
+            const tableHTML = `
+                <table class="orders-table">
+                    <thead>
+                        <tr>
+                            <th>رقم الطلب</th>
+                            <th>العميل</th>
+                            <th>الجوال</th>
+                            <th>السيارة</th>
+                            <th>القطعة</th>
+                            <th>السعر</th>
+                            <th>الضمان</th>
+                            <th>تاريخ التسليم</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${completedOrders.map(order => `
+                            <tr>
+                                <td><strong>${order.orderNumber}</strong></td>
+                                <td>${order.customerName}</td>
+                                <td>${order.customerPhone}</td>
+                                <td>${order.carInfo?.fullName || (order.carInfo?.make + ' ' + order.carInfo?.model)} ${order.carInfo?.year || ''}</td>
+                                <td>${order.items?.[0]?.partName || 'غير محدد'}</td>
+                                <td>${order.items?.[0]?.price ? order.items[0].price + ' ريال' : 'غير محدد'}</td>
+                                <td>${order.items?.[0]?.warranty ? '✅ ' + (order.items[0].warrantyDuration || 'نعم') : '❌ لا'}</td>
+                                <td>${formatDate(order.createdAt)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            container.innerHTML = tableHTML;
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('ar-SA', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            });
+        }
+
+        function refreshData() {
+            document.getElementById('ordersContent').innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>جاري تحديث البيانات...</p>
+                </div>
+            `;
+            setTimeout(loadCompletedOrders, 1000);
+        }
+    </script>
+</body>
+</html>

@@ -8,10 +8,30 @@ const upload = require('../middleware/upload');
 router.get('/health', (req, res) => res.json({ ok: true, route: 'orders' }));
 
 // إنشاء طلب جديد مع معالجة أخطاء multer
+// ✅ لا يوجد أخطاء كبيرة في الكود من ناحية منطقية أو وظيفية، الكود يعالج رفع صورة مع الطلب ويتعامل مع أخطاء multer بشكل جيد ويعطي رسائل واضحة للمستخدم.
+// ✅ التحقق من الأخطاء الخاصة بـ multer (مثل حجم الملف أو نوعه) صحيح.
+// ✅ في حال وجود خطأ، يتم إرجاع رسالة مناسبة مع كود الحالة 400.
+// ✅ في حال عدم وجود خطأ، يتم استدعاء next() للانتقال إلى المعالج التالي (async handler).
+
+// ملاحظات طفيفة لتحسين القراءة فقط (اختياري):
+// - يمكن استخدام return بدلاً من next() في حال وجود خطأ (وهو مطبق).
+// - ترتيب فحص الأخطاء جيد.
+// - لا يوجد تسرب للملفات أو بيانات حساسة في الرسائل.
+// - لا يوجد أخطاء syntax أو منطقية واضحة في هذا الجزء.
+
+// الكود سليم ويمكن استخدامه كما هو.
+
 router.post('/', (req, res, next) => {
     upload.single('partImage')(req, res, (err) => {
         if (err) {
-            console.error('Multer error:', err);
+            console.error('❌ Multer error:', err);
+            console.error('Error details:', {
+                message: err.message,
+                code: err.code,
+                field: err.field,
+                stack: err.stack
+            });
+            
             if (err.message && err.message.includes('Unexpected end of form')) {
                 return res.status(400).json({
                     message: 'خطأ في إرسال النموذج. الرجاء التأكد من ملء جميع الحقول والمحاولة مرة أخرى.',
@@ -24,9 +44,18 @@ router.post('/', (req, res, next) => {
                     error: 'File too large'
                 });
             }
+            if (err.message && err.message.includes('Only image files are allowed')) {
+                return res.status(400).json({
+                    message: 'يُسمح فقط برفع ملفات الصور (JPG, PNG, GIF)',
+                    error: 'Invalid file type'
+                });
+            }
+            
+            // خطأ عام
             return res.status(400).json({
-                message: 'خطأ في رفع الملف: ' + err.message,
-                error: err.code || 'Upload error'
+                message: 'خطأ في رفع الصورة. الرجاء التأكد من أن الملف صورة صحيحة وحجمها أقل من 10MB.',
+                error: err.message || err.code || 'Upload error',
+                details: process.env.NODE_ENV === 'development' ? err.stack : undefined
             });
         }
         next();

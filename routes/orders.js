@@ -1047,10 +1047,37 @@ router.put('/admin/:id/pricing', async (req, res) => {
             return res.status(404).json({ message: 'الطلب غير موجود' });
         }
 
+        console.log('📝 Updating pricing:', { price, warranty, warrantyDuration });
+
         if (order.items && order.items[0]) {
-            order.items[0].price = price || order.items[0].price;
+            order.items[0].price = parseFloat(price);
             order.items[0].warranty = warranty;
             order.items[0].warrantyDuration = warrantyDuration;
+            
+            // حساب تاريخ انتهاء الضمان
+            if (warranty && warrantyDuration) {
+                const startDate = new Date();
+                order.items[0].warrantyStartDate = startDate;
+                
+                // حساب تاريخ الانتهاء بناءً على المدة
+                const endDate = new Date(startDate);
+                
+                // استخراج الرقم من النص (مثل "3 أشهر" -> 3)
+                const durationMatch = warrantyDuration.match(/(\d+)/);
+                const durationNumber = durationMatch ? parseInt(durationMatch[1]) : 0;
+                
+                if (warrantyDuration.includes('يوم')) {
+                    endDate.setDate(endDate.getDate() + durationNumber);
+                } else if (warrantyDuration.includes('أسبوع')) {
+                    endDate.setDate(endDate.getDate() + (durationNumber * 7));
+                } else if (warrantyDuration.includes('شهر')) {
+                    endDate.setMonth(endDate.getMonth() + durationNumber);
+                } else if (warrantyDuration.includes('سنة')) {
+                    endDate.setFullYear(endDate.getFullYear() + durationNumber);
+                }
+                
+                order.items[0].warrantyEndDate = endDate;
+            }
         }
 
         order.totalAmount = (parseFloat(price) || 0) + (order.deliveryFee || 0);
@@ -1062,6 +1089,8 @@ router.put('/admin/:id/pricing', async (req, res) => {
         });
 
         await order.save();
+
+        console.log('✅ Pricing updated successfully');
 
         res.json({
             message: 'تم تحديث السعر والضمان بنجاح',

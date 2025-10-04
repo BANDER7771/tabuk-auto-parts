@@ -40,7 +40,15 @@ const orderSchema = new mongoose.Schema({
         price: Number,
         images: [String],
         partImage: String,
-        imageUrl: String
+        imageUrl: String,
+        // ✅ إضافة حقول الضمان
+        warranty: {
+            type: Boolean,
+            default: false
+        },
+        warrantyDuration: String,  // مثل: "3 أشهر", "6 أشهر", "سنة"
+        warrantyStartDate: Date,   // تاريخ بدء الضمان
+        warrantyEndDate: Date      // تاريخ انتهاء الضمان
     }],
     totalAmount: {
         type: Number,

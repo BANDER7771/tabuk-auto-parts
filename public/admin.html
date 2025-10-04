@@ -1206,25 +1206,41 @@ ${(order.items?.[0]?.imageUrl || order.items?.[0]?.partImage) ? `
 
         <div class="status-update-section">
             <h4 class="detail-title">تحديد السعر والضمان</h4>
+            
+            ${order.items?.[0]?.warranty && order.items?.[0]?.warrantyEndDate ? `
+            <div style="background: ${new Date() > new Date(order.items[0].warrantyEndDate) ? '#fee' : '#efe'}; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 2px solid ${new Date() > new Date(order.items[0].warrantyEndDate) ? '#f44' : '#4a4'};">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <span style="font-size: 1.5rem;">${new Date() > new Date(order.items[0].warrantyEndDate) ? '❌' : '✅'}</span>
+                    <strong style="font-size: 1.1rem;">حالة الضمان: ${new Date() > new Date(order.items[0].warrantyEndDate) ? 'منتهي' : 'ساري'}</strong>
+                </div>
+                <div style="font-size: 0.9rem; color: #666;">
+                    <div>📅 بدأ: ${new Date(order.items[0].warrantyStartDate).toLocaleDateString('ar-SA')}</div>
+                    <div>📅 ينتهي: ${new Date(order.items[0].warrantyEndDate).toLocaleDateString('ar-SA')}</div>
+                    <div>⏱️ المدة: ${order.items[0].warrantyDuration}</div>
+                    ${new Date() <= new Date(order.items[0].warrantyEndDate) ? `
+                    <div style="margin-top: 0.5rem; font-weight: 600; color: #2e7d32;">
+                        🕐 باقي ${Math.ceil((new Date(order.items[0].warrantyEndDate) - new Date()) / (1000 * 60 * 60 * 24))} يوم
+                    </div>
+                    ` : ''}
+                </div>
+            </div>
+            ` : ''}
+            
             <div class="status-actions" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
                 <div class="control-group">
                     <label>سعر القطعة (ريال)</label>
                     <input type="number" class="control-input" id="partPrice" placeholder="0.00" value="${order.items?.[0]?.price || ''}" step="0.01">
                 </div>
                 <div class="control-group">
-                    <label>الضمان</label>
-                    <select class="control-input" id="warrantyOption">
-                        <option value="">بدون ضمان</option>
-                        <option value="3months" ${order.items?.[0]?.warrantyDuration === '3 أشهر' ? 'selected' : ''}>3 أشهر</option>
-                        <option value="6months" ${order.items?.[0]?.warrantyDuration === '6 أشهر' ? 'selected' : ''}>6 أشهر</option>
-                        <option value="1year" ${order.items?.[0]?.warrantyDuration === 'سنة' ? 'selected' : ''}>سنة واحدة</option>
-                    </select>
+                    <label>مدة الضمان (مثل: 3 أشهر، 6 أشهر، سنة، 15 يوم)</label>
+                    <input type="text" class="control-input" id="warrantyDuration" placeholder="اكتب المدة يدوياً" value="${order.items?.[0]?.warrantyDuration || ''}">
+                    <small style="color: #999; font-size: 0.75rem;">اتركه فارغاً إذا لم يكن هناك ضمان</small>
                 </div>
                 <div class="control-group">
                     <label>&nbsp;</label>
                     <button class="btn btn-primary" onclick="updatePricing('${order._id}')" style="width: 100%;">
                         <span>💰</span>
-                        <span>تحديث السعر</span>
+                        <span>تحديث السعر والضمان</span>
                     </button>
                 </div>
             </div>
@@ -1606,20 +1622,20 @@ function openWhatsAppChat(phone, orderNumber, customerName, partName, carName) {
 // تحديث السعر والضمان
 async function updatePricing(orderId) {
     const price = document.getElementById('partPrice').value;
-    const warrantyOption = document.getElementById('warrantyOption').value;
+    const warrantyDuration = document.getElementById('warrantyDuration').value.trim();
     
     if (!price || parseFloat(price) <= 0) {
         alert('يرجى إدخال سعر صحيح');
         return;
     }
     
-    const warrantyMap = {
-        '3months': '3 أشهر',
-        '6months': '6 أشهر',
-        '1year': 'سنة'
-    };
+    const warranty = !!warrantyDuration; // true إذا كان هناك ضمان
     
-    const warrantyDuration = warrantyMap[warrantyOption] || '';
+    console.log('📝 Sending pricing update:', {
+        price: parseFloat(price),
+        warranty: warranty,
+        warrantyDuration: warrantyDuration
+    });
     
     try {
         const response = await fetch(`/api/orders/admin/${orderId}/pricing`, {
@@ -1629,24 +1645,29 @@ async function updatePricing(orderId) {
             },
             body: JSON.stringify({
                 price: parseFloat(price),
-                warranty: !!warrantyOption,
-                warrantyDuration: warrantyDuration
+                warranty: warranty,
+                warrantyDuration: warrantyDuration || ''
             })
         });
         
         if (response.ok) {
-            alert(`✅ تم تحديث السعر: ${price} ريال${warrantyDuration ? '\nالضمان: ' + warrantyDuration : ''}`);
+            const result = await response.json();
+            console.log('✅ Pricing updated:', result);
+            
+            alert(`✅ تم تحديث السعر: ${price} ريال${warrantyDuration ? '\nالضمان: ' + warrantyDuration : '\nبدون ضمان'}`);
             await loadOrders();
             closeOrderModal();
         } else {
             const error = await response.json();
+            console.error('❌ Update failed:', error);
             alert('❌ فشل التحديث: ' + error.message);
         }
     } catch (error) {
-        console.error('Error updating pricing:', error);
+        console.error('❌ Error updating pricing:', error);
         alert('حدث خطأ في تحديث السعر');
     }
 }
+
 
 // إرسال للمندوب
 async function sendSelectedToDelivery() {

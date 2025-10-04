@@ -378,35 +378,60 @@
             }
 
             const tableHTML = `
-                <table class="orders-table">
-                    <thead>
-                        <tr>
-                            <th>رقم الطلب</th>
-                            <th>العميل</th>
-                            <th>الجوال</th>
-                            <th>السيارة</th>
-                            <th>القطعة</th>
-                            <th>السعر</th>
-                            <th>الضمان</th>
-                            <th>تاريخ التسليم</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${completedOrders.map(order => `
-                            <tr>
-                                <td><strong>${order.orderNumber}</strong></td>
-                                <td>${order.customerName}</td>
-                                <td>${order.customerPhone}</td>
-                                <td>${order.carInfo?.fullName || (order.carInfo?.make + ' ' + order.carInfo?.model)} ${order.carInfo?.year || ''}</td>
-                                <td>${order.items?.[0]?.partName || 'غير محدد'}</td>
-                                <td>${order.items?.[0]?.price ? order.items[0].price + ' ريال' : 'غير محدد'}</td>
-                                <td>${order.items?.[0]?.warranty ? '✅ ' + (order.items[0].warrantyDuration || 'نعم') : '❌ لا'}</td>
-                                <td>${formatDate(order.createdAt)}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            `;
+    <table class="orders-table">
+        <thead>
+            <tr>
+                <th>رقم الطلب</th>
+                <th>العميل</th>
+                <th>الجوال</th>
+                <th>السيارة</th>
+                <th>القطعة</th>
+                <th>السعر</th>
+                <th>الضمان</th>
+                <th>حالة الضمان</th>
+                <th>تاريخ التسليم</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${completedOrders.map(order => {
+                const warranty = order.items?.[0]?.warranty;
+                const warrantyDuration = order.items?.[0]?.warrantyDuration;
+                const warrantyEndDate = order.items?.[0]?.warrantyEndDate;
+                
+                let warrantyStatus = '';
+                if (warranty && warrantyEndDate) {
+                    const isExpired = new Date() > new Date(warrantyEndDate);
+                    const daysLeft = Math.ceil((new Date(warrantyEndDate) - new Date()) / (1000 * 60 * 60 * 24));
+                    
+                    if (isExpired) {
+                        warrantyStatus = '<span style="background: #fee; color: #d32f2f; padding: 0.3rem 0.6rem; border-radius: 12px; font-size: 0.8rem;">❌ منتهي</span>';
+                    } else if (daysLeft <= 7) {
+                        warrantyStatus = `<span style="background: #fff3e0; color: #f57c00; padding: 0.3rem 0.6rem; border-radius: 12px; font-size: 0.8rem;">⚠️ باقي ${daysLeft} يوم</span>`;
+                    } else {
+                        warrantyStatus = `<span style="background: #e8f5e9; color: #2e7d32; padding: 0.3rem 0.6rem; border-radius: 12px; font-size: 0.8rem;">✅ ساري (${daysLeft} يوم)</span>`;
+                    }
+                } else {
+                    warrantyStatus = '<span style="color: #999;">-</span>';
+                }
+                
+                return `
+                    <tr>
+                        <td><strong>${order.orderNumber}</strong></td>
+                        <td>${order.customerName}</td>
+                        <td>${order.customerPhone}</td>
+                        <td>${order.carInfo?.fullName || (order.carInfo?.make + ' ' + order.carInfo?.model)} ${order.carInfo?.year || ''}</td>
+                        <td>${order.items?.[0]?.partName || 'غير محدد'}</td>
+                        <td>${order.items?.[0]?.price ? order.items[0].price + ' ريال' : 'غير محدد'}</td>
+                        <td>${warranty ? '✅ ' + (warrantyDuration || 'نعم') : '❌ لا'}</td>
+                        <td>${warrantyStatus}</td>
+                        <td>${formatDate(order.createdAt)}</td>
+                    </tr>
+                `;
+            }).join('')}
+        </tbody>
+    </table>
+`;
+
 
             container.innerHTML = tableHTML;
         }

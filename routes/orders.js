@@ -861,5 +861,101 @@ router.post('/sell-car', upload.array('images', 10), async (req, res) => {
     font-weight: 600;
 }
 */
+router.post('/admin/send-to-delivery', async (req, res) => {
+    try {
+        const { orderIds, deliveryPhone } = req.body;
 
+        if (!orderIds || !Array.isArray(orderIds) || orderIds.length === 0) {
+            return res.status(400).json({ 
+                message: 'يرجى تحديد طلبات للإرسال' 
+            });
+        }
+
+        // استخدام رقم المندوب من الطلب، أو رقم افتراضي
+        const deliveryNumber = deliveryPhone || process.env.DELIVERY_WHATSAPP || '966545376792';
+
+        // جلب الطلبات من قاعدة البيانات
+        const orders = await Order.find({ _id: { $in: orderIds } });
+
+        if (orders.length === 0) {
+            return res.status(404).json({ 
+                message: 'لم يتم العثور على الطلبات المحددة' 
+            });
+        }
+
+        // تجميع كل الطلبات في رسالة واحدة
+        let message = `🚚 *طلبات جديدة للتوصيل* 🚚\n\n`;
+        message += `📦 *عدد الطلبات:* ${orders.length}\n`;
+        message += `📅 *التاريخ:* ${new Date().toLocaleDateString('ar-SA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}\n`;
+        message += `⏰ *الوقت:* ${new Date().toLocaleTimeString('ar-SA')}\n\n`;
+        message += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+        orders.forEach((order, index) => {
+            const deliveryText = order.deliveryOption === 'express' ? '🔥 مستعجل (1-2 ساعة)' : 
+                               order.deliveryOption === 'standard' ? '⚡ سريع (3-5 ساعات)' : 
+                               '📋 عادي (12-24 ساعة)';
+
+            const hasImage = !!(order.items?.[0]?.imageUrl || order.items?.[0]?.partImage);
+
+            message += `*${index + 1}. طلب رقم:* ${order.orderNumber}\n`;
+            message += `👤 *العميل:* ${order.customerName}\n`;
+            message += `📱 *الجوال:* ${order.customerPhone}\n`;
+            message += `🚗 *السيارة:* ${order.carInfo?.fullName || (order.carInfo?.make + ' ' + order.carInfo?.model)} ${order.carInfo?.year || ''}\n`;
+            message += `🔧 *القطعة:* ${order.items?.[0]?.partName || 'غير محدد'}\n`;
+            message += `🚚 *التوصيل:* ${deliveryText}\n`;
+            
+            if (order.shippingAddress?.city) {
+                message += `📍 *المدينة:* ${order.shippingAddress.city}\n`;
+            }
+            
+            if (order.notes) {
+                message += `📝 *ملاحظات:* ${order.notes}\n`;
+            }
+            
+            if (hasImage) {
+                const imageUrl = order.items[0].imageUrl || order.items[0].partImage;
+                message += `📷 *صورة القطعة:* ${imageUrl}\n`;
+            }
+            
+            message += `\n━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+        });
+
+        message += `\n✅ *يرجى البدء بالتوصيل*\n`;
+        message += `📞 *للاستفسار:* تواصل مع الإدارة`;
+
+        try {
+            // إرسال الرسالة للمندوب
+            await sendWhatsAppNotification({
+                orderNumber: `BULK-${Date.now()}`,
+                customerName: 'المندوب',
+                customerPhone: deliveryNumber,
+                orderType: 'تحويل للتوصيل',
+                description: message,
+                createdAt: new Date()
+            });
+
+            res.json({
+                message: `تم إرسال ${orders.length} طلب للمندوب بنجاح`,
+                deliveryNumber: deliveryNumber,
+                orderCount: orders.length,
+                success: true
+            });
+        } catch (error) {
+            console.error('خطأ في إرسال للمندوب:', error);
+            res.status(500).json({
+                message: 'فشل الإرسال للمندوب',
+                error: error.message,
+                success: false
+            });
+        }
+    } catch (error) {
+        console.error('❌ Error in POST /admin/send-to-delivery:', error);
+        res.status(500).json({ 
+            message: 'خطأ في إرسال الطلبات للمندوب', 
+            error: error.message 
+        });
+    }
+});
+
+module.exports = router;
 module.exports = router;

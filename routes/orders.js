@@ -797,5 +797,69 @@ router.post('/sell-car', upload.array('images', 10), async (req, res) => {
         });
     }
 });
+// WhatsApp Features CSS (moved to a comment to avoid JS syntax errors)
+// If you want to use this CSS, place it in your public CSS file, not in this JS file.
+/*
+.whatsapp-actions {
+    padding: 1rem 2rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    background: #f8f9fa;
+}
+
+.btn-whatsapp {
+    background: #25D366;
+    color: white;
+}
+
+.btn-whatsapp:hover {
+    background: #128C7E;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+}
+
+.btn-whatsapp:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.phone-link {
+    color: #25D366;
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    transition: all 0.2s;
+}
+
+.phone-link:hover {
+    color: #128C7E;
+    text-decoration: underline;
+}
+
+.order-checkbox {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.select-all-checkbox {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.selected-count {
+    background: var(--primary);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+*/
 
 module.exports = router;

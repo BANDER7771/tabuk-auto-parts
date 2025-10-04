@@ -1041,6 +1041,7 @@ router.post('/admin/send-to-delivery', async (req, res) => {
 router.put('/admin/:id/pricing', async (req, res) => {
     try {
         const { price, warranty, warrantyDuration } = req.body;
+        console.log('Received:', { price, warranty, warrantyDuration });
         const order = await Order.findById(req.params.id);
 
         if (!order) {
@@ -1078,6 +1079,7 @@ router.put('/admin/:id/pricing', async (req, res) => {
                 
                 order.items[0].warrantyEndDate = endDate;
             }
+            console.log('Updated order:', order.items[0]);
         }
 
         order.totalAmount = (parseFloat(price) || 0) + (order.deliveryFee || 0);

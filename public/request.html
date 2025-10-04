@@ -1286,6 +1286,29 @@
                         firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     }
                 }, 300);
+            }
+
+            return isValid;
+
+            // إذا كان هناك خطأ، انتقل إلى الخطوة الأولى والحقل الخاطئ
+            if (!isValid) {
+                // الانتقال للخطوة الأولى
+                currentStep = 1;
+                document.querySelectorAll('.form-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                document.querySelector('.form-section[data-section="1"]').classList.add('active');
+                updateStepIndicators();
+                updateButtons();
+                updateProgressBar();
+
+                // الانتظار قليلاً ثم التركيز على الحقل الخاطئ
+                setTimeout(() => {
+                    if (firstErrorField) {
+                        firstErrorField.focus();
+                        firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }, 300);
 
                 // عرض رسالة تنبيه واضحة
                 alert('⚠️ الرجاء إكمال جميع البيانات المطلوبة قبل إرسال الطلب\n\nتم إرجاعك للخطوة الأولى للمراجعة ✓');

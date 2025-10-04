@@ -1233,9 +1233,10 @@
             return isValid;
         }
 
-        // Validate current step
+        // Validate current step - محسّن
         function validateStep(step) {
             let isValid = true;
+            let firstErrorField = null;
             const section = document.querySelector(`.form-section[data-section="${step}"]`);
             const requiredFields = section.querySelectorAll('[required]');
             
@@ -1250,6 +1251,7 @@
                         formGroup.classList.add('error');
                         if (errorMsg) errorMsg.classList.add('show');
                         isValid = false;
+                        if (!firstErrorField) firstErrorField = field;
                     } else {
                         formGroup.classList.remove('error');
                         if (errorMsg) errorMsg.classList.remove('show');
@@ -1258,11 +1260,38 @@
                     formGroup.classList.add('error');
                     if (errorMsg) errorMsg.classList.add('show');
                     isValid = false;
+                    if (!firstErrorField) firstErrorField = field;
                 } else {
                     formGroup.classList.remove('error');
                     if (errorMsg) errorMsg.classList.remove('show');
                 }
             });
+
+            // إذا كان هناك خطأ، انتقل إلى الخطوة الأولى والحقل الخاطئ
+            if (!isValid) {
+                // الانتقال للخطوة الأولى
+                currentStep = 1;
+                document.querySelectorAll('.form-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                document.querySelector('.form-section[data-section="1"]').classList.add('active');
+                updateStepIndicators();
+                updateButtons();
+                updateProgressBar();
+
+                // الانتظار قليلاً ثم التركيز على الحقل الخاطئ
+                setTimeout(() => {
+                    if (firstErrorField) {
+                        firstErrorField.focus();
+                        firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }, 300);
+
+                // عرض رسالة تنبيه واضحة
+                alert('⚠️ الرجاء إكمال جميع البيانات المطلوبة قبل إرسال الطلب\n\nتم إرجاعك للخطوة الأولى للمراجعة ✓');
+            }
+
+            return isValid;
             
             // Phone validation for step 1
             if (step === 1) {

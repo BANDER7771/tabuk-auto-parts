@@ -8,19 +8,6 @@ const upload = require('../middleware/upload');
 router.get('/health', (req, res) => res.json({ ok: true, route: 'orders' }));
 
 // إنشاء طلب جديد مع معالجة أخطاء multer
-// ✅ لا يوجد أخطاء كبيرة في الكود من ناحية منطقية أو وظيفية، الكود يعالج رفع صورة مع الطلب ويتعامل مع أخطاء multer بشكل جيد ويعطي رسائل واضحة للمستخدم.
-// ✅ التحقق من الأخطاء الخاصة بـ multer (مثل حجم الملف أو نوعه) صحيح.
-// ✅ في حال وجود خطأ، يتم إرجاع رسالة مناسبة مع كود الحالة 400.
-// ✅ في حال عدم وجود خطأ، يتم استدعاء next() للانتقال إلى المعالج التالي (async handler).
-
-// ملاحظات طفيفة لتحسين القراءة فقط (اختياري):
-// - يمكن استخدام return بدلاً من next() في حال وجود خطأ (وهو مطبق).
-// - ترتيب فحص الأخطاء جيد.
-// - لا يوجد تسرب للملفات أو بيانات حساسة في الرسائل.
-// - لا يوجد أخطاء syntax أو منطقية واضحة في هذا الجزء.
-
-// الكود سليم ويمكن استخدامه كما هو.
-
 router.post('/', (req, res, next) => {
     upload.single('partImage')(req, res, (err) => {
         if (err) {
@@ -141,16 +128,17 @@ router.post('/', (req, res, next) => {
 
         // إنشاء طلب جديد
         const order = new Order({
-            orderNumber: orderNumber,
+            orderNumber: `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
             customerName: fullName,
             customerPhone: phone,
-            customerEmail: email,
+            customerEmail: '',
             items: [{
                 partName: partDetails,
                 quantity: 1,
-                imageUrl: req.file ? `/uploads/${req.file.filename}` : null
-            }],
-            carInfo: {
+                // حفظ الصورة بشكل صحيح - Cloudinary أو Local
+                partImage: req.file ? (req.file.path || `/uploads/${req.file.filename}`) : null,
+                imageUrl: req.file ? (req.file.path || `/uploads/${req.file.filename}`) : null
+            }],            carInfo: {
                 make: carMake,
                 model: carModel,
                 year: parseInt(carYear),

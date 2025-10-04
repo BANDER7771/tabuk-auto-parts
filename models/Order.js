@@ -6,7 +6,6 @@ const orderSchema = new mongoose.Schema({
         unique: true,
         required: true
     },
-    // معلومات العميل - بدون الحاجة لتسجيل دخول
     customerName: {
         type: String,
         required: true
@@ -18,7 +17,6 @@ const orderSchema = new mongoose.Schema({
     customerEmail: {
         type: String
     },
-    // معلومات السيارة
     carInfo: {
         make: String,
         model: String,
@@ -26,9 +24,9 @@ const orderSchema = new mongoose.Schema({
         vin: String,
         condition: String,
         mileage: Number,
-        transmission: String
+        transmission: String,
+        fullName: String
     },
-    // القطع المطلوبة
     items: [{
         partName: String,
         partId: {
@@ -40,7 +38,9 @@ const orderSchema = new mongoose.Schema({
             default: 1
         },
         price: Number,
-        images: [String] // صور القطعة أو السيارة
+        images: [String],
+        partImage: String,
+        imageUrl: String
     }],
     totalAmount: {
         type: Number,
@@ -85,7 +85,7 @@ const orderSchema = new mongoose.Schema({
     },
     trackingNumber: String,
     notes: String,
-    images: [String], // صور الطلب (للسيارات المباعة)
+    images: [String],
     timeline: [{
         status: String,
         date: Date,
@@ -104,7 +104,6 @@ const orderSchema = new mongoose.Schema({
     }
 });
 
-// Generate order number
 orderSchema.pre('save', async function(next) {
     if (!this.orderNumber) {
         const timestamp = Date.now();
@@ -112,7 +111,6 @@ orderSchema.pre('save', async function(next) {
         this.orderNumber = `ORD-${timestamp}-${random}`;
     }
     
-    // إضافة الحالة الأولية للـ timeline
     if (this.isNew) {
         this.timeline.push({
             status: 'pending',

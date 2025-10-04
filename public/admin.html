@@ -1056,93 +1056,126 @@
         }
 
         function openOrderModal(orderId) {
-            const order = currentOrders.find(o => o._id === orderId);
-            if (!order) return;
+    const order = currentOrders.find(o => o._id === orderId);
+    if (!order) return;
 
-            const modalContent = document.getElementById('modalContent');
-            modalContent.innerHTML = `
-                <div class="detail-section">
-                    <h4 class="detail-title">معلومات الطلب</h4>
-                    <div class="detail-grid">
-                        <div class="detail-item">
-                            <span class="detail-label">رقم الطلب</span>
-                            <span class="detail-value">${order.orderNumber}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">التاريخ</span>
-                            <span class="detail-value">${formatDateTime(order.createdAt)}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">الحالة الحالية</span>
-                            <span class="detail-value">
-                                <span class="status-badge status-${order.status}">
-                                    ${getStatusText(order.status)}
-                                </span>
-                            </span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">الأولوية</span>
-                            <span class="detail-value priority-${order.urgency}">
-                                ${order.urgency === 'urgent' ? '🔥 مستعجل' : '📅 عادي'}
-                            </span>
-                        </div>
-                    </div>
+    // دوال مساعدة لعرض النصوص بشكل جميل
+    const getDeliveryText = (option) => {
+        switch(option) {
+            case 'express': return '🔥 مستعجل (1-2 ساعة)';
+            case 'standard': return '⚡ سريع (3-5 ساعات)';
+            case 'free':
+            default: return '📋 عادي (12-24 ساعة)';
+        }
+    };
+
+    const getPaymentText = (method) => {
+        switch(method) {
+            case 'card': return '💳 بطاقة';
+            case 'cash': return '💵 نقدي';
+            case 'transfer': return '🏦 تحويل بنكي';
+            case 'tamara': return '🛍️ تمارا';
+            case 'tabby': return '🛒 تابي';
+            default: return '💵 نقدي';
+        }
+    };
+
+    const modalContent = document.getElementById('modalContent');
+    modalContent.innerHTML = `
+        <div class="detail-section">
+            <h4 class="detail-title">معلومات الطلب</h4>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <span class="detail-label">رقم الطلب</span>
+                    <span class="detail-value">${order.orderNumber}</span>
                 </div>
-
-                <div class="detail-section">
-                    <h4 class="detail-title">معلومات العميل</h4>
-                    <div class="detail-grid">
-                        <div class="detail-item">
-                            <span class="detail-label">الاسم</span>
-                            <span class="detail-value">${order.customerName}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">رقم الجوال</span>
-                            <span class="detail-value">${order.customerPhone}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">البريد الإلكتروني</span>
-                            <span class="detail-value">${order.customerEmail || 'غير متوفر'}</span>
-                        </div>
-                    </div>
+                <div class="detail-item">
+                    <span class="detail-label">التاريخ</span>
+                    <span class="detail-value">${formatDateTime(order.createdAt)}</span>
                 </div>
-
-                <div class="detail-section">
-                    <h4 class="detail-title">معلومات السيارة</h4>
-                    <div class="detail-grid">
-                        <div class="detail-item">
-                            <span class="detail-label">اسم السيارة وفئتها</span>
-                            <span class="detail-value">${order.carInfo?.fullName || (order.carInfo?.make + ' ' + order.carInfo?.model) || 'غير محدد'}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">موديل السيارة</span>
-                            <span class="detail-value">${order.carInfo?.year || 'غير محدد'}</span>
-                        </div>
-                        ${order.carInfo?.vin ? `
-                        <div class="detail-item">
-                            <span class="detail-label">رقم الشاسيه</span>
-                            <span class="detail-value">${order.carInfo.vin}</span>
-                        </div>
-                        ` : ''}
-                    </div>
+                <div class="detail-item">
+                    <span class="detail-label">الحالة الحالية</span>
+                    <span class="detail-value">
+                        <span class="status-badge status-${order.status}">
+                            ${getStatusText(order.status)}
+                        </span>
+                    </span>
                 </div>
+                <div class="detail-item">
+                    <span class="detail-label">الأولوية</span>
+                    <span class="detail-value priority-${order.urgency}">
+                        ${order.urgency === 'urgent' ? '🔥 مستعجل' : '📅 عادي'}
+                    </span>
+                </div>
+            </div>
+        </div>
 
-                <div class="detail-section">
-                    <h4 class="detail-title">تفاصيل الطلب</h4>
-                    <div class="detail-grid">
-                        <div class="detail-item">
-                            <span class="detail-label">القطعة المطلوبة</span>
-                            <span class="detail-value">${order.items?.[0]?.partName || 'غير محدد'}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">الكمية</span>
-                            <span class="detail-value">${order.items?.[0]?.quantity || 1}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">المبلغ الإجمالي</span>
-                            <span class="detail-value">${order.totalAmount ? order.totalAmount + ' ريال' : 'لم يحدد بعد'}</span>
-                        </div>
-                    </div>
+        <div class="detail-section">
+            <h4 class="detail-title">معلومات العميل</h4>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <span class="detail-label">الاسم</span>
+                    <span class="detail-value">${order.customerName}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">رقم الجوال</span>
+                    <span class="detail-value">${order.customerPhone}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">البريد الإلكتروني</span>
+                    <span class="detail-value">${order.customerEmail || 'غير متوفر'}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <h4 class="detail-title">معلومات السيارة</h4>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <span class="detail-label">اسم السيارة وفئتها</span>
+                    <span class="detail-value">${order.carInfo?.fullName || (order.carInfo?.make + ' ' + order.carInfo?.model) || 'غير محدد'}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">موديل السيارة</span>
+                    <span class="detail-value">${order.carInfo?.year || 'غير محدد'}</span>
+                </div>
+                ${order.carInfo?.vin ? `
+                <div class="detail-item">
+                    <span class="detail-label">رقم الشاسيه</span>
+                    <span class="detail-value">${order.carInfo.vin}</span>
+                </div>
+                ` : ''}
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <h4 class="detail-title">تفاصيل الطلب</h4>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <span class="detail-label">القطعة المطلوبة</span>
+                    <span class="detail-value">${order.items?.[0]?.partName || 'غير محدد'}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">الكمية</span>
+                    <span class="detail-value">${order.items?.[0]?.quantity || 1}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">طريقة التوصيل</span>
+                    <span class="detail-value">${getDeliveryText(order.deliveryOption)}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">رسوم التوصيل</span>
+                    <span class="detail-value">${order.deliveryFee ? order.deliveryFee + ' ريال' : 'مجاني'}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">طريقة الدفع</span>
+                    <span class="detail-value">${getPaymentText(order.paymentMethod)}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">المبلغ الإجمالي</span>
+                    <span class="detail-value">${order.totalAmount ? order.totalAmount + ' ريال' : 'لم يحدد بعد'}</span>
+                </div>
+            </div>
 ${(order.items?.[0]?.imageUrl || order.items?.[0]?.partImage) ? `
     <div class="detail-item" style="grid-column: 1 / -1; margin-top: 1rem;">
         <span class="detail-label">صورة القطعة</span>
@@ -1157,45 +1190,79 @@ ${(order.items?.[0]?.imageUrl || order.items?.[0]?.partImage) ? `
             </div>
         </div>
     </div>
-` : ''}                    ${order.notes ? `
-                        <div class="detail-item" style="grid-column: 1 / -1; margin-top: 1rem;">
-                            <span class="detail-label">ملاحظات</span>
-                            <span class="detail-value">${order.notes}</span>
-                        </div>
-                    ` : ''}
+` : ''}
+            ${order.notes ? `
+                <div class="detail-item" style="grid-column: 1 / -1; margin-top: 1rem;">
+                    <span class="detail-label">ملاحظات</span>
+                    <span class="detail-value">${order.notes}</span>
                 </div>
+            ` : ''}
+        </div>
 
-                <div class="status-update-section">
-                    <h4 class="detail-title">تحديث حالة الطلب</h4>
-                    <div class="status-actions">
-                        <div class="control-group status-select">
-                            <label>الحالة الجديدة</label>
-                            <select class="control-input" id="newStatus">
-                                <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>جديد</option>
-                                <option value="confirmed" ${order.status === 'confirmed' ? 'selected' : ''}>مؤكد</option>
-                                <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>قيد المعالجة</option>
-                                <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>في الطريق</option>
-                                <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>تم التسليم</option>
-                                <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>ملغي</option>
-                            </select>
-                        </div>
-                        <div class="control-group">
-                            <label>ملاحظة التحديث</label>
-                            <input type="text" class="control-input" id="statusNote" placeholder="ملاحظة اختيارية...">
-                        </div>
-                        <div class="control-group">
-                            <label>&nbsp;</label>
-                            <button class="btn btn-primary" onclick="updateOrderStatus('${order._id}')">
-                                <span>💾</span>
-                                <span>تحديث</span>
-                            </button>
-                        </div>
-                    </div>
+        ${order.shippingAddress ? `
+        <div class="detail-section">
+            <h4 class="detail-title">معلومات التوصيل</h4>
+            <div class="detail-grid">
+                ${order.shippingAddress.city ? `
+                <div class="detail-item">
+                    <span class="detail-label">المدينة</span>
+                    <span class="detail-value">${order.shippingAddress.city}</span>
                 </div>
-            `;
+                ` : ''}
+                ${order.shippingAddress.district ? `
+                <div class="detail-item">
+                    <span class="detail-label">الحي</span>
+                    <span class="detail-value">${order.shippingAddress.district}</span>
+                </div>
+                ` : ''}
+                ${order.shippingAddress.street ? `
+                <div class="detail-item">
+                    <span class="detail-label">الشارع</span>
+                    <span class="detail-value">${order.shippingAddress.street}</span>
+                </div>
+                ` : ''}
+                ${order.shippingAddress.details ? `
+                <div class="detail-item" style="grid-column: 1 / -1;">
+                    <span class="detail-label">تفاصيل العنوان</span>
+                    <span class="detail-value">${order.shippingAddress.details}</span>
+                </div>
+                ` : ''}
+            </div>
+        </div>
+        ` : ''}
 
-            document.getElementById('orderModal').classList.add('active');
-        }
+        <div class="status-update-section">
+            <h4 class="detail-title">تحديث حالة الطلب</h4>
+            <div class="status-actions">
+                <div class="control-group status-select">
+                    <label>الحالة الجديدة</label>
+                    <select class="control-input" id="newStatus">
+                        <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>جديد</option>
+                        <option value="confirmed" ${order.status === 'confirmed' ? 'selected' : ''}>مؤكد</option>
+                        <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>قيد المعالجة</option>
+                        <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>في الطريق</option>
+                        <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>تم التسليم</option>
+                        <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>ملغي</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>ملاحظة التحديث</label>
+                    <input type="text" class="control-input" id="statusNote" placeholder="ملاحظة اختيارية...">
+                </div>
+                <div class="control-group">
+                    <label>&nbsp;</label>
+                    <button class="btn btn-primary" onclick="updateOrderStatus('${order._id}')">
+                        <span>💾</span>
+                        <span>تحديث</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('orderModal').classList.add('active');
+}
+
 
         function closeOrderModal() {
             document.getElementById('orderModal').classList.remove('active');

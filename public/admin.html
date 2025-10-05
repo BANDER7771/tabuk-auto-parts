@@ -43,11 +43,13 @@
         }
 
         .header-content {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
 
         .header-title {
@@ -65,6 +67,7 @@
             display: flex;
             gap: 1rem;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .refresh-btn {
@@ -78,6 +81,10 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            text-decoration: none;
+            border: none;
+            font-size: 0.95rem;
+            font-weight: 600;
         }
 
         .refresh-btn:hover {
@@ -86,32 +93,32 @@
 
         /* Stats Cards */
         .stats-section {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 2rem auto;
             padding: 0 2rem;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 1.5rem;
         }
 
         .stat-card {
             background: white;
-            border-radius: 12px;
             padding: 1.5rem;
+            border-radius: 12px;
             box-shadow: var(--shadow);
             border: 1px solid var(--border);
-            transition: transform 0.2s;
+            transition: transform 0.3s;
         }
 
         .stat-card:hover {
-            transform: translateY(-2px);
+            transform: translateY(-5px);
         }
 
         .stat-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 0.5rem;
+            margin-bottom: 1rem;
         }
 
         .stat-title {
@@ -123,21 +130,22 @@
         .stat-icon {
             width: 40px;
             height: 40px;
-            border-radius: 8px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
         }
 
         .stat-value {
-            font-size: 2.2rem;
+            font-size: 2rem;
             font-weight: 700;
-            margin-bottom: 0.25rem;
+            color: #333;
+            margin-bottom: 0.5rem;
         }
 
         .stat-change {
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             display: flex;
             align-items: center;
             gap: 0.3rem;
@@ -151,17 +159,17 @@
             color: var(--danger);
         }
 
-        /* Controls */
+        /* Controls Section */
         .controls-section {
-            max-width: 1400px;
-            margin: 2rem auto;
+            max-width: 1600px;
+            margin: 0 auto 2rem;
             padding: 0 2rem;
         }
 
         .controls-card {
             background: white;
+            padding: 1.5rem;
             border-radius: 12px;
-            padding: 2rem;
             box-shadow: var(--shadow);
             border: 1px solid var(--border);
         }
@@ -169,8 +177,8 @@
         .controls-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            align-items: end;
+            gap: 1rem;
+            margin-top: 1rem;
         }
 
         .control-group {
@@ -181,15 +189,15 @@
 
         .control-group label {
             font-weight: 600;
-            color: #555;
             font-size: 0.9rem;
+            color: #555;
         }
 
         .control-input {
-            padding: 0.8rem 1rem;
+            padding: 0.7rem;
             border: 2px solid var(--border);
             border-radius: 8px;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             transition: border-color 0.3s;
         }
 
@@ -198,18 +206,58 @@
             border-color: var(--primary);
         }
 
+        /* Actions Bar */
+        .actions-bar {
+            max-width: 1600px;
+            margin: 0 auto 2rem;
+            padding: 0 2rem;
+        }
+
+        .actions-card {
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .selected-info {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
         .btn {
-            padding: 0.8rem 1.5rem;
+            padding: 0.7rem 1.2rem;
             border-radius: 8px;
             border: none;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
-            display: inline-flex;
+            display: flex;
             align-items: center;
-            justify-content: center;
             gap: 0.5rem;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn:not(:disabled):hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
 
         .btn-primary {
@@ -217,25 +265,30 @@
             color: white;
         }
 
-        .btn-primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+        .btn-success {
+            background: var(--success);
+            color: white;
         }
 
-        .btn-secondary {
-            background: #f8f9fa;
-            color: #666;
-            border: 1px solid var(--border);
+        .btn-warning {
+            background: var(--warning);
+            color: white;
         }
 
-        .btn-secondary:hover {
-            background: #e9ecef;
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-info {
+            background: var(--info);
+            color: white;
         }
 
         /* Orders Table */
         .orders-section {
-            max-width: 1400px;
-            margin: 2rem auto;
+            max-width: 1600px;
+            margin: 0 auto 2rem;
             padding: 0 2rem;
         }
 
@@ -248,26 +301,21 @@
         }
 
         .orders-header {
-            padding: 1.5rem 2rem;
-            border-bottom: 1px solid var(--border);
+            padding: 1.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .orders-title {
+        .orders-header h3 {
             font-size: 1.3rem;
-            font-weight: 700;
-            color: #333;
         }
 
         .orders-count {
-            background: var(--light);
-            color: #666;
-            padding: 0.4rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
+            font-size: 0.9rem;
+            opacity: 0.9;
         }
 
         .orders-table {
@@ -275,225 +323,166 @@
             border-collapse: collapse;
         }
 
-        .orders-table th,
-        .orders-table td {
-            padding: 1rem 1.5rem;
-            text-align: right;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
         .orders-table th {
             background: #f8f9fa;
+            padding: 1rem;
+            text-align: right;
             font-weight: 600;
             color: #555;
-            font-size: 0.9rem;
+            border-bottom: 2px solid var(--border);
             position: sticky;
             top: 0;
+            z-index: 10;
+        }
+
+        .orders-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            text-align: right;
         }
 
         .orders-table tbody tr {
-            transition: background-color 0.2s;
+            transition: background 0.2s;
             cursor: pointer;
         }
 
         .orders-table tbody tr:hover {
-            background-color: #f8f9fa;
+            background: #f8f9fa;
         }
 
-        /* Status Badges */
         .status-badge {
             padding: 0.4rem 0.8rem;
             border-radius: 20px;
             font-size: 0.8rem;
             font-weight: 600;
-            text-align: center;
-            min-width: 80px;
             display: inline-block;
         }
 
-        .status-pending {
-            background: #fff3cd;
-            color: #856404;
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-confirmed { background: #d1ecf1; color: #0c5460; }
+        .status-processing { background: #d4edda; color: #155724; }
+        .status-shipped { background: #cce5ff; color: #004085; }
+        .status-delivered { background: #d4edda; color: #155724; }
+        .status-cancelled { background: #f8d7da; color: #721c24; }
+
+        .warranty-badge {
+            padding: 0.3rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
         }
 
-        .status-confirmed {
-            background: #d1ecf1;
-            color: #0c5460;
-        }
+        .warranty-active { background: #d4edda; color: #155724; }
+        .warranty-expired { background: #f8d7da; color: #721c24; }
+        .warranty-none { background: #e2e3e5; color: #6c757d; }
 
-        .status-processing {
-            background: #cce5ff;
-            color: #004085;
-        }
-
-        .status-shipped {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .status-delivered {
-            background: #d1e7dd;
-            color: #0f5132;
-        }
-
-        .status-cancelled {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        /* Priority Badges */
-        .priority-normal {
-            color: #666;
-        }
-
-        .priority-urgent {
-            color: var(--danger);
-            font-weight: bold;
-        }
-
-        /* Order Details Modal */
-        .modal-overlay {
+        /* Modal */
+        .modal {
             display: none;
             position: fixed;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.7);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
-        .modal {
-            background: white;
-            border-radius: 12px;
-            max-width: 800px;
             width: 100%;
-            max-height: 90vh;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
             overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
 
-        .modal-header {
-            padding: 2rem 2rem 1rem;
-            border-bottom: 1px solid var(--border);
+        .modal.active {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #333;
-        }
-
-        .close-modal {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #999;
-            padding: 0.5rem;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
             justify-content: center;
-        }
-
-        .close-modal:hover {
-            background: #f5f5f5;
+            align-items: flex-start;
+            padding: 2rem;
         }
 
         .modal-content {
+            background: white;
+            border-radius: 15px;
             padding: 2rem;
+            max-width: 900px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            margin: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .modal-header h2 {
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.3s;
+            padding: 0;
+            width: 40px;
+            height: 40px;
+        }
+
+        .close-btn:hover {
+            color: #333;
         }
 
         .detail-section {
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
         }
 
         .detail-title {
             font-size: 1.1rem;
-            font-weight: 600;
-            color: #333;
             margin-bottom: 1rem;
+            color: var(--primary);
+            border-bottom: 1px solid var(--border);
             padding-bottom: 0.5rem;
-            border-bottom: 2px solid #f0f0f0;
         }
 
         .detail-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 1rem;
         }
 
         .detail-item {
-            display: flex;
-            flex-direction: column;
-            gap: 0.3rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-right: 3px solid var(--primary);
         }
 
         .detail-label {
-            font-size: 0.85rem;
+            font-weight: 600;
             color: #666;
-            font-weight: 500;
+            font-size: 0.85rem;
+            display: block;
+            margin-bottom: 0.3rem;
         }
 
         .detail-value {
-            font-size: 1rem;
             color: #333;
-            font-weight: 600;
-        }
-
-        .status-update-section {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin-top: 2rem;
+            font-size: 1rem;
         }
 
         .status-actions {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1rem;
-            align-items: end;
             margin-top: 1rem;
         }
 
-        .status-select {
-            flex: 1;
-        }
-
-        /* Loading State */
-        .loading {
-            text-align: center;
-            padding: 3rem;
-            color: #666;
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f0f0f0;
-            border-top: 4px solid var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 1rem;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
+        /* Empty State */
         .empty-state {
             text-align: center;
             padding: 4rem 2rem;
@@ -506,16 +495,41 @@
             opacity: 0.5;
         }
 
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .header-content {
                 flex-direction: column;
-                gap: 1rem;
-                text-align: center;
+                align-items: flex-start;
             }
 
-            .stats-section,
+            .stats-section {
+                grid-template-columns: repeat(2, 1fr);
+                padding: 0 1rem;
+            }
+
             .controls-section,
+            .actions-bar,
             .orders-section {
                 padding: 0 1rem;
             }
@@ -530,40 +544,27 @@
 
             .orders-table th,
             .orders-table td {
-                padding: 0.8rem 1rem;
+                padding: 0.8rem 0.5rem;
             }
 
-            .modal {
-                margin: 1rem;
-                max-height: calc(100vh - 2rem);
+            .btn-group {
+                width: 100%;
             }
 
-            .modal-content {
-                padding: 1.5rem;
-            }
-
-            .detail-grid {
-                grid-template-columns: 1fr;
+            .btn {
+                flex: 1;
+                justify-content: center;
             }
         }
 
         /* Animations */
-        .fade-in {
-            animation: fadeIn 0.3s ease;
-        }
-
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .slide-up {
-            animation: slideUp 0.3s ease;
-        }
-
-        @keyframes slideUp {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease;
         }
     </style>
 </head>
@@ -573,14 +574,14 @@
         <div class="header-content">
             <div class="header-title">
                 <span>🔧</span>
-                <h1>لوحة إدارة الطلبات</h1>
+                <h1>لوحة إدارة الطلبات المتقدمة</h1>
             </div>
             <div class="header-actions">
-                <a href="admin-completed.html" class="refresh-btn" style="text-decoration: none; background: #4caf50;">
+                <a href="admin-completed.html" class="refresh-btn">
                     <span>✅</span>
                     <span>الطلبات الناجحة</span>
                 </a>
-                <a href="admin-archived.html" class="refresh-btn" style="text-decoration: none;">
+                <a href="admin-archived.html" class="refresh-btn">
                     <span>📦</span>
                     <span>المؤرشفة</span>
                 </a>
@@ -599,91 +600,76 @@
                 <span class="stat-title">إجمالي الطلبات</span>
                 <div class="stat-icon" style="background: #e3f2fd; color: #1976d2;">📊</div>
             </div>
-            <div class="stat-value" id="totalOrders">-</div>
+            <div class="stat-value" id="totalOrders">0</div>
             <div class="stat-change positive">
-                <span>↗</span>
-                <span id="totalOrdersChange">-</span>
+                <span>الكل</span>
             </div>
         </div>
 
         <div class="stat-card fade-in">
             <div class="stat-header">
                 <span class="stat-title">طلبات جديدة</span>
-                <div class="stat-icon" style="background: #fff3e0; color: #f57c00;">🆕</div>
+                <div class="stat-icon" style="background: #fff3e0; color: #f57c00;">⏳</div>
             </div>
-            <div class="stat-value" id="pendingOrders">-</div>
-            <div class="stat-change" id="pendingOrdersChange">
-                <span>-</span>
-            </div>
-        </div>
-
-        <div class="stat-card fade-in">
-            <div class="stat-header">
-                <span class="stat-title">قيد المعالجة</span>
-                <div class="stat-icon" style="background: #e8f5e8; color: #388e3c;">⚙️</div>
-            </div>
-            <div class="stat-value" id="processingOrders">-</div>
-            <div class="stat-change" id="processingOrdersChange">
-                <span>-</span>
+            <div class="stat-value" id="pendingOrders">0</div>
+            <div class="stat-change positive">
+                <span>قيد الانتظار</span>
             </div>
         </div>
 
         <div class="stat-card fade-in">
             <div class="stat-header">
-                <span class="stat-title">تم التسليم</span>
-                <div class="stat-icon" style="background: #e8f5e8; color: #2e7d32;">✅</div>
+                <span class="stat-title">طلبات مكتملة</span>
+                <div class="stat-icon" style="background: #e8f5e9; color: #388e3c;">✅</div>
             </div>
-            <div class="stat-value" id="deliveredOrders">-</div>
-            <div class="stat-change positive" id="deliveredOrdersChange">
-                <span>↗</span>
-                <span>-</span>
+            <div class="stat-value" id="completedOrders">0</div>
+            <div class="stat-change positive">
+                <span>تم التسليم</span>
             </div>
         </div>
-    </section>
 
-    <!-- Brand Management Section -->
-    <section class="controls-section">
-        <div class="controls-card slide-up">
-            <h3 style="margin-bottom: 1.5rem; color: #333; font-size: 1.2rem;">إدارة البراند</h3>
-            <div class="controls-grid">
-                <div class="control-group">
-                    <label>صورة البراند الحالية</label>
-                    <div style="display: flex; align-items: center; gap: 1rem;">
-                        <img id="currentBrandImage" src="/uploads/brand-logo.png" alt="شعار البراند" 
-                             style="width: 60px; height: 60px; object-fit: contain; border: 2px solid #e0e0e0; border-radius: 8px; background: white;"
-                             onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                        <div id="noBrandImage" style="display: none; width: 60px; height: 60px; border: 2px dashed #ccc; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #999; font-size: 0.8rem;">
-                            لا توجد صورة
-                        </div>
-                    </div>
-                </div>
-                <div class="control-group">
-                    <label>رفع صورة جديدة</label>
-                    <input type="file" class="control-input" id="brandImageInput" accept="image/*" onchange="previewBrandImage(this)">
-                </div>
-                <div class="control-group">
-                    <label>معاينة الصورة الجديدة</label>
-                    <img id="brandImagePreview" style="width: 60px; height: 60px; object-fit: contain; border: 2px solid #e0e0e0; border-radius: 8px; background: white; display: none;">
-                </div>
-                <div class="control-group">
-                    <label>&nbsp;</label>
-                    <button class="btn btn-primary" onclick="uploadBrandImage()">
-                        <span>📤</span>
-                        <span>رفع الصورة</span>
-                    </button>
-                </div>
+        <div class="stat-card fade-in">
+            <div class="stat-header">
+                <span class="stat-title">إجمالي الإيرادات</span>
+                <div class="stat-icon" style="background: #f3e5f5; color: #7b1fa2;">💰</div>
+            </div>
+            <div class="stat-value" id="totalRevenue">0 ريال</div>
+            <div class="stat-change positive">
+                <span>من الطلبات المسعرة</span>
+            </div>
+        </div>
+
+        <div class="stat-card fade-in">
+            <div class="stat-header">
+                <span class="stat-title">ضمانات سارية</span>
+                <div class="stat-icon" style="background: #e0f2f1; color: #00796b;">🛡️</div>
+            </div>
+            <div class="stat-value" id="activeWarranties">0</div>
+            <div class="stat-change positive">
+                <span>فعالة</span>
+            </div>
+        </div>
+
+        <div class="stat-card fade-in">
+            <div class="stat-header">
+                <span class="stat-title">ضمانات منتهية</span>
+                <div class="stat-icon" style="background: #ffebee; color: #c62828;">⚠️</div>
+            </div>
+            <div class="stat-value" id="expiredWarranties">0</div>
+            <div class="stat-change negative">
+                <span>انتهت</span>
             </div>
         </div>
     </section>
 
     <!-- Controls Section -->
     <section class="controls-section">
-        <div class="controls-card slide-up">
-            <h3 style="margin-bottom: 1.5rem; color: #333; font-size: 1.2rem;">فلترة الطلبات</h3>
+        <div class="controls-card fade-in">
+            <h3 style="color: #333; font-size: 1.2rem;">🔍 البحث والتصفية المتقدمة</h3>
             <div class="controls-grid">
                 <div class="control-group">
                     <label>البحث</label>
-                    <input type="text" class="control-input" id="searchInput" placeholder="رقم الطلب، الاسم، أو الجوال...">
+                    <input type="text" class="control-input" id="searchInput" placeholder="رقم الطلب، اسم العميل، الجوال...">
                 </div>
                 <div class="control-group">
                     <label>الحالة</label>
@@ -698,46 +684,72 @@
                     </select>
                 </div>
                 <div class="control-group">
-                    <label>التاريخ من</label>
+                    <label>حالة الضمان</label>
+                    <select class="control-input" id="warrantyFilter">
+                        <option value="">الكل</option>
+                        <option value="active">ساري</option>
+                        <option value="expired">منتهي</option>
+                        <option value="none">بدون ضمان</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>من تاريخ</label>
                     <input type="date" class="control-input" id="dateFrom">
                 </div>
                 <div class="control-group">
-                    <label>التاريخ إلى</label>
+                    <label>إلى تاريخ</label>
                     <input type="date" class="control-input" id="dateTo">
                 </div>
                 <div class="control-group">
-                    <label>&nbsp;</label>
-                    <button class="btn btn-primary" onclick="applyFilters()">
-                        <span>🔍</span>
-                        <span>بحث</span>
-                    </button>
-                </div>
-                <div class="control-group">
-                    <label>&nbsp;</label>
-                    <button class="btn btn-secondary" onclick="clearFilters()">
-                        <span>🗑️</span>
-                        <span>مسح</span>
-                    </button>
+                    <label>السعر</label>
+                    <select class="control-input" id="priceFilter">
+                        <option value="">جميع الأسعار</option>
+                        <option value="with">محدد السعر</option>
+                        <option value="without">لم يحدد</option>
+                    </select>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Orders Section -->
+    <!-- Actions Bar -->
+    <section class="actions-bar">
+        <div class="actions-card fade-in">
+            <div class="selected-info">
+                <span id="selectedCount">0 طلب محدد</span>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-success" id="sendToDeliveryBtn" onclick="sendSelectedToDelivery()" disabled>
+                    <span>🚚</span>
+                    <span>إرسال للمندوب</span>
+                </button>
+                <button class="btn btn-info" onclick="exportToExcel()" disabled id="exportBtn">
+                    <span>📥</span>
+                    <span>تصدير Excel</span>
+                </button>
+                <button class="btn btn-warning" onclick="printSelected()" disabled id="printBtn">
+                    <span>🖨️</span>
+                    <span>طباعة</span>
+                </button>
+                <button class="btn btn-primary" id="archiveSelectedBtn" onclick="archiveSelected()" disabled>
+                    <span>📦</span>
+                    <span>أرشفة</span>
+                </button>
+                <button class="btn btn-danger" id="deleteSelectedBtn" onclick="deleteSelected()" disabled>
+                    <span>🗑️</span>
+                    <span>حذف</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Orders Table -->
     <section class="orders-section">
-        <div class="orders-card slide-up">
+        <div class="orders-card fade-in">
             <div class="orders-header">
-                <h2 class="orders-title">الطلبات</h2>
+                <h3>قائمة الطلبات</h3>
                 <span class="orders-count" id="ordersCount">0 طلب</span>
             </div>
-            <div class="whatsapp-actions">
-                <button class="btn btn-whatsapp" id="sendToWhatsappBtn" onclick="sendSelectedToWhatsApp()" disabled>
-                    <span>📱</span>
-                    <span>إرسال المحدد للواتساب</span>
-                </button>
-                <span class="selected-count" id="selectedCount">0 محدد</span>
-            </div>
-            
             <div id="ordersContent">
                 <div class="loading">
                     <div class="spinner"></div>
@@ -748,42 +760,50 @@
     </section>
 
     <!-- Order Details Modal -->
-    <div class="modal-overlay" id="orderModal">
-        <div class="modal">
+    <div id="orderModal" class="modal" onclick="if(event.target===this) closeOrderModal()">
+        <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title">تفاصيل الطلب</h3>
-                <button class="close-modal" onclick="closeOrderModal()">×</button>
+                <h2>تفاصيل الطلب</h2>
+                <button class="close-btn" onclick="closeOrderModal()">&times;</button>
             </div>
-            <div class="modal-content" id="modalContent">
-                <!-- Content will be populated by JavaScript -->
-            </div>
+            <div id="orderDetails"></div>
         </div>
     </div>
 
     <script>
-        // فحص كلمة المرور
+        // Password protection
         function checkAdminPassword() {
             const savedPassword = localStorage.getItem('adminPassword');
-            if (savedPassword !== '8899') {
-                const password = prompt('أدخل كلمة مرور الإدارة:');
-                if (password === '8899') {
-                    localStorage.setItem('adminPassword', '8899');
-                    return true;
-                } else {
-                    alert('كلمة مرور خاطئة!');
-                    window.location.href = 'index.html';
-                    return false;
-                }
+            if (savedPassword === 'admin123') {
+                return true;
             }
-            return true;
+            
+            const attempts = parseInt(localStorage.getItem('loginAttempts') || '0');
+            if (attempts >= 3) {
+                alert('تم تجاوز عدد المحاولات المسموح بها. يرجى المحاولة لاحقاً.');
+                window.location.href = 'index.html';
+                return false;
+            }
+            
+            const password = prompt('يرجى إدخال كلمة المرور للدخول إلى لوحة الإدارة:');
+            if (password === 'admin123') {
+                localStorage.setItem('adminPassword', 'admin123');
+                localStorage.setItem('loginAttempts', '0');
+                return true;
+            } else {
+                localStorage.setItem('loginAttempts', (attempts + 1).toString());
+                alert('كلمة المرور غير صحيحة');
+                window.location.href = 'index.html';
+                return false;
+            }
         }
 
-        // التحقق من كلمة المرور عند تحميل الصفحة
         if (!checkAdminPassword()) {
             throw new Error('Unauthorized access');
         }
 
-        let currentOrders = [];
+        // Global variables
+        let allOrders = [];
         let filteredOrders = [];
 
         // Initialize page
@@ -793,596 +813,20 @@
         });
 
         function setupEventListeners() {
-            // Real-time search
             document.getElementById('searchInput').addEventListener('input', debounce(applyFilters, 300));
-            
-            // Filter changes
             document.getElementById('statusFilter').addEventListener('change', applyFilters);
+            document.getElementById('warrantyFilter').addEventListener('change', applyFilters);
             document.getElementById('dateFrom').addEventListener('change', applyFilters);
             document.getElementById('dateTo').addEventListener('change', applyFilters);
+            document.getElementById('priceFilter').addEventListener('change', applyFilters);
             
-            // Close modal on outside click
-            document.getElementById('orderModal').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    closeOrderModal();
+            document.addEventListener('change', function(e) {
+                if (e.target.classList.contains('order-checkbox')) {
+                    updateSelectedCount();
                 }
             });
         }
 
-        async function loadOrders() {
-            try {
-                const response = await fetch('/api/orders/admin', {
-                    credentials: 'same-origin',
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                });
-                if (response.ok) {
-                    const data = await response.json();
-                    
-                    // التحقق من نوع البيانات المستلمة
-                    if (data.orders && Array.isArray(data.orders)) {
-                        // البيانات الجديدة مع الطلبات الاحتياطية
-                        currentOrders = [...(data.orders || []), ...(data.backupOrders || [])];
-                        
-                        // عرض تحذير إذا كانت هناك طلبات احتياطية
-                        if (data.backupOrders && data.backupOrders.length > 0) {
-                            console.warn(`⚠️ يوجد ${data.backupOrders.length} طلب محفوظ في الملف الاحتياطي`);
-                            showNotification(`تحذير: يوجد ${data.backupOrders.length} طلب محفوظ احتياطياً بسبب مشكلة في قاعدة البيانات`, 'warning');
-                        }
-                        
-                        // عرض حالة قاعدة البيانات
-                        console.log(`📊 حالة قاعدة البيانات: ${data.dbStatus}`);
-                        console.log(`📋 إجمالي الطلبات: ${data.totalOrders}`);
-                        
-                    } else if (Array.isArray(data)) {
-                        // البيانات القديمة (مصفوفة مباشرة)
-                        currentOrders = data;
-                    } else {
-                        currentOrders = [];
-                    }
-                } else {
-                    console.warn('Failed to load orders from API');
-                    currentOrders = [];
-                }
-                
-                filteredOrders = [...currentOrders];
-                updateStats();
-                renderOrders();
-            } catch (error) {
-                console.error('Error loading orders:', error);
-                currentOrders = [];
-                filteredOrders = [];
-                updateStats();
-                renderOrders();
-                showNotification('خطأ في جلب الطلبات', 'error');
-            }
-        }
-
-
-        function updateStats() {
-            const stats = {
-                total: currentOrders.length,
-                pending: currentOrders.filter(o => o.status === 'pending').length,
-                processing: currentOrders.filter(o => ['confirmed', 'processing'].includes(o.status)).length,
-                delivered: currentOrders.filter(o => o.status === 'delivered').length
-            };
-
-            document.getElementById('totalOrders').textContent = stats.total;
-            document.getElementById('pendingOrders').textContent = stats.pending;
-            document.getElementById('processingOrders').textContent = stats.processing;
-            document.getElementById('deliveredOrders').textContent = stats.delivered;
-
-            // إحصائيات حقيقية بدلاً من القيم الوهمية
-            const today = new Date();
-            const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
-            const thisWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-            
-            const todayOrders = currentOrders.filter(order => 
-                new Date(order.createdAt) >= yesterday
-            ).length;
-            
-            const weekOrders = currentOrders.filter(order => 
-                new Date(order.createdAt) >= thisWeek
-            ).length;
-            
-            document.getElementById('totalOrdersChange').textContent = 
-                stats.total > 0 ? `${stats.total} طلب إجمالي` : 'لا توجد طلبات بعد';
-            document.getElementById('pendingOrdersChange').innerHTML = 
-                `<span>📋</span><span>${todayOrders} طلب اليوم</span>`;
-            document.getElementById('processingOrdersChange').innerHTML = 
-                `<span>⚡</span><span>${stats.processing} قيد المعالجة</span>`;
-            document.getElementById('deliveredOrdersChange').textContent = 
-                `${weekOrders} طلب هذا الأسبوع`;
-        }
-
-        function renderOrders() {
-    const container = document.getElementById('ordersContent');
-    const count = document.getElementById('ordersCount');
-    
-    count.textContent = `${filteredOrders.length} طلب`;
-
-    if (filteredOrders.length === 0) {
-        container.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-icon">📦</div>
-                <h3>لا توجد طلبات</h3>
-                <p>لم نجد أي طلبات تطابق المعايير المحددة</p>
-            </div>
-        `;
-        return;
-    }
-
-    const tableHTML = `
-        <table class="orders-table">
-            <thead>
-                <tr>
-                    <th style="width: 40px;">
-                        <input type="checkbox" class="select-all-checkbox" id="selectAll" onchange="toggleSelectAll(this)">
-                    </th>
-                    <th>رقم الطلب</th>
-                    <th>العميل</th>
-                    <th>الجوال</th>
-                    <th>السيارة</th>
-                    <th>القطعة</th>
-                    <th>الحالة</th>
-                    <th>الأولوية</th>
-                    <th>التاريخ</th>
-                    <th>الإجراءات</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${filteredOrders.map(order => {
-                    const partName = order.items?.[0]?.partName || 'غير محدد';
-                    const carFullName = order.carInfo?.fullName || ((order.carInfo?.make || '') + ' ' + (order.carInfo?.model || ''));
-                    const carYear = order.carInfo?.year || '';
-                    const urgencyText = order.urgency === 'urgent' ? '🔥 مستعجل' : '📋 عادي';
-                    const createdAt = order.createdAt ? new Date(order.createdAt).toLocaleDateString('ar-SA') : '';
-                    
-                    return `
-                        <tr>
-                            <td onclick="event.stopPropagation();">
-                                <input type="checkbox" class="order-checkbox" data-order-id="${order._id}" onchange="updateSelectedCount()">
-                            </td>
-                            <td onclick="openOrderModal('${order._id}')"><strong>${order.orderNumber}</strong></td>
-                            <td onclick="openOrderModal('${order._id}')">${order.customerName}</td>
-                            <td onclick="event.stopPropagation();">
-                                <a href="#" class="phone-link" onclick="openWhatsAppChat('${order.customerPhone}', '${order.orderNumber}', '${order.customerName}', '${partName.replace(/'/g, '')}', '${carFullName}'); return false;">
-                                    <span>📱</span>
-                                    <span>${order.customerPhone}</span>
-                                </a>
-                            </td>
-                            <td onclick="openOrderModal('${order._id}')">${carFullName} ${carYear}</td>
-                            <td onclick="openOrderModal('${order._id}')">${partName}</td>
-                            <td onclick="openOrderModal('${order._id}')">
-                                <span class="status-badge status-${order.status}">
-                                    ${getStatusText(order.status)}
-                                </span>
-                            </td>
-                            <td onclick="openOrderModal('${order._id}')">
-                                <span class="priority-${order.urgency}">
-                                    ${urgencyText}
-                                </span>
-                            </td>
-                            <td onclick="openOrderModal('${order._id}')">${createdAt}</td>
-                            <td onclick="event.stopPropagation();">
-                                <div style="display: flex; gap: 0.3rem; flex-wrap: wrap;">
-                                    <button onclick="openOrderModal('${order._id}')" 
-                                            style="padding: 0.3rem 0.6rem; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">
-                                        عرض
-                                    </button>
-                                    <button onclick="archiveOrder('${order._id}', event)" 
-                                            style="padding: 0.3rem 0.6rem; background: #ff9800; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">
-                                        📦
-                                    </button>
-                                    <button onclick="deleteOrder('${order._id}', event)" 
-                                            style="padding: 0.3rem 0.6rem; background: #d32f2f; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">
-                                        🗑️
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-                }).join('')}
-            </tbody>
-        </table>
-    `;
-
-    container.innerHTML = tableHTML;
-    updateSelectedCount();
-}
-        function getStatusText(status) {
-            const statusMap = {
-                'pending': 'جديد',
-                'confirmed': 'مؤكد',
-                'processing': 'قيد المعالجة',
-                'shipped': 'في الطريق',
-                'delivered': 'تم التسليم',
-                'cancelled': 'ملغي'
-            };
-            return statusMap[status] || status;
-        }
-
-        function formatDate(dateStr) {
-            const date = new Date(dateStr);
-            return date.toLocaleDateString('en-GB', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit'
-            });
-        }
-
-        function formatDateTime(dateStr) {
-            const date = new Date(dateStr);
-            return date.toLocaleString('en-GB', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        }
-
-        function applyFilters() {
-            const search = document.getElementById('searchInput').value.toLowerCase();
-            const status = document.getElementById('statusFilter').value;
-            const dateFrom = document.getElementById('dateFrom').value;
-            const dateTo = document.getElementById('dateTo').value;
-
-            filteredOrders = currentOrders.filter(order => {
-                // Search filter
-                if (search && !order.orderNumber.toLowerCase().includes(search) && 
-                    !order.customerName.toLowerCase().includes(search) && 
-                    !order.customerPhone.includes(search)) {
-                    return false;
-                }
-
-                // Status filter
-                if (status && order.status !== status) {
-                    return false;
-                }
-
-                // Date filters
-                const orderDate = new Date(order.createdAt);
-                if (dateFrom && orderDate < new Date(dateFrom)) {
-                    return false;
-                }
-                if (dateTo && orderDate > new Date(dateTo + ' 23:59:59')) {
-                    return false;
-                }
-
-                return true;
-            });
-
-            renderOrders();
-        }
-
-        function clearFilters() {
-            document.getElementById('searchInput').value = '';
-            document.getElementById('statusFilter').value = '';
-            document.getElementById('dateFrom').value = '';
-            document.getElementById('dateTo').value = '';
-            
-            filteredOrders = [...currentOrders];
-            renderOrders();
-        }
-
-        function openOrderModal(orderId) {
-    const order = currentOrders.find(o => o._id === orderId);
-    if (!order) return;
-
-    const getDeliveryText = (option) => {
-        switch(option) {
-            case 'express': return '🔥 مستعجل (1-2 ساعة)';
-            case 'standard': return '⚡ سريع (3-5 ساعات)';
-            case 'free':
-            default: return '📋 عادي (12-24 ساعة)';
-        }
-    };
-
-    const getPaymentText = (method) => {
-        switch(method) {
-            case 'card': return '💳 بطاقة';
-            case 'cash': return '💵 نقدي';
-            case 'transfer': return '🏦 تحويل بنكي';
-            case 'tamara': return '🛍️ تمارا';
-            case 'tabby': return '🛒 تابي';
-            default: return '💵 نقدي';
-        }
-    };
-
-    const modalContent = document.getElementById('modalContent');
-    modalContent.innerHTML = `
-        <div class="detail-section">
-            <h4 class="detail-title">معلومات الطلب</h4>
-            <div class="detail-grid">
-                <div class="detail-item">
-                    <span class="detail-label">رقم الطلب</span>
-                    <span class="detail-value">${order.orderNumber}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">التاريخ</span>
-                    <span class="detail-value">${formatDateTime(order.createdAt)}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">الحالة الحالية</span>
-                    <span class="detail-value">
-                        <span class="status-badge status-${order.status}">
-                            ${getStatusText(order.status)}
-                        </span>
-                    </span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">الأولوية</span>
-                    <span class="detail-value priority-${order.urgency}">
-                        ${order.urgency === 'urgent' ? '🔥 مستعجل' : '📅 عادي'}
-                    </span>
-                </div>
-            </div>
-        </div>
-
-        <div class="detail-section">
-            <h4 class="detail-title">معلومات العميل</h4>
-            <div class="detail-grid">
-                <div class="detail-item">
-                    <span class="detail-label">الاسم</span>
-                    <span class="detail-value">${order.customerName}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">رقم الجوال</span>
-                    <span class="detail-value">${order.customerPhone}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">البريد الإلكتروني</span>
-                    <span class="detail-value">${order.customerEmail || 'غير متوفر'}</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="detail-section">
-            <h4 class="detail-title">معلومات السيارة</h4>
-            <div class="detail-grid">
-                <div class="detail-item">
-                    <span class="detail-label">السيارة</span>
-                    <span class="detail-value">${order.carInfo?.fullName || (order.carInfo?.make + ' ' + order.carInfo?.model) || 'غير محدد'}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">الموديل</span>
-                    <span class="detail-value">${order.carInfo?.year || 'غير محدد'}</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="detail-section">
-            <h4 class="detail-title">تفاصيل الطلب</h4>
-            <div class="detail-grid">
-                <div class="detail-item">
-                    <span class="detail-label">القطعة المطلوبة</span>
-                    <span class="detail-value">${order.items?.[0]?.partName || 'غير محدد'}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">الكمية</span>
-                    <span class="detail-value">${order.items?.[0]?.quantity || 1}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">طريقة التوصيل</span>
-                    <span class="detail-value">${getDeliveryText(order.deliveryOption)}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">رسوم التوصيل</span>
-                    <span class="detail-value">${order.deliveryFee ? order.deliveryFee + ' ريال' : 'مجاني'}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">طريقة الدفع</span>
-                    <span class="detail-value">${getPaymentText(order.paymentMethod)}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">المبلغ الإجمالي</span>
-                    <span class="detail-value">${order.totalAmount ? order.totalAmount + ' ريال' : 'لم يحدد بعد'}</span>
-                </div>
-            </div>
-${(order.items?.[0]?.imageUrl || order.items?.[0]?.partImage) ? `
-    <div class="detail-item" style="grid-column: 1 / -1; margin-top: 1rem;">
-        <span class="detail-label">صورة القطعة</span>
-        <div style="margin-top: 0.5rem;">
-            <img src="${order.items[0].imageUrl || order.items[0].partImage}" 
-                 alt="صورة القطعة" 
-                 style="max-width: 300px; max-height: 200px; border-radius: 8px; border: 2px solid #e0e0e0; cursor: pointer; object-fit: cover;" 
-                 onclick="window.open('${order.items[0].imageUrl || order.items[0].partImage}', '_blank')"
-                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-            <div style="display: none; padding: 1rem; background: #f5f5f5; border-radius: 8px; text-align: center; color: #999;">
-                ❌ فشل في تحميل الصورة
-            </div>
-        </div>
-    </div>
-` : ''}
-            ${order.notes ? `
-                <div class="detail-item" style="grid-column: 1 / -1; margin-top: 1rem;">
-                    <span class="detail-label">ملاحظات</span>
-                    <span class="detail-value">${order.notes}</span>
-                </div>
-            ` : ''}
-        </div>
-
-        <div class="status-update-section">
-            <h4 class="detail-title">تحديد السعر والضمان</h4>
-            
-            ${order.items?.[0]?.warranty && order.items?.[0]?.warrantyEndDate ? `
-            <div style="background: ${new Date() > new Date(order.items[0].warrantyEndDate) ? '#fee' : '#efe'}; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 2px solid ${new Date() > new Date(order.items[0].warrantyEndDate) ? '#f44' : '#4a4'};">
-                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                    <span style="font-size: 1.5rem;">${new Date() > new Date(order.items[0].warrantyEndDate) ? '❌' : '✅'}</span>
-                    <strong style="font-size: 1.1rem;">حالة الضمان: ${new Date() > new Date(order.items[0].warrantyEndDate) ? 'منتهي' : 'ساري'}</strong>
-                </div>
-                <div style="font-size: 0.9rem; color: #666;">
-                    <div>📅 بدأ: ${new Date(order.items[0].warrantyStartDate).toLocaleDateString('ar-SA')}</div>
-                    <div>📅 ينتهي: ${new Date(order.items[0].warrantyEndDate).toLocaleDateString('ar-SA')}</div>
-                    <div>⏱️ المدة: ${order.items[0].warrantyDuration}</div>
-                    ${new Date() <= new Date(order.items[0].warrantyEndDate) ? `
-                    <div style="margin-top: 0.5rem; font-weight: 600; color: #2e7d32;">
-                        🕐 باقي ${Math.ceil((new Date(order.items[0].warrantyEndDate) - new Date()) / (1000 * 60 * 60 * 24))} يوم
-                    </div>
-                    ` : ''}
-                </div>
-            </div>
-            ` : ''}
-            
-            <div class="status-actions" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                <div class="control-group">
-                    <label>سعر القطعة (ريال)</label>
-                    <input type="number" class="control-input" id="partPrice" placeholder="0.00" value="${order.items?.[0]?.price || ''}" step="0.01">
-                </div>
-                <div class="control-group">
-                    <label>مدة الضمان (مثل: 3 أشهر، 6 أشهر، سنة، 15 يوم)</label>
-                    <input type="text" class="control-input" id="warrantyDuration" placeholder="اكتب المدة يدوياً" value="${(order.items && order.items[0] && order.items[0].warrantyDuration) ? order.items[0].warrantyDuration : ''}">
-                    <small style="color: #999; font-size: 0.75rem;">اتركه فارغاً إذا لم يكن هناك ضمان</small>
-                </div>
-                <div class="control-group">
-                    <label>&nbsp;</label>
-                    <button class="btn btn-primary" onclick="updatePricing('${order._id}')" style="width: 100%;">
-                        <span>💰</span>
-                        <span>تحديث السعر والضمان</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div class="status-update-section">
-            <h4 class="detail-title">تحديث حالة الطلب</h4>
-            <div class="status-actions">
-                <div class="control-group status-select">
-                    <label>الحالة الجديدة</label>
-                    <select class="control-input" id="newStatus">
-                        <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>جديد</option>
-                        <option value="confirmed" ${order.status === 'confirmed' ? 'selected' : ''}>مؤكد</option>
-                        <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>قيد المعالجة</option>
-                        <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>في الطريق</option>
-                        <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>تم التسليم</option>
-                        <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>ملغي</option>
-                    </select>
-                </div>
-                <div class="control-group">
-                    <label>ملاحظة التحديث</label>
-                    <input type="text" class="control-input" id="statusNote" placeholder="ملاحظة اختيارية...">
-                </div>
-                <div class="control-group">
-                    <label>&nbsp;</label>
-                    <button class="btn btn-primary" onclick="updateOrderStatus('${order._id}')">
-                        <span>💾</span>
-                        <span>تحديث</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    `;
-
-    document.getElementById('orderModal').classList.add('active');
-}
-
-
-
-        function closeOrderModal() {
-            document.getElementById('orderModal').classList.remove('active');
-        }
-
-        async function updateOrderStatus(orderId) {
-            const newStatus = document.getElementById('newStatus').value;
-            const statusNote = document.getElementById('statusNote').value;
-
-            try {
-                const response = await fetch(`/api/orders/admin/${orderId}/status`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        status: newStatus,
-                        description: statusNote || `تم تحديث الحالة إلى ${getStatusText(newStatus)}`
-                    })
-                });
-
-                if (response.ok) {
-                    // Update local data
-                    const orderIndex = currentOrders.findIndex(o => o._id === orderId);
-                    if (orderIndex !== -1) {
-                        currentOrders[orderIndex].status = newStatus;
-                        filteredOrders = currentOrders.filter(o => filteredOrders.some(f => f._id === o._id));
-                        updateStats();
-                        renderOrders();
-                    }
-                    
-                    alert('تم تحديث حالة الطلب بنجاح');
-                    closeOrderModal();
-                } else {
-                    alert('فشل في تحديث حالة الطلب');
-                }
-            } catch (error) {
-                console.error('Error updating order:', error);
-                alert('حدث خطأ في تحديث حالة الطلب');
-            }
-        }
-
-        async function archiveOrder(orderId, event) {
-            event.stopPropagation();
-            
-            if (!confirm('هل أنت متأكد من أرشفة هذا الطلب؟')) {
-                return;
-            }
-
-            try {
-                const response = await fetch(`/api/orders/admin/${orderId}/archive`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (response.ok) {
-                    alert('تم أرشفة الطلب بنجاح');
-                    loadOrders(); // إعادة تحميل الطلبات
-                } else {
-                    alert('فشل في أرشفة الطلب');
-                }
-            } catch (error) {
-                console.error('Error archiving order:', error);
-                alert('حدث خطأ في أرشفة الطلب');
-            }
-        }
-
-        async function deleteOrder(orderId, event) {
-            event.stopPropagation();
-            
-            if (!confirm('هل أنت متأكد من حذف هذا الطلب نهائياً؟ لا يمكن التراجع عن هذا الإجراء!')) {
-                return;
-            }
-
-            try {
-                const response = await fetch(`/api/orders/admin/${orderId}`, {
-                    method: 'DELETE'
-                });
-
-                if (response.ok) {
-                    alert('تم حذف الطلب نهائياً');
-                    loadOrders(); // إعادة تحميل الطلبات
-                } else {
-                    alert('فشل في حذف الطلب');
-                }
-            } catch (error) {
-                console.error('Error deleting order:', error);
-                alert('حدث خطأ في حذف الطلب');
-            }
-        }
-
-        function refreshData() {
-            document.getElementById('ordersContent').innerHTML = `
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <p>جاري تحديث البيانات...</p>
-                </div>
-            `;
-            setTimeout(loadOrders, 1000);
-        }
-
-        // Utility function for debouncing
         function debounce(func, wait) {
             let timeout;
             return function executedFunction(...args) {
@@ -1395,213 +839,787 @@ ${(order.items?.[0]?.imageUrl || order.items?.[0]?.partImage) ? `
             };
         }
 
-        // Brand Image Management Functions
-        function previewBrandImage(input) {
-            const preview = document.getElementById('brandImagePreview');
-            
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
+        async function loadOrders() {
+            try {
+                const response = await fetch('/api/orders/admin', {
+                    credentials: 'same-origin',
+                    headers: { 'Accept': 'application/json' }
+                });
                 
-                reader.onload = function(e) {
-                    preview.src = e.target.result;
-                    preview.style.display = 'block';
-                };
+                if (response.ok) {
+                    const data = await response.json();
+                    allOrders = data.orders || [];
+                    filteredOrders = [...allOrders];
+                } else {
+                    console.warn('Failed to load orders from API');
+                    allOrders = [];
+                    filteredOrders = [];
+                }
                 
-                reader.readAsDataURL(input.files[0]);
-            } else {
-                preview.style.display = 'none';
+                updateStats();
+                renderOrders();
+            } catch (error) {
+                console.error('Error loading orders:', error);
+                allOrders = [];
+                filteredOrders = [];
+                updateStats();
+                renderOrders();
             }
         }
 
-        async function uploadBrandImage() {
-            const input = document.getElementById('brandImageInput');
-            const file = input.files[0];
+        function updateStats() {
+            const total = filteredOrders.length;
+            const pending = filteredOrders.filter(o => o.status === 'pending').length;
+            const completed = filteredOrders.filter(o => o.status === 'delivered').length;
             
-            if (!file) {
-                alert('يرجى اختيار صورة أولاً');
+            const revenue = filteredOrders.reduce((sum, o) => {
+                const price = o.items && o.items[0] && o.items[0].price ? parseFloat(o.items[0].price) : 0;
+                return sum + price;
+            }, 0);
+
+            const now = new Date();
+            const activeWarranties = filteredOrders.filter(o => {
+                const item = o.items && o.items[0];
+                return item && item.warranty && item.warrantyEndDate && new Date(item.warrantyEndDate) > now;
+            }).length;
+
+            const expiredWarranties = filteredOrders.filter(o => {
+                const item = o.items && o.items[0];
+                return item && item.warranty && item.warrantyEndDate && new Date(item.warrantyEndDate) <= now;
+            }).length;
+
+            document.getElementById('totalOrders').textContent = total;
+            document.getElementById('pendingOrders').textContent = pending;
+            document.getElementById('completedOrders').textContent = completed;
+            document.getElementById('totalRevenue').textContent = revenue.toFixed(2) + ' ريال';
+            document.getElementById('activeWarranties').textContent = activeWarranties;
+            document.getElementById('expiredWarranties').textContent = expiredWarranties;
+
+            // Update export button state
+            const exportBtn = document.getElementById('exportBtn');
+            const printBtn = document.getElementById('printBtn');
+            if (exportBtn) exportBtn.disabled = filteredOrders.length === 0;
+            if (printBtn) printBtn.disabled = filteredOrders.length === 0;
+        }
+
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            const warrantyFilter = document.getElementById('warrantyFilter').value;
+            const dateFrom = document.getElementById('dateFrom').value;
+            const dateTo = document.getElementById('dateTo').value;
+            const priceFilter = document.getElementById('priceFilter').value;
+
+            filteredOrders = allOrders.filter(order => {
+                // Search
+                if (searchTerm) {
+                    const matches = 
+                        order.orderNumber.toLowerCase().includes(searchTerm) ||
+                        order.customerName.toLowerCase().includes(searchTerm) ||
+                        order.customerPhone.includes(searchTerm) ||
+                        (order.carInfo && order.carInfo.fullName && order.carInfo.fullName.toLowerCase().includes(searchTerm));
+                    
+                    if (!matches) return false;
+                }
+
+                // Status
+                if (statusFilter && order.status !== statusFilter) return false;
+
+                // Warranty
+                if (warrantyFilter) {
+                    const item = order.items && order.items[0];
+                    const now = new Date();
+                    
+                    if (warrantyFilter === 'active') {
+                        if (!item || !item.warranty || !item.warrantyEndDate || new Date(item.warrantyEndDate) <= now) return false;
+                    } else if (warrantyFilter === 'expired') {
+                        if (!item || !item.warranty || !item.warrantyEndDate || new Date(item.warrantyEndDate) > now) return false;
+                    } else if (warrantyFilter === 'none') {
+                        if (item && item.warranty) return false;
+                    }
+                }
+
+                // Date range
+                if (dateFrom) {
+                    const orderDate = new Date(order.createdAt);
+                    const fromDate = new Date(dateFrom);
+                    if (orderDate < fromDate) return false;
+                }
+                
+                if (dateTo) {
+                    const orderDate = new Date(order.createdAt);
+                    const toDate = new Date(dateTo);
+                    toDate.setHours(23, 59, 59);
+                    if (orderDate > toDate) return false;
+                }
+
+                // Price
+                if (priceFilter) {
+                    const hasPrice = order.items && order.items[0] && order.items[0].price;
+                    if (priceFilter === 'with' && !hasPrice) return false;
+                    if (priceFilter === 'without' && hasPrice) return false;
+                }
+
+                return true;
+            });
+
+            updateStats();
+            renderOrders();
+        }
+
+        function renderOrders() {
+            const container = document.getElementById('ordersContent');
+            const count = document.getElementById('ordersCount');
+
+            count.textContent = `${filteredOrders.length} طلب`;
+
+            if (filteredOrders.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📦</div>
+                        <h3>لا توجد طلبات</h3>
+                        <p>لا توجد طلبات تطابق معايير البحث</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const tableHTML = `
+                <table class="orders-table">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>
+                            <th>رقم الطلب</th>
+                            <th>العميل</th>
+                            <th>الجوال</th>
+                            <th>السيارة</th>
+                            <th>القطعة</th>
+                            <th>السعر</th>
+                            <th>الحالة</th>
+                            <th>الضمان</th>
+                            <th>التاريخ</th>
+                            <th>إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${filteredOrders.map(order => {
+                            const item = order.items && order.items[0];
+                            const warranty = getWarrantyStatus(item);
+                            
+                            return `
+                                <tr onclick="showOrderDetails('${order._id}')">
+                                    <td onclick="event.stopPropagation()">
+                                        <input type="checkbox" class="order-checkbox" data-order-id="${order._id}">
+                                    </td>
+                                    <td><strong>${order.orderNumber}</strong></td>
+                                    <td>${order.customerName}</td>
+                                    <td>${order.customerPhone}</td>
+                                    <td>${order.carInfo ? (order.carInfo.fullName || order.carInfo.make + ' ' + order.carInfo.model) : 'غير محدد'}</td>
+                                    <td>${item ? item.partName : 'غير محدد'}</td>
+                                    <td>${item && item.price ? item.price + ' ريال' : '<span style="color: #999;">لم يحدد</span>'}</td>
+                                    <td><span class="status-badge status-${order.status}">${getStatusText(order.status)}</span></td>
+                                    <td><span class="warranty-badge warranty-${warranty.class}">${warranty.text}</span></td>
+                                    <td>${new Date(order.createdAt).toLocaleDateString('ar-SA')}</td>
+                                    <td onclick="event.stopPropagation()">
+                                        <button class="btn btn-success" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" 
+                                                onclick="openWhatsAppChat('${order.customerPhone}', '${order.orderNumber}', '${order.customerName}', '${item ? item.partName : ''}', '${order.carInfo ? (order.carInfo.fullName || order.carInfo.make + ' ' + order.carInfo.model) : ''}')">
+                                            💬
+                                        </button>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            container.innerHTML = tableHTML;
+        }
+
+        function getStatusText(status) {
+            const statuses = {
+                'pending': 'جديد',
+                'confirmed': 'مؤكد',
+                'processing': 'قيد المعالجة',
+                'shipped': 'في الطريق',
+                'delivered': 'تم التسليم',
+                'cancelled': 'ملغي'
+            };
+            return statuses[status] || status;
+        }
+
+        function getWarrantyStatus(item) {
+            if (!item || !item.warranty) {
+                return { text: 'بدون', class: 'none' };
+            }
+
+            const now = new Date();
+            const endDate = new Date(item.warrantyEndDate);
+            
+            if (endDate > now) {
+                const daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
+                return { text: `✅ ${daysLeft}ي`, class: 'active' };
+            } else {
+                return { text: '❌ منتهي', class: 'expired' };
+            }
+        }
+
+        function showOrderDetails(orderId) {
+            const order = allOrders.find(o => o._id === orderId);
+            if (!order) return;
+
+            const item = order.items && order.items[0];
+            const warranty = getWarrantyStatus(item);
+
+            let warrantySection = '';
+            if (item && item.warranty && item.warrantyEndDate) {
+                const isExpired = new Date() > new Date(item.warrantyEndDate);
+                const bgColor = isExpired ? '#fee' : '#efe';
+                const borderColor = isExpired ? '#f44' : '#4a4';
+                const icon = isExpired ? '❌' : '✅';
+                const statusText = isExpired ? 'منتهي' : 'ساري';
+                
+                let timeLeftText = '';
+                if (!isExpired) {
+                    const daysLeft = Math.ceil((new Date(item.warrantyEndDate) - new Date()) / (1000 * 60 * 60 * 24));
+                    timeLeftText = `<div style="margin-top: 0.5rem; font-weight: 600; color: #2e7d32;">🕐 باقي ${daysLeft} يوم</div>`;
+                }
+                
+                warrantySection = `
+                    <div style="background: ${bgColor}; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 2px solid ${borderColor};">
+                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                            <span style="font-size: 1.5rem;">${icon}</span>
+                            <strong style="font-size: 1.1rem;">حالة الضمان: ${statusText}</strong>
+                        </div>
+                        <div style="font-size: 0.9rem; color: #666;">
+                            <div>📅 بدأ: ${new Date(item.warrantyStartDate).toLocaleDateString('ar-SA')}</div>
+                            <div>📅 ينتهي: ${new Date(item.warrantyEndDate).toLocaleDateString('ar-SA')}</div>
+                            <div>⏱️ المدة: ${item.warrantyDuration}</div>
+                            ${timeLeftText}
+                        </div>
+                    </div>
+                `;
+            }
+
+            const detailsHTML = `
+                <div class="detail-section">
+                    <h4 class="detail-title">معلومات الطلب</h4>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">رقم الطلب</span>
+                            <span class="detail-value"><strong>${order.orderNumber}</strong></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">الحالة</span>
+                            <span class="detail-value"><span class="status-badge status-${order.status}">${getStatusText(order.status)}</span></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">تاريخ الطلب</span>
+                            <span class="detail-value">${new Date(order.createdAt).toLocaleString('ar-SA')}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h4 class="detail-title">معلومات العميل</h4>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">الاسم</span>
+                            <span class="detail-value">${order.customerName}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">رقم الجوال</span>
+                            <span class="detail-value">${order.customerPhone}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">السيارة</span>
+                            <span class="detail-value">${order.carInfo ? (order.carInfo.fullName || order.carInfo.make + ' ' + order.carInfo.model + ' ' + (order.carInfo.year || '')) : 'غير محدد'}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h4 class="detail-title">تفاصيل القطعة</h4>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">القطعة المطلوبة</span>
+                            <span class="detail-value">${item ? item.partName : 'غير محدد'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">الكمية</span>
+                            <span class="detail-value">${item && item.quantity ? item.quantity : 1}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">طريقة التوصيل</span>
+                            <span class="detail-value">${getDeliveryText(order.deliveryOption)}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">المبلغ الإجمالي</span>
+                            <span class="detail-value">${order.totalAmount ? order.totalAmount + ' ريال' : 'لم يحدد بعد'}</span>
+                        </div>
+                    </div>
+                </div>
+
+                ${order.notes ? `
+                <div class="detail-section">
+                    <h4 class="detail-title">ملاحظات</h4>
+                    <div class="detail-item">
+                        <span class="detail-value">${order.notes}</span>
+                    </div>
+                </div>
+                ` : ''}
+
+                <div class="detail-section">
+                    <h4 class="detail-title">تحديد السعر والضمان</h4>
+                    ${warrantySection}
+                    <div class="status-actions">
+                        <div class="control-group">
+                            <label>سعر القطعة (ريال)</label>
+                            <input type="number" class="control-input" id="partPrice" placeholder="0.00" 
+                                   value="${item && item.price ? item.price : ''}" step="0.01">
+                        </div>
+                        <div class="control-group">
+                            <label>مدة الضمان</label>
+                            <input type="text" class="control-input" id="warrantyDuration" 
+                                   placeholder="مثال: 3 أشهر، 6 أشهر، سنة" 
+                                   value="${(item && item.warrantyDuration) ? item.warrantyDuration : ''}">
+                            <small style="color: #999; font-size: 0.75rem;">اتركه فارغاً للضمان</small>
+                        </div>
+                        <div class="control-group">
+                            <label>&nbsp;</label>
+                            <button class="btn btn-primary" onclick="updatePricing('${order._id}')" style="width: 100%;">
+                                💰 تحديث السعر والضمان
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h4 class="detail-title">تحديث حالة الطلب</h4>
+                    <div class="status-actions">
+                        <div class="control-group">
+                            <label>الحالة الجديدة</label>
+                            <select class="control-input" id="newStatus">
+                                <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>جديد</option>
+                                <option value="confirmed" ${order.status === 'confirmed' ? 'selected' : ''}>مؤكد</option>
+                                <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>قيد المعالجة</option>
+                                <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>في الطريق</option>
+                                <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>تم التسليم</option>
+                                <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>ملغي</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label>&nbsp;</label>
+                            <button class="btn btn-info" onclick="updateOrderStatus('${order._id}')" style="width: 100%;">
+                                🔄 تحديث الحالة
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <div class="btn-group" style="width: 100%; justify-content: space-between;">
+                        <button class="btn btn-success" onclick="openWhatsAppChat('${order.customerPhone}', '${order.orderNumber}', '${order.customerName}', '${item ? item.partName : ''}', '${order.carInfo ? (order.carInfo.fullName || order.carInfo.make + ' ' + order.carInfo.model) : ''}')">
+                            💬 تواصل واتساب
+                        </button>
+                        <button class="btn btn-warning" onclick="archiveOrder('${order._id}', event)">
+                            📦 أرشفة
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteOrder('${order._id}', event)">
+                            🗑️ حذف
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('orderDetails').innerHTML = detailsHTML;
+            document.getElementById('orderModal').classList.add('active');
+        }
+
+        function closeOrderModal() {
+            document.getElementById('orderModal').classList.remove('active');
+        }
+
+        function getDeliveryText(option) {
+            const options = {
+                'free': 'عادي (12-24 ساعة) - مجاني',
+                'standard': 'سريع (3-5 ساعات) - 25 ريال',
+                'express': 'مستعجل (1-2 ساعة) - 50 ريال'
+            };
+            return options[option] || option;
+        }
+
+        async function updatePricing(orderId) {
+            const price = document.getElementById('partPrice').value;
+            const warrantyDuration = document.getElementById('warrantyDuration').value.trim();
+            
+            if (!price || parseFloat(price) <= 0) {
+                alert('يرجى إدخال سعر صحيح');
                 return;
             }
             
-            // التحقق من نوع الملف
-            if (!file.type.startsWith('image/')) {
-                alert('يرجى اختيار ملف صورة صحيح');
-                return;
-            }
+            const warranty = !!warrantyDuration;
             
-            // التحقق من حجم الملف (أقل من 5MB)
-            if (file.size > 5 * 1024 * 1024) {
-                alert('حجم الصورة كبير جداً. يرجى اختيار صورة أصغر من 5MB');
-                return;
-            }
-            
-            const formData = new FormData();
-            formData.append('brandImage', file);
+            console.log('📝 Sending pricing update:', { price: parseFloat(price), warranty, warrantyDuration });
             
             try {
-                const uploadBtn = event.target;
-                const originalText = uploadBtn.innerHTML;
-                uploadBtn.innerHTML = '<span>⏳</span><span>جاري الرفع...</span>';
-                uploadBtn.disabled = true;
-                
-                const response = await fetch('/api/admin/brand-image', {
-                    method: 'POST',
-                    body: formData,
-                    credentials: 'same-origin'
+                const response = await fetch(`/api/orders/admin/${orderId}/pricing`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        price: parseFloat(price),
+                        warranty: warranty,
+                        warrantyDuration: warrantyDuration || ''
+                    })
                 });
                 
                 if (response.ok) {
                     const result = await response.json();
-                    
-                    // تحديث الصورة الحالية
-                    const currentImage = document.getElementById('currentBrandImage');
-                    currentImage.src = result.imageUrl + '?t=' + Date.now(); // إضافة timestamp لتجنب cache
-                    currentImage.style.display = 'block';
-                    document.getElementById('noBrandImage').style.display = 'none';
-                    
-                    // إخفاء المعاينة وإعادة تعيين الإدخال
-                    document.getElementById('brandImagePreview').style.display = 'none';
-                    input.value = '';
-                    
-                    alert('تم رفع صورة البراند بنجاح!');
+                    console.log('✅ Pricing updated:', result);
+                    alert(`✅ تم تحديث السعر: ${price} ريال${warrantyDuration ? '\nالضمان: ' + warrantyDuration : '\nبدون ضمان'}`);
+                    await loadOrders();
+                    closeOrderModal();
                 } else {
                     const error = await response.json();
-                    alert('فشل في رفع الصورة: ' + (error.message || 'خطأ غير معروف'));
+                    console.error('❌ Update failed:', error);
+                    alert('❌ فشل التحديث: ' + error.message);
                 }
             } catch (error) {
-                console.error('Error uploading brand image:', error);
-                alert('حدث خطأ في رفع الصورة');
-            } finally {
-                const uploadBtn = document.querySelector('[onclick="uploadBrandImage()"]');
-                uploadBtn.innerHTML = '<span>📤</span><span>رفع الصورة</span>';
-                uploadBtn.disabled = false;
+                console.error('❌ Error updating pricing:', error);
+                alert('حدث خطأ في تحديث السعر');
             }
         }
 
-        // Auto refresh every 30 seconds for real-time updates
-        setInterval(loadOrders, 30 * 1000);
-        
-        // إضافة مؤشر التحديث التلقائي
-        let refreshCounter = 30;
-        setInterval(() => {
-            refreshCounter--;
-            const refreshIndicator = document.getElementById('refresh-indicator');
-            if (refreshIndicator) {
-                refreshIndicator.textContent = `التحديث التلقائي خلال ${refreshCounter} ثانية`;
+        async function updateOrderStatus(orderId) {
+            const newStatus = document.getElementById('newStatus').value;
+            
+            if (!confirm(`هل تريد تحديث حالة الطلب إلى "${getStatusText(newStatus)}"؟`)) {
+                return;
             }
-            if (refreshCounter <= 0) {
-                refreshCounter = 30;
-            }
-        }, 1000);
-        // ==================== ميزات الواتساب ====================
-
-function toggleSelectAll(checkbox) {
-    const checkboxes = document.querySelectorAll('.order-checkbox');
-    checkboxes.forEach(cb => {
-        cb.checked = checkbox.checked;
-    });
-    updateSelectedCount();
-}
-
-function updateSelectedCount() {
-    const checkboxes = document.querySelectorAll('.order-checkbox:checked');
-    const count = checkboxes.length;
-    const btn = document.getElementById('sendToWhatsappBtn');
-    const countSpan = document.getElementById('selectedCount');
-
-    if (countSpan) {
-        countSpan.textContent = `${count} محدد`;
-    }
-    if (btn) {
-        btn.disabled = count === 0;
-    }
-
-    // تحديث حالة "تحديد الكل"
-    const allCheckboxes = document.querySelectorAll('.order-checkbox');
-    const selectAllCheckbox = document.getElementById('selectAll');
-    if (selectAllCheckbox) {
-        selectAllCheckbox.checked = count === allCheckboxes.length && count > 0;
-    }
-}
-
-async function sendSelectedToWhatsApp() {
-    const checkboxes = document.querySelectorAll('.order-checkbox:checked');
-    const orderIds = Array.from(checkboxes).map(cb => cb.dataset.orderId);
-
-    if (orderIds.length === 0) {
-        alert('يرجى تحديد طلبات أولاً');
-        return;
-    }
-
-    if (!confirm(`هل تريد إرسال ${orderIds.length} طلب للواتساب؟`)) {
-        return;
-    }
-
-    const btn = document.getElementById('sendToWhatsappBtn');
-    const originalText = btn ? btn.innerHTML : '';
-    if (btn) {
-        btn.innerHTML = '<span>⏳</span><span>جاري الإرسال...</span>';
-        btn.disabled = true;
-    }
-
-    try {
-        const response = await fetch('/api/orders/admin/send-to-whatsapp', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            credentials: 'same-origin',
-            body: JSON.stringify({ orderIds })
-        });
-
-        let result;
-        try {
-            result = await response.json();
-        } catch (e) {
-            result = {};
-        }
-
-        if (response.ok) {
-            alert(`✅ ${result.message || 'تم الإرسال بنجاح'}\n\nنجح: ${result.successCount || 0}\nفشل: ${result.failCount || 0}`);
-
-            // إلغاء تحديد الطلبات المرسلة بنجاح
-            if (result.results && Array.isArray(result.results)) {
-                checkboxes.forEach(cb => {
-                    const orderId = cb.dataset.orderId;
-                    const successOrder = result.results.find(r => r.orderId == orderId && r.success);
-                    if (successOrder) {
-                        cb.checked = false;
-                    }
+            
+            try {
+                const response = await fetch(`/api/orders/admin/${orderId}/status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
                 });
+                
+                if (response.ok) {
+                    alert('✅ تم تحديث حالة الطلب بنجاح');
+                    await loadOrders();
+                    closeOrderModal();
+                } else {
+                    alert('❌ فشل في تحديث الحالة');
+                }
+            } catch (error) {
+                console.error('Error updating status:', error);
+                alert('حدث خطأ في تحديث حالة الطلب');
             }
+        }
+
+        async function sendSelectedToDelivery() {
+            const checkboxes = document.querySelectorAll('.order-checkbox:checked');
+            const orderIds = Array.from(checkboxes).map(cb => cb.dataset.orderId);
+            
+            if (orderIds.length === 0) {
+                alert('يرجى تحديد طلبات أولاً');
+                return;
+            }
+            
+            const deliveryPhone = prompt('أدخل رقم المندوب (اتركه فارغاً للرقم الافتراضي 966545376792):', '');
+            if (deliveryPhone === null) return;
+            
+            if (!confirm(`هل تريد إرسال ${orderIds.length} طلب للمندوب؟`)) {
+                return;
+            }
+            
+            const btn = document.getElementById('sendToDeliveryBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span>⏳</span><span>جاري الإرسال...</span>';
+            btn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/orders/admin/send-to-delivery', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ 
+                        orderIds,
+                        deliveryPhone: deliveryPhone || undefined
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert(`✅ تم إرسال ${result.orderCount} طلب للمندوب بنجاح!\n\nرقم المندوب: ${result.deliveryNumber}`);
+                    checkboxes.forEach(cb => cb.checked = false);
+                    updateSelectedCount();
+                } else {
+                    alert('❌ ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error sending to delivery:', error);
+                alert('حدث خطأ في إرسال الطلبات للمندوب');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = orderIds.length === 0;
+            }
+        }
+
+        function exportToExcel() {
+            if (filteredOrders.length === 0) {
+                alert('لا توجد طلبات للتصدير');
+                return;
+            }
+
+            let csv = '\ufeffرقم الطلب,العميل,الجوال,السيارة,القطعة,السعر,الحالة,الضمان,التاريخ\n';
+            
+            filteredOrders.forEach(order => {
+                const item = order.items && order.items[0];
+                const warranty = getWarrantyStatus(item);
+                
+                csv += `${order.orderNumber},`;
+                csv += `${order.customerName},`;
+                csv += `${order.customerPhone},`;
+                csv += `${order.carInfo ? (order.carInfo.fullName || order.carInfo.make + ' ' + order.carInfo.model) : 'غير محدد'},`;
+                csv += `${item ? item.partName : 'غير محدد'},`;
+                csv += `${item && item.price ? item.price : 'لم يحدد'},`;
+                csv += `${getStatusText(order.status)},`;
+                csv += `${warranty.text},`;
+                csv += `${new Date(order.createdAt).toLocaleDateString('ar-SA')}\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `orders_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+        }
+
+        function printSelected() {
+            const checkboxes = document.querySelectorAll('.order-checkbox:checked');
+            if (checkboxes.length === 0) {
+                alert('يرجى تحديد طلبات للطباعة');
+                return;
+            }
+
+            const selectedOrders = Array.from(checkboxes).map(cb => {
+                return allOrders.find(o => o._id === cb.dataset.orderId);
+            });
+
+            const printWindow = window.open('', '_blank');
+            let printContent = '<html><head><title>طباعة الطلبات</title><style>body{font-family:Arial;direction:rtl;}div{border:2px solid #333;padding:20px;margin-bottom:20px;page-break-after:always;}</style></head><body>';
+            
+            selectedOrders.forEach(order => {
+                const item = order.items && order.items[0];
+                printContent += `
+                    <div>
+                        <h2>طلب رقم: ${order.orderNumber}</h2>
+                        <p><strong>العميل:</strong> ${order.customerName}</p>
+                        <p><strong>الجوال:</strong> ${order.customerPhone}</p>
+                        <p><strong>السيارة:</strong> ${order.carInfo ? (order.carInfo.fullName || order.carInfo.make + ' ' + order.carInfo.model) : 'غير محدد'}</p>
+                        <p><strong>القطعة:</strong> ${item ? item.partName : 'غير محدد'}</p>
+                        <p><strong>السعر:</strong> ${item && item.price ? item.price + ' ريال' : 'لم يحدد'}</p>
+                        <p><strong>الحالة:</strong> ${getStatusText(order.status)}</p>
+                        <p><strong>التاريخ:</strong> ${new Date(order.createdAt).toLocaleString('ar-SA')}</p>
+                    </div>
+                `;
+            });
+
+            printContent += '</body></html>';
+            printWindow.document.write(printContent);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        async function archiveOrder(orderId, event) {
+            event.stopPropagation();
+            
+            if (!confirm('هل أنت متأكد من أرشفة هذا الطلب؟')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/orders/admin/${orderId}/archive`, {
+                    method: 'PUT',
+                    credentials: 'same-origin'
+                });
+
+                if (response.ok) {
+                    alert('✅ تم أرشفة الطلب بنجاح');
+                    await loadOrders();
+                    closeOrderModal();
+                } else {
+                    alert('❌ فشل في أرشفة الطلب');
+                }
+            } catch (error) {
+                console.error('Error archiving order:', error);
+                alert('حدث خطأ في أرشفة الطلب');
+            }
+        }
+
+        async function deleteOrder(orderId, event) {
+            event.stopPropagation();
+            
+            if (!confirm('⚠️ هل أنت متأكد من حذف هذا الطلب نهائياً؟\n\nلا يمكن التراجع عن هذا الإجراء!')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/orders/admin/${orderId}`, {
+                    method: 'DELETE',
+                    credentials: 'same-origin'
+                });
+
+                if (response.ok) {
+                    alert('✅ تم حذف الطلب نهائياً');
+                    await loadOrders();
+                    closeOrderModal();
+                } else {
+                    alert('❌ فشل في حذف الطلب');
+                }
+            } catch (error) {
+                console.error('Error deleting order:', error);
+                alert('حدث خطأ في حذف الطلب');
+            }
+        }
+
+        async function archiveSelected() {
+            const checkboxes = document.querySelectorAll('.order-checkbox:checked');
+            const orderIds = Array.from(checkboxes).map(cb => cb.dataset.orderId);
+            
+            if (orderIds.length === 0) {
+                alert('يرجى تحديد طلبات أولاً');
+                return;
+            }
+            
+            if (!confirm(`هل تريد أرشفة ${orderIds.length} طلب؟`)) {
+                return;
+            }
+            
+            const btn = document.getElementById('archiveSelectedBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span>⏳</span><span>جاري الأرشفة...</span>';
+            btn.disabled = true;
+            
+            try {
+                let successCount = 0;
+                let failCount = 0;
+                
+                for (const orderId of orderIds) {
+                    try {
+                        const response = await fetch(`/api/orders/admin/${orderId}/archive`, {
+                            method: 'PUT',
+                            credentials: 'same-origin'
+                        });
+                        
+                        if (response.ok) successCount++;
+                        else failCount++;
+                    } catch (error) {
+                        failCount++;
+                    }
+                }
+                
+                alert(`✅ تم أرشفة ${successCount} طلب${failCount > 0 ? `\n❌ فشل ${failCount} طلب` : ''}`);
+                await loadOrders();
+                updateSelectedCount();
+            } catch (error) {
+                console.error('Error archiving orders:', error);
+                alert('حدث خطأ في أرشفة الطلبات');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = true;
+            }
+        }
+
+        async function deleteSelected() {
+            const checkboxes = document.querySelectorAll('.order-checkbox:checked');
+            const orderIds = Array.from(checkboxes).map(cb => cb.dataset.orderId);
+            
+            if (orderIds.length === 0) {
+                alert('يرجى تحديد طلبات أولاً');
+                return;
+            }
+            
+            if (!confirm(`⚠️ تحذير: هل تريد حذف ${orderIds.length} طلب نهائياً؟\n\nلا يمكن التراجع عن هذا الإجراء!`)) {
+                return;
+            }
+            
+            const btn = document.getElementById('deleteSelectedBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span>⏳</span><span>جاري الحذف...</span>';
+            btn.disabled = true;
+            
+            try {
+                let successCount = 0;
+                let failCount = 0;
+                
+                for (const orderId of orderIds) {
+                    try {
+                        const response = await fetch(`/api/orders/admin/${orderId}`, {
+                            method: 'DELETE',
+                            credentials: 'same-origin'
+                        });
+                        
+                        if (response.ok) successCount++;
+                        else failCount++;
+                    } catch (error) {
+                        failCount++;
+                    }
+                }
+                
+                alert(`✅ تم حذف ${successCount} طلب${failCount > 0 ? `\n❌ فشل ${failCount} طلب` : ''}`);
+                await loadOrders();
+                updateSelectedCount();
+            } catch (error) {
+                console.error('Error deleting orders:', error);
+                alert('حدث خطأ في حذف الطلبات');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = true;
+            }
+        }
+
+        function toggleSelectAll(checkbox) {
+            const checkboxes = document.querySelectorAll('.order-checkbox');
+            checkboxes.forEach(cb => cb.checked = checkbox.checked);
             updateSelectedCount();
-        } else {
-            alert('❌ ' + (result.message || 'حدث خطأ أثناء الإرسال'));
         }
-    } catch (error) {
-        console.error('Error sending to WhatsApp:', error);
-        alert('حدث خطأ في إرسال الطلبات');
-    } finally {
-        if (btn) {
-            btn.innerHTML = originalText;
-            btn.disabled = false;
+
+        function updateSelectedCount() {
+            const checkboxes = document.querySelectorAll('.order-checkbox:checked');
+            const count = checkboxes.length;
+            
+            document.getElementById('selectedCount').textContent = `${count} طلب محدد`;
+            
+            const deliveryBtn = document.getElementById('sendToDeliveryBtn');
+            const archiveBtn = document.getElementById('archiveSelectedBtn');
+            const deleteBtn = document.getElementById('deleteSelectedBtn');
+            const printBtn = document.getElementById('printBtn');
+            
+            if (deliveryBtn) deliveryBtn.disabled = count === 0;
+            if (archiveBtn) archiveBtn.disabled = count === 0;
+            if (deleteBtn) deleteBtn.disabled = count === 0;
+            if (printBtn) printBtn.disabled = count === 0;
+            
+            const selectAllCheckbox = document.getElementById('selectAll');
+            if (selectAllCheckbox) {
+                const allCheckboxes = document.querySelectorAll('.order-checkbox');
+                selectAllCheckbox.checked = count === allCheckboxes.length && count > 0;
+            }
         }
-    }
-}
 
-// فتح واتساب للعميل
-function openWhatsAppChat(phone, orderNumber, customerName, partName, carName) {
-    // تنظيف رقم الهاتف
-    let cleanPhone = (phone || '').replace(/[^0-9]/g, '');
-    if (cleanPhone.startsWith('0')) {
-        cleanPhone = cleanPhone.substring(1);
-    }
-    // إذا لم يبدأ بـ 966 أضفها
-    if (!cleanPhone.startsWith('966') && cleanPhone.length >= 9) {
-        cleanPhone = '966' + cleanPhone;
-    }
+        function openWhatsAppChat(phone, orderNumber, customerName, partName, carName) {
+            let cleanPhone = (phone || '').replace(/[^0-9]/g, '');
+            if (cleanPhone.startsWith('0')) {
+                cleanPhone = cleanPhone.substring(1);
+            }
+            if (!cleanPhone.startsWith('966') && cleanPhone.length >= 9) {
+                cleanPhone = '966' + cleanPhone;
+            }
 
-    // إنشاء رسالة واتساب
-    const message = `مرحباً ${customerName || ''}،
+            const message = `مرحباً ${customerName || ''}،
 
 بخصوص طلبك رقم: ${orderNumber || ''}
 
@@ -1612,321 +1630,19 @@ function openWhatsAppChat(phone, orderNumber, customerName, partName, carName) {
 
 شكراً لثقتك بنا - تشاليح تبوك`;
 
-    const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
-}
-// ========================================
-// أضف هذه الدوال في admin.html قبل </script> الأخير
-// ========================================
-
-// تحديث السعر والضمان
-async function updatePricing(orderId) {
-    const price = document.getElementById('partPrice').value;
-    const warrantyDuration = document.getElementById('warrantyDuration').value.trim();
-    
-    if (!price || parseFloat(price) <= 0) {
-        alert('يرجى إدخال سعر صحيح');
-        return;
-    }
-    
-    const warranty = !!warrantyDuration; // true إذا كان هناك ضمان
-    
-    console.log('📝 Sending pricing update:', {
-        price: parseFloat(price),
-        warranty: warranty,
-        warrantyDuration: warrantyDuration
-    });
-    
-    try {
-        const response = await fetch(`/api/orders/admin/${orderId}/pricing`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                price: parseFloat(price),
-                warranty: warranty,
-                warrantyDuration: warrantyDuration || ''
-            })
-        });
-        
-        if (response.ok) {
-            const result = await response.json();
-            console.log('✅ Pricing updated:', result);
-            
-            alert(`✅ تم تحديث السعر: ${price} ريال${warrantyDuration ? '\nالضمان: ' + warrantyDuration : '\nبدون ضمان'}`);
-            await loadOrders();
-            closeOrderModal();
-        } else {
-            const error = await response.json();
-            console.error('❌ Update failed:', error);
-            alert('❌ فشل التحديث: ' + error.message);
+            const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
         }
-    } catch (error) {
-        console.error('❌ Error updating pricing:', error);
-        alert('حدث خطأ في تحديث السعر');
-    }
-}
 
-
-// إرسال للمندوب
-async function sendSelectedToDelivery() {
-    const checkboxes = document.querySelectorAll('.order-checkbox:checked');
-    const orderIds = Array.from(checkboxes).map(cb => cb.dataset.orderId);
-    
-    if (orderIds.length === 0) {
-        alert('يرجى تحديد طلبات أولاً');
-        return;
-    }
-    
-    const deliveryPhone = prompt('أدخل رقم المندوب (اتركه فارغاً للرقم الافتراضي):', '');
-    if (deliveryPhone === null) return;
-    
-    if (!confirm(`هل تريد إرسال ${orderIds.length} طلب للمندوب؟`)) {
-        return;
-    }
-    
-    const btn = document.getElementById('sendToDeliveryBtn');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '<span>⏳</span><span>جاري الإرسال...</span>';
-    btn.disabled = true;
-    
-    try {
-        const response = await fetch('/api/orders/admin/send-to-delivery', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            credentials: 'same-origin',
-            body: JSON.stringify({ 
-                orderIds,
-                deliveryPhone: deliveryPhone || undefined
-            })
-        });
-        
-        const result = await response.json();
-        
-        if (response.ok) {
-            alert(`✅ تم إرسال ${result.orderCount} طلب للمندوب بنجاح!\n\nرقم المندوب: ${result.deliveryNumber}`);
-            checkboxes.forEach(cb => cb.checked = false);
-            updateSelectedCount();
-        } else {
-            alert('❌ ' + result.message);
+        function refreshData() {
+            document.getElementById('ordersContent').innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>جاري تحديث البيانات...</p>
+                </div>
+            `;
+            loadOrders();
         }
-    } catch (error) {
-        console.error('Error sending to delivery:', error);
-        alert('حدث خطأ في إرسال الطلبات للمندوب');
-    } finally {
-        btn.innerHTML = originalText;
-        updateSelectedCount();
-    }
-}
-
-// أرشفة طلب واحد
-async function archiveOrder(orderId, event) {
-    event.stopPropagation();
-    
-    if (!confirm('هل أنت متأكد من أرشفة هذا الطلب؟')) {
-        return;
-    }
-
-    try {
-        const response = await fetch(`/api/orders/admin/${orderId}/archive`, {
-            method: 'PUT',
-            credentials: 'same-origin'
-        });
-
-        if (response.ok) {
-            alert('✅ تم أرشفة الطلب بنجاح');
-            await loadOrders();
-        } else {
-            alert('❌ فشل في أرشفة الطلب');
-        }
-    } catch (error) {
-        console.error('Error archiving order:', error);
-        alert('حدث خطأ في أرشفة الطلب');
-    }
-}
-
-// حذف طلب واحد
-async function deleteOrder(orderId, event) {
-    event.stopPropagation();
-    
-    if (!confirm('⚠️ هل أنت متأكد من حذف هذا الطلب نهائياً؟\n\nلا يمكن التراجع عن هذا الإجراء!')) {
-        return;
-    }
-
-    try {
-        const response = await fetch(`/api/orders/admin/${orderId}`, {
-            method: 'DELETE',
-            credentials: 'same-origin'
-        });
-
-        if (response.ok) {
-            alert('✅ تم حذف الطلب نهائياً');
-            await loadOrders();
-        } else {
-            alert('❌ فشل في حذف الطلب');
-        }
-    } catch (error) {
-        console.error('Error deleting order:', error);
-        alert('حدث خطأ في حذف الطلب');
-    }
-}
-
-// أرشفة طلبات محددة
-async function archiveSelected() {
-    const checkboxes = document.querySelectorAll('.order-checkbox:checked');
-    const orderIds = Array.from(checkboxes).map(cb => cb.dataset.orderId);
-    
-    if (orderIds.length === 0) {
-        alert('يرجى تحديد طلبات أولاً');
-        return;
-    }
-    
-    if (!confirm(`هل تريد أرشفة ${orderIds.length} طلب؟`)) {
-        return;
-    }
-    
-    const btn = document.getElementById('archiveSelectedBtn');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '<span>⏳</span><span>جاري الأرشفة...</span>';
-    btn.disabled = true;
-    
-    try {
-        let successCount = 0;
-        let failCount = 0;
-        
-        for (const orderId of orderIds) {
-            try {
-                const response = await fetch(`/api/orders/admin/${orderId}/archive`, {
-                    method: 'PUT',
-                    credentials: 'same-origin'
-                });
-                
-                if (response.ok) {
-                    successCount++;
-                } else {
-                    failCount++;
-                }
-            } catch (error) {
-                failCount++;
-            }
-        }
-        
-        alert(`✅ تم أرشفة ${successCount} طلب${failCount > 0 ? `\n❌ فشل ${failCount} طلب` : ''}`);
-        await loadOrders();
-        updateSelectedCount();
-    } catch (error) {
-        console.error('Error archiving orders:', error);
-        alert('حدث خطأ في أرشفة الطلبات');
-    } finally {
-        btn.innerHTML = originalText;
-        updateSelectedCount();
-    }
-}
-
-// حذف طلبات محددة
-async function deleteSelected() {
-    const checkboxes = document.querySelectorAll('.order-checkbox:checked');
-    const orderIds = Array.from(checkboxes).map(cb => cb.dataset.orderId);
-    
-    if (orderIds.length === 0) {
-        alert('يرجى تحديد طلبات أولاً');
-        return;
-    }
-    
-    if (!confirm(`⚠️ تحذير: هل تريد حذف ${orderIds.length} طلب نهائياً؟\n\nلا يمكن التراجع عن هذا الإجراء!`)) {
-        return;
-    }
-    
-    const btn = document.getElementById('deleteSelectedBtn');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '<span>⏳</span><span>جاري الحذف...</span>';
-    btn.disabled = true;
-    
-    try {
-        let successCount = 0;
-        let failCount = 0;
-        
-        for (const orderId of orderIds) {
-            try {
-                const response = await fetch(`/api/orders/admin/${orderId}`, {
-                    method: 'DELETE',
-                    credentials: 'same-origin'
-                });
-                
-                if (response.ok) {
-                    successCount++;
-                } else {
-                    failCount++;
-                }
-            } catch (error) {
-                failCount++;
-            }
-        }
-        
-        alert(`✅ تم حذف ${successCount} طلب${failCount > 0 ? `\n❌ فشل ${failCount} طلب` : ''}`);
-        await loadOrders();
-        updateSelectedCount();
-    } catch (error) {
-        console.error('Error deleting orders:', error);
-        alert('حدث خطأ في حذف الطلبات');
-    } finally {
-        btn.innerHTML = originalText;
-        updateSelectedCount();
-    }
-}
-
-// تحديث عداد الطلبات المحددة
-function toggleSelectAll(checkbox) {
-    const checkboxes = document.querySelectorAll('.order-checkbox');
-    checkboxes.forEach(cb => {
-        cb.checked = checkbox.checked;
-    });
-    updateSelectedCount();
-}
-
-function updateSelectedCount() {
-    const checkboxes = document.querySelectorAll('.order-checkbox:checked');
-    const count = checkboxes.length;
-    
-    const countSpan = document.getElementById('selectedCount');
-    if (countSpan) countSpan.textContent = `${count} محدد`;
-    
-    const deliveryBtn = document.getElementById('sendToDeliveryBtn');
-    const archiveBtn = document.getElementById('archiveSelectedBtn');
-    const deleteBtn = document.getElementById('deleteSelectedBtn');
-    
-    if (deliveryBtn) deliveryBtn.disabled = count === 0;
-    if (archiveBtn) archiveBtn.disabled = count === 0;
-    if (deleteBtn) deleteBtn.disabled = count === 0;
-    
-    const allCheckboxes = document.querySelectorAll('.order-checkbox');
-    const selectAllCheckbox = document.getElementById('selectAll');
-    if (selectAllCheckbox) {
-        selectAllCheckbox.checked = count === allCheckboxes.length && count > 0;
-    }
-}
-
-// فتح واتساب للعميل
-function openWhatsAppChat(phone, orderNumber, customerName, partName, carName) {
-    const cleanPhone = phone.replace(/[^0-9]/g, '');
-    
-    const message = `مرحباً ${customerName}،
-
-بخصوص طلبك رقم: ${orderNumber}
-
-🚗 السيارة: ${carName}
-🔧 القطعة: ${partName}
-
-سنقوم بالتواصل معك قريباً لتأكيد توفر القطعة والسعر.
-
-شكراً لثقتك بنا - تشاليح تبوك`;
-
-    const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
-}
-</script>
+    </script>
 </body>
 </html>

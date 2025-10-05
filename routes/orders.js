@@ -137,7 +137,8 @@ router.post('/', (req, res, next) => {
                 quantity: 1,
                 // حفظ الصورة بشكل صحيح - Cloudinary أو Local
                 partImage: req.file ? (req.file.path || `/uploads/${req.file.filename}`) : null,
-                imageUrl: req.file ? (req.file.path || `/uploads/${req.file.filename}`) : null
+                imageUrl: req.file ? (req.file.path || `/uploads/${req.file.filename}`) : null,
+                images: req.file ? [req.file.path || `/uploads/${req.file.filename}`] : []
             }],            carInfo: {
                 make: carMake,
                 model: carModel,
@@ -797,70 +798,6 @@ router.post('/sell-car', upload.array('images', 10), async (req, res) => {
         });
     }
 });
-// WhatsApp Features CSS (moved to a comment to avoid JS syntax errors)
-// If you want to use this CSS, place it in your public CSS file, not in this JS file.
-/*
-.whatsapp-actions {
-    padding: 1rem 2rem;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-    background: #f8f9fa;
-}
-
-.btn-whatsapp {
-    background: #25D366;
-    color: white;
-}
-
-.btn-whatsapp:hover {
-    background: #128C7E;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
-}
-
-.btn-whatsapp:disabled {
-    background: #ccc;
-    cursor: not-allowed;
-}
-
-.phone-link {
-    color: #25D366;
-    text-decoration: none;
-    font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    transition: all 0.2s;
-}
-
-.phone-link:hover {
-    color: #128C7E;
-    text-decoration: underline;
-}
-
-.order-checkbox {
-    width: 18px;
-    height: 18px;
-    cursor: pointer;
-}
-
-.select-all-checkbox {
-    width: 18px;
-    height: 18px;
-    cursor: pointer;
-}
-
-.selected-count {
-    background: var(--primary);
-    color: white;
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    font-size: 0.9rem;
-    font-weight: 600;
-}
-*/
 router.post('/admin/send-to-delivery', async (req, res) => {
     try {
         const { orderIds, deliveryPhone } = req.body;
@@ -871,10 +808,7 @@ router.post('/admin/send-to-delivery', async (req, res) => {
             });
         }
 
-        // استخدام رقم المندوب من الطلب، أو رقم افتراضي
         const deliveryNumber = deliveryPhone || process.env.DELIVERY_WHATSAPP || '966545376792';
-
-        // جلب الطلبات من قاعدة البيانات
         const orders = await Order.find({ _id: { $in: orderIds } });
 
         if (orders.length === 0) {
@@ -883,16 +817,16 @@ router.post('/admin/send-to-delivery', async (req, res) => {
             });
         }
 
-        // تجميع كل الطلبات في رسالة واحدة
-        let message = `🚚 *طلبات جديدة للتوصيل* 🚚\n\n`;
-        message += `📦 *عدد الطلبات:* ${orders.length}\n`;
-        message += `📅 *التاريخ:* ${new Date().toLocaleDateString('ar-SA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}\n`;
-        message += `⏰ *الوقت:* ${new Date().toLocaleTimeString('ar-SA')}\n\n`;
+        let message = `🚚 *طلبات جديدة للتوصيل*\n\n`;
+        message += `📦 عدد الطلبات: ${orders.length}\n`;
+        message += `📅 ${new Date().toLocaleDateString('ar-SA')}\n\n`;
         message += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
 
         orders.forEach((order, index) => {
-            const deliveryText = order.deliveryOption === 'express' ? '🔥 مستعجل (1-2 ساعة)' : 
-                               order.deliveryOption === 'standard' ? '⚡ سريع (3-5 ساعات)' : 
+            const deliveryText = order.deliveryOption === 'express' ? 
+                               '🔥 مستعجل (1-2 ساعة)' : 
+                               order.deliveryOption === 'standard' ? 
+                               '⚡ سريع (3-5 ساعات)' : 
                                '📋 عادي (12-24 ساعة)';
 
             const hasImage = !!(order.items?.[0]?.imageUrl || order.items?.[0]?.partImage);
@@ -924,7 +858,6 @@ router.post('/admin/send-to-delivery', async (req, res) => {
         message += `📞 *للاستفسار:* تواصل مع الإدارة`;
 
         try {
-            // إرسال الرسالة للمندوب
             await sendWhatsAppNotification({
                 orderNumber: `BULK-${Date.now()}`,
                 customerName: 'المندوب',
@@ -956,87 +889,6 @@ router.post('/admin/send-to-delivery', async (req, res) => {
         });
     }
 });
-router.post('/admin/send-to-delivery', async (req, res) => {
-    try {
-        const { orderIds, deliveryPhone } = req.body;
-
-        if (!orderIds || !Array.isArray(orderIds) || orderIds.length === 0) {
-            return res.status(400).json({ 
-                message: 'يرجى تحديد طلبات للإرسال' 
-            });
-        }
-
-        const deliveryNumber = deliveryPhone || process.env.DELIVERY_WHATSAPP || '966545376792';
-        const orders = await Order.find({ _id: { $in: orderIds } });
-
-        if (orders.length === 0) {
-            return res.status(404).json({ 
-                message: 'لم يتم العثور على الطلبات المحددة' 
-            });
-        }
-
-        let message = `🚚 *طلبات جديدة للتوصيل*\n\n`;
-        message += `📦 عدد الطلبات: ${orders.length}\n`;
-        message += `📅 ${new Date().toLocaleDateString('ar-SA')}\n\n`;
-        message += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-
-        orders.forEach((order, index) => {
-            const deliveryText = order.deliveryOption === 'express' ? '🔥 مستعجل' : 
-                               order.deliveryOption === 'standard' ? '⚡ سريع' : '📋 عادي';
-            const hasImage = !!(order.items?.[0]?.imageUrl || order.items?.[0]?.partImage);
-
-            message += `*${index + 1}. ${order.orderNumber}*\n`;
-            message += `👤 ${order.customerName}\n`;
-            message += `📱 ${order.customerPhone}\n`;
-            message += `🚗 ${order.carInfo?.fullName || (order.carInfo?.make + ' ' + order.carInfo?.model)} ${order.carInfo?.year || ''}\n`;
-            message += `🔧 ${order.items?.[0]?.partName || 'غير محدد'}\n`;
-            message += `🚚 ${deliveryText}\n`;
-            
-            if (order.shippingAddress?.city) {
-                message += `📍 ${order.shippingAddress.city}\n`;
-            }
-            if (order.notes) {
-                message += `📝 ${order.notes}\n`;
-            }
-            if (hasImage) {
-                message += `📷 ${order.items[0].imageUrl || order.items[0].partImage}\n`;
-            }
-            message += `\n━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-        });
-
-        message += `✅ يرجى البدء بالتوصيل`;
-
-        try {
-            await sendWhatsAppNotification({
-                orderNumber: `BULK-${Date.now()}`,
-                customerName: 'المندوب',
-                customerPhone: deliveryNumber,
-                orderType: 'تحويل للتوصيل',
-                description: message,
-                createdAt: new Date()
-            });
-
-            res.json({
-                message: `تم إرسال ${orders.length} طلب للمندوب بنجاح`,
-                deliveryNumber: deliveryNumber,
-                orderCount: orders.length
-            });
-        } catch (error) {
-            console.error('خطأ في إرسال للمندوب:', error);
-            res.status(500).json({
-                message: 'فشل الإرسال للمندوب',
-                error: error.message
-            });
-        }
-    } catch (error) {
-        console.error('❌ Error in POST /admin/send-to-delivery:', error);
-        res.status(500).json({ 
-            message: 'خطأ في إرسال الطلبات للمندوب', 
-            error: error.message 
-        });
-    }
-});
-
 // تحديث السعر والضمان
 router.put('/admin/:id/pricing', async (req, res) => {
     try {

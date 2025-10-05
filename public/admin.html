@@ -1233,7 +1233,7 @@ ${(order.items?.[0]?.imageUrl || order.items?.[0]?.partImage) ? `
                 </div>
                 <div class="control-group">
                     <label>مدة الضمان (مثل: 3 أشهر، 6 أشهر، سنة، 15 يوم)</label>
-                    <input type="text" class="control-input" id="warrantyDuration" placeholder="اكتب المدة يدوياً" value="${order.items?.[0]?.warrantyDuration || ''}">
+                    <input type="text" class="control-input" id="warrantyDuration" placeholder="اكتب المدة يدوياً" value="${(order.items && order.items[0] && order.items[0].warrantyDuration) ? order.items[0].warrantyDuration : ''}">
                     <small style="color: #999; font-size: 0.75rem;">اتركه فارغاً إذا لم يكن هناك ضمان</small>
                 </div>
                 <div class="control-group">

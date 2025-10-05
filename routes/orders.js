@@ -893,29 +893,31 @@ router.post('/admin/send-to-delivery', async (req, res) => {
 router.put('/admin/:id/pricing', async (req, res) => {
     try {
         const { price, warranty, warrantyDuration } = req.body;
-        console.log('Received:', { price, warranty, warrantyDuration });
-        const order = await Order.findById(req.params.id);
+        
+        // التحقق من البيانات
+        if (!price || parseFloat(price) <= 0) {
+            return res.status(400).json({ message: 'يرجى إدخال سعر صحيح' });
+        }
 
+        const order = await Order.findById(req.params.id);
         if (!order) {
             return res.status(404).json({ message: 'الطلب غير موجود' });
         }
 
         console.log('📝 Updating pricing:', { price, warranty, warrantyDuration });
 
+        // تحديث السعر والضمان
         if (order.items && order.items[0]) {
             order.items[0].price = parseFloat(price);
             order.items[0].warranty = warranty;
-            order.items[0].warrantyDuration = warrantyDuration;
+            order.items[0].warrantyDuration = warrantyDuration || '';
             
             // حساب تاريخ انتهاء الضمان
             if (warranty && warrantyDuration) {
                 const startDate = new Date();
                 order.items[0].warrantyStartDate = startDate;
                 
-                // حساب تاريخ الانتهاء بناءً على المدة
                 const endDate = new Date(startDate);
-                
-                // استخراج الرقم من النص (مثل "3 أشهر" -> 3)
                 const durationMatch = warrantyDuration.match(/(\d+)/);
                 const durationNumber = durationMatch ? parseInt(durationMatch[1]) : 0;
                 
@@ -930,16 +932,23 @@ router.put('/admin/:id/pricing', async (req, res) => {
                 }
                 
                 order.items[0].warrantyEndDate = endDate;
+            } else {
+                // إزالة معلومات الضمان إذا لم يتم تحديده
+                order.items[0].warranty = false;
+                order.items[0].warrantyDuration = '';
+                order.items[0].warrantyStartDate = null;
+                order.items[0].warrantyEndDate = null;
             }
-            console.log('Updated order:', order.items[0]);
         }
 
+        // تحديث المبلغ الإجمالي
         order.totalAmount = (parseFloat(price) || 0) + (order.deliveryFee || 0);
         
+        // إضافة للخط الزمني
         order.timeline.push({
             status: 'pricing_updated',
             date: new Date(),
-            description: `تم تحديث السعر: ${price} ريال${warranty ? ' - مع ضمان ' + warrantyDuration : ''}`
+            description: `تم تحديث السعر: ${price} ريال${warranty && warrantyDuration ? ' - مع ضمان ' + warrantyDuration : ' - بدون ضمان'}`
         });
 
         await order.save();
@@ -948,7 +957,7 @@ router.put('/admin/:id/pricing', async (req, res) => {
 
         res.json({
             message: 'تم تحديث السعر والضمان بنجاح',
-            order
+            order: order
         });
     } catch (error) {
         console.error('❌ Error updating pricing:', error);
@@ -958,7 +967,6 @@ router.put('/admin/:id/pricing', async (req, res) => {
         });
     }
 });
-
 // الحصول على الطلبات الناجحة (المكتملة)
 router.get('/admin/completed', async (req, res) => {
     try {

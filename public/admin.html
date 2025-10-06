@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة إدارة الطلبات المتقدمة - تشاليح تبوك</title>
+    <title>لوحة إدارة الطلبات - تشاليح تبوك</title>
     <style>
         * {
             margin: 0;
@@ -14,37 +14,31 @@
         :root {
             --primary: #667eea;
             --secondary: #764ba2;
-            --success: #00c853;
-            --warning: #ff6f00;
-            --danger: #d32f2f;
-            --info: #2196f3;
-            --dark: #1a1a1a;
-            --light: #f8f9fa;
-            --border: #e0e0e0;
-            --shadow: 0 4px 15px rgba(0,0,0,0.1);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f7fa;
-            color: #333;
-            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
         }
 
         /* Header */
-        .admin-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+        .header {
+            background: white;
             padding: 1.5rem 2rem;
-            box-shadow: var(--shadow);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .header-content {
-            max-width: 1600px;
-            margin: 0 auto;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -52,170 +46,170 @@
             gap: 1rem;
         }
 
-        .header-title {
+        .header h1 {
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             display: flex;
             align-items: center;
-            gap: 1rem;
-        }
-
-        .header-title h1 {
-            font-size: 1.8rem;
-            font-weight: 700;
+            gap: 0.5rem;
         }
 
         .header-actions {
             display: flex;
-            gap: 1rem;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .refresh-btn {
-            background: rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.3);
-            color: white;
-            padding: 0.7rem 1.2rem;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
             gap: 0.5rem;
-            text-decoration: none;
-            font-size: 0.95rem;
-            font-weight: 600;
         }
 
-        .refresh-btn:hover {
-            background: rgba(255,255,255,0.3);
-            transform: translateY(-2px);
-        }
-
-        /* Stats Cards */
-        .stats-section {
-            max-width: 1600px;
-            margin: 2rem auto;
-            padding: 0 2rem;
+        /* Stats */
+        .stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
         }
 
         .stat-card {
             background: white;
             padding: 1.5rem;
-            border-radius: 12px;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border);
-            transition: transform 0.3s;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            transition: all 0.3s;
         }
 
         .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
         }
 
-        .stat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .stat-title {
-            color: #666;
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        .stat-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.3rem;
-        }
-
-        .stat-value {
+        .stat-card .icon {
             font-size: 2rem;
-            font-weight: 700;
-            color: #333;
             margin-bottom: 0.5rem;
         }
 
-        .stat-change {
+        .stat-card .value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .stat-card .label {
             font-size: 0.85rem;
+            color: #666;
+            margin-top: 0.3rem;
+        }
+
+        /* Tabs */
+        .tabs {
+            background: white;
+            border-radius: 16px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .tab-buttons {
             display: flex;
-            align-items: center;
-            gap: 0.3rem;
+            gap: 0.5rem;
+            border-bottom: 2px solid #f3f4f6;
+            padding-bottom: 1rem;
+            flex-wrap: wrap;
         }
 
-        .stat-change.positive {
-            color: var(--success);
+        .tab-btn {
+            padding: 0.7rem 1.5rem;
+            border: none;
+            background: transparent;
+            color: #666;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s;
+            position: relative;
         }
 
-        /* Controls Section */
-        .controls-section {
-            max-width: 1600px;
-            margin: 0 auto 2rem;
-            padding: 0 2rem;
+        .tab-btn:hover {
+            background: #f3f4f6;
+            color: #333;
         }
 
-        .controls-card {
+        .tab-btn.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .tab-btn .badge {
+            background: rgba(0,0,0,0.2);
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            margin-right: 0.3rem;
+        }
+
+        .tab-btn:not(.active) .badge {
+            background: #e5e7eb;
+            color: #666;
+        }
+
+        .tab-content {
+            display: none;
+            padding-top: 1rem;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Filters */
+        .filters {
             background: white;
             padding: 1.5rem;
-            border-radius: 12px;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border);
+            border-radius: 16px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
         }
 
-        .controls-grid {
+        .filter-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1rem;
-            margin-top: 1rem;
         }
 
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .control-group label {
+        .filter-group label {
+            display: block;
+            font-size: 0.85rem;
             font-weight: 600;
-            font-size: 0.9rem;
             color: #555;
+            margin-bottom: 0.5rem;
         }
 
-        .control-input {
+        .filter-group input,
+        .filter-group select {
+            width: 100%;
             padding: 0.7rem;
-            border: 2px solid var(--border);
+            border: 2px solid #e5e7eb;
             border-radius: 8px;
             font-size: 0.9rem;
-            transition: border-color 0.3s;
+            transition: all 0.3s;
         }
 
-        .control-input:focus {
+        .filter-group input:focus,
+        .filter-group select:focus {
             outline: none;
             border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
         /* Actions Bar */
         .actions-bar {
-            max-width: 1600px;
-            margin: 0 auto 2rem;
-            padding: 0 2rem;
-        }
-
-        .actions-card {
             background: white;
             padding: 1rem 1.5rem;
-            border-radius: 12px;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border);
+            border-radius: 16px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -224,28 +218,35 @@
         }
 
         .selected-info {
+            font-size: 1.1rem;
             font-weight: 600;
             color: var(--primary);
-            font-size: 1.1rem;
         }
 
-        .btn-group {
+        .action-btns {
             display: flex;
-            gap: 0.8rem;
+            gap: 0.5rem;
             flex-wrap: wrap;
         }
 
+        /* Buttons */
         .btn {
             padding: 0.7rem 1.2rem;
-            border-radius: 8px;
             border: none;
+            border-radius: 10px;
             font-size: 0.9rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 0.5rem;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
         }
 
         .btn:disabled {
@@ -253,67 +254,19 @@
             cursor: not-allowed;
         }
 
-        .btn:not(:disabled):hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-        }
-
-        .btn-success {
-            background: var(--success);
-            color: white;
-        }
-
-        .btn-warning {
-            background: var(--warning);
-            color: white;
-        }
-
-        .btn-danger {
-            background: var(--danger);
-            color: white;
-        }
-
-        .btn-info {
-            background: var(--info);
-            color: white;
-        }
+        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-info { background: var(--info); color: white; }
+        .btn-light { background: #f3f4f6; color: #333; }
 
         /* Orders Table */
-        .orders-section {
-            max-width: 1600px;
-            margin: 0 auto 2rem;
-            padding: 0 2rem;
-        }
-
-        .orders-card {
+        .orders-container {
             background: white;
-            border-radius: 12px;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             overflow: hidden;
-        }
-
-        .orders-header {
-            padding: 1.5rem;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .orders-header h3 {
-            font-size: 1.3rem;
-        }
-
-        .orders-count {
-            font-size: 0.9rem;
-            opacity: 0.9;
         }
 
         .orders-table {
@@ -322,26 +275,24 @@
         }
 
         .orders-table th {
-            background: #f8f9fa;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
             padding: 1rem;
             text-align: right;
             font-weight: 600;
-            color: #555;
-            border-bottom: 2px solid var(--border);
-            position: sticky;
-            top: 0;
-            z-index: 10;
+            color: #495057;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .orders-table td {
             padding: 1rem;
-            border-bottom: 1px solid var(--border);
-            text-align: right;
+            border-bottom: 1px solid #f1f3f5;
         }
 
         .orders-table tbody tr {
-            transition: background 0.2s;
             cursor: pointer;
+            transition: all 0.2s;
         }
 
         .orders-table tbody tr:hover {
@@ -351,28 +302,17 @@
         .status-badge {
             padding: 0.4rem 0.8rem;
             border-radius: 20px;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: 600;
             display: inline-block;
         }
 
-        .status-pending { background: #fff3cd; color: #856404; }
-        .status-confirmed { background: #d1ecf1; color: #0c5460; }
-        .status-processing { background: #d4edda; color: #155724; }
-        .status-shipped { background: #cce5ff; color: #004085; }
-        .status-delivered { background: #d4edda; color: #155724; }
-        .status-cancelled { background: #f8d7da; color: #721c24; }
-
-        .warranty-badge {
-            padding: 0.3rem 0.6rem;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        .warranty-active { background: #d4edda; color: #155724; }
-        .warranty-expired { background: #f8d7da; color: #721c24; }
-        .warranty-none { background: #e2e3e5; color: #6c757d; }
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-confirmed { background: #dbeafe; color: #1e40af; }
+        .status-processing { background: #d1fae5; color: #065f46; }
+        .status-shipped { background: #e0e7ff; color: #3730a3; }
+        .status-delivered { background: #d1fae5; color: #065f46; }
+        .status-cancelled { background: #fee2e2; color: #991b1b; }
 
         /* Modal */
         .modal {
@@ -383,26 +323,28 @@
             width: 100%;
             height: 100%;
             background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
             z-index: 1000;
             overflow-y: auto;
         }
 
         .modal.active {
             display: flex;
-            justify-content: center;
             align-items: flex-start;
+            justify-content: center;
             padding: 2rem;
         }
 
         .modal-content {
             background: white;
-            border-radius: 15px;
+            border-radius: 16px;
             padding: 2rem;
             max-width: 900px;
             width: 100%;
-            max-height: 85vh;
+            max-height: 90vh;
             overflow-y: auto;
             margin: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
 
         .modal-header {
@@ -411,116 +353,99 @@
             align-items: center;
             margin-bottom: 1.5rem;
             padding-bottom: 1rem;
-            border-bottom: 2px solid var(--border);
+            border-bottom: 2px solid #f3f4f6;
         }
 
         .modal-header h2 {
             color: var(--primary);
-            font-size: 1.5rem;
+            font-size: 1.4rem;
         }
 
         .close-btn {
             background: none;
             border: none;
             font-size: 2rem;
-            cursor: pointer;
             color: #999;
-            transition: color 0.3s;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
             padding: 0;
-            width: 40px;
-            height: 40px;
-        }
-
-        .close-btn:hover {
-            color: #333;
         }
 
         .detail-section {
             margin-bottom: 1.5rem;
         }
 
-        .detail-title {
-            font-size: 1.1rem;
-            margin-bottom: 1rem;
+        .detail-section h4 {
             color: var(--primary);
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 1.05rem;
         }
 
         .detail-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1rem;
         }
 
         .detail-item {
             padding: 1rem;
             background: #f8f9fa;
-            border-radius: 8px;
-            border-right: 3px solid var(--primary);
+            border-radius: 10px;
         }
 
-        .detail-label {
-            font-weight: 600;
-            color: #666;
-            font-size: 0.85rem;
+        .detail-item label {
             display: block;
+            font-size: 0.75rem;
+            color: #666;
             margin-bottom: 0.3rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .detail-value {
+        .detail-item .value {
+            font-weight: 600;
             color: #333;
-            font-size: 1rem;
         }
 
-        .status-actions {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        /* Image Display - التحسين المطلوب */
         .order-image {
             max-width: 100%;
             max-height: 400px;
-            border-radius: 8px;
-            border: 2px solid #e0e0e0;
+            border-radius: 12px;
             cursor: pointer;
-            object-fit: contain;
-            background: #f9f9f9;
-            display: block;
-            margin: 0.5rem auto;
+            border: 3px solid #e5e7eb;
+            transition: all 0.3s;
         }
 
         .order-image:hover {
             border-color: var(--primary);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
         }
 
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 4rem 2rem;
-            color: #666;
+        .form-control {
+            width: 100%;
+            padding: 0.7rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 0.9rem;
         }
 
-        .empty-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            opacity: 0.5;
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
-        /* Loading */
         .loading {
             text-align: center;
             padding: 3rem;
+            color: #666;
         }
 
         .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid #f3f3f3;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f4f6;
             border-top: 4px solid var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
@@ -532,25 +457,32 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Responsive */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #999;
+        }
+
+        .empty-state .icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
         @media (max-width: 768px) {
-            .header-content {
-                flex-direction: column;
-                align-items: flex-start;
+            body {
+                padding: 0.5rem;
             }
 
-            .stats-section {
+            .stats {
                 grid-template-columns: repeat(2, 1fr);
-                padding: 0 1rem;
             }
 
-            .controls-section,
-            .actions-bar,
-            .orders-section {
-                padding: 0 1rem;
+            .tab-buttons {
+                overflow-x: auto;
             }
 
-            .controls-grid {
+            .filter-grid {
                 grid-template-columns: 1fr;
             }
 
@@ -560,445 +492,296 @@
 
             .orders-table th,
             .orders-table td {
-                padding: 0.8rem 0.5rem;
+                padding: 0.7rem 0.5rem;
             }
-
-            .btn-group {
-                width: 100%;
-            }
-
-            .btn {
-                flex: 1;
-                justify-content: center;
-            }
-        }
-
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .fade-in {
-            animation: fadeIn 0.3s ease;
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <header class="admin-header">
-        <div class="header-content">
-            <div class="header-title">
-                <span>🔧</span>
-                <h1>لوحة إدارة الطلبات المتقدمة</h1>
-            </div>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🔧 لوحة إدارة الطلبات</h1>
             <div class="header-actions">
-                <a href="admin-completed.html" class="refresh-btn">
-                    <span>✅</span>
-                    <span>الطلبات الناجحة</span>
-                </a>
-                <a href="admin-archived.html" class="refresh-btn">
-                    <span>📦</span>
-                    <span>المؤرشفة</span>
-                </a>
-                <button class="refresh-btn" onclick="refreshData()">
-                    <span>🔄</span>
-                    <span>تحديث</span>
+                <a href="admin-completed.html" class="btn btn-success">✅ المكتملة</a>
+                <a href="admin-archived.html" class="btn btn-light">📦 الأرشيف</a>
+                <button class="btn btn-info" onclick="loadOrders()">🔄 تحديث</button>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="icon">📊</div>
+                <div class="value" id="totalOrders">0</div>
+                <div class="label">إجمالي الطلبات</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">🆕</div>
+                <div class="value" id="newOrders">0</div>
+                <div class="label">طلبات جديدة</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">⚙️</div>
+                <div class="value" id="activeOrders">0</div>
+                <div class="label">طلبات جارية</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">💰</div>
+                <div class="value" id="totalRevenue">0 ر.س</div>
+                <div class="label">الإيرادات</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">🛡️</div>
+                <div class="value" id="activeWarranties">0</div>
+                <div class="label">ضمانات سارية</div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="switchTab('new')">
+                    <span class="badge" id="newBadge">0</span>
+                    🆕 طلبات جديدة
+                </button>
+                <button class="tab-btn" onclick="switchTab('active')">
+                    <span class="badge" id="activeBadge">0</span>
+                    ⚙️ طلبات جارية
+                </button>
+                <button class="tab-btn" onclick="switchTab('all')">
+                    <span class="badge" id="allBadge">0</span>
+                    📋 جميع الطلبات
                 </button>
             </div>
-        </div>
-    </header>
 
-    <!-- Stats Section -->
-    <section class="stats-section">
-        <div class="stat-card fade-in">
-            <div class="stat-header">
-                <span class="stat-title">إجمالي الطلبات</span>
-                <div class="stat-icon" style="background: #e3f2fd; color: #1976d2;">📊</div>
-            </div>
-            <div class="stat-value" id="totalOrders">0</div>
-            <div class="stat-change positive">
-                <span>الكل</span>
-            </div>
-        </div>
-
-        <div class="stat-card fade-in">
-            <div class="stat-header">
-                <span class="stat-title">طلبات جديدة</span>
-                <div class="stat-icon" style="background: #fff3e0; color: #f57c00;">⏳</div>
-            </div>
-            <div class="stat-value" id="pendingOrders">0</div>
-            <div class="stat-change positive">
-                <span>قيد الانتظار</span>
-            </div>
-        </div>
-
-        <div class="stat-card fade-in">
-            <div class="stat-header">
-                <span class="stat-title">طلبات مكتملة</span>
-                <div class="stat-icon" style="background: #e8f5e9; color: #388e3c;">✅</div>
-            </div>
-            <div class="stat-value" id="completedOrders">0</div>
-            <div class="stat-change positive">
-                <span>تم التسليم</span>
-            </div>
-        </div>
-
-        <div class="stat-card fade-in">
-            <div class="stat-header">
-                <span class="stat-title">إجمالي الإيرادات</span>
-                <div class="stat-icon" style="background: #f3e5f5; color: #7b1fa2;">💰</div>
-            </div>
-            <div class="stat-value" id="totalRevenue">0 ريال</div>
-            <div class="stat-change positive">
-                <span>من الطلبات المسعرة</span>
-            </div>
-        </div>
-
-        <div class="stat-card fade-in">
-            <div class="stat-header">
-                <span class="stat-title">ضمانات سارية</span>
-                <div class="stat-icon" style="background: #e0f2f1; color: #00796b;">🛡️</div>
-            </div>
-            <div class="stat-value" id="activeWarranties">0</div>
-            <div class="stat-change positive">
-                <span>فعالة</span>
-            </div>
-        </div>
-
-        <div class="stat-card fade-in">
-            <div class="stat-header">
-                <span class="stat-title">ضمانات منتهية</span>
-                <div class="stat-icon" style="background: #ffebee; color: #c62828;">⚠️</div>
-            </div>
-            <div class="stat-value" id="expiredWarranties">0</div>
-            <div class="stat-change">
-                <span>انتهت</span>
-            </div>
-        </div>
-    </section>
-
-    <!-- Controls Section -->
-    <section class="controls-section">
-        <div class="controls-card fade-in">
-            <h3 style="color: #333; font-size: 1.2rem;">🔍 البحث والتصفية المتقدمة</h3>
-            <div class="controls-grid">
-                <div class="control-group">
-                    <label>البحث</label>
-                    <input type="text" class="control-input" id="searchInput" placeholder="رقم الطلب، اسم العميل، الجوال...">
+            <!-- Filters -->
+            <div class="filters" style="margin-top: 1rem;">
+                <div class="filter-grid">
+                    <div class="filter-group">
+                        <label>🔍 البحث</label>
+                        <input type="text" id="searchInput" placeholder="رقم الطلب، العميل، الجوال...">
+                    </div>
+                    <div class="filter-group">
+                        <label>📅 من تاريخ</label>
+                        <input type="date" id="dateFrom">
+                    </div>
+                    <div class="filter-group">
+                        <label>📅 إلى تاريخ</label>
+                        <input type="date" id="dateTo">
+                    </div>
+                    <div class="filter-group">
+                        <label>💰 السعر</label>
+                        <select id="priceFilter">
+                            <option value="">الكل</option>
+                            <option value="with">محدد</option>
+                            <option value="without">لم يحدد</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="control-group">
-                    <label>الحالة</label>
-                    <select class="control-input" id="statusFilter">
-                        <option value="">جميع الحالات</option>
-                        <option value="pending">جديد</option>
-                        <option value="confirmed">مؤكد</option>
-                        <option value="processing">قيد المعالجة</option>
-                        <option value="shipped">في الطريق</option>
-                        <option value="delivered">تم التسليم</option>
-                        <option value="cancelled">ملغي</option>
-                    </select>
+            </div>
+
+            <!-- Actions Bar -->
+            <div class="actions-bar">
+                <div class="selected-info" id="selectedCount">0 طلب محدد</div>
+                <div class="action-btns">
+                    <button class="btn btn-success" id="deliveryBtn" onclick="sendToDelivery()" disabled>
+                        🚚 إرسال للمندوب
+                    </button>
+                    <button class="btn btn-warning" id="archiveBtn" onclick="archiveSelected()" disabled>
+                        📦 أرشفة
+                    </button>
+                    <button class="btn btn-danger" id="deleteBtn" onclick="deleteSelected()" disabled>
+                        🗑️ حذف
+                    </button>
+                    <button class="btn btn-info" onclick="exportToExcel()">
+                        📥 تصدير
+                    </button>
                 </div>
-                <div class="control-group">
-                    <label>حالة الضمان</label>
-                    <select class="control-input" id="warrantyFilter">
-                        <option value="">الكل</option>
-                        <option value="active">ساري</option>
-                        <option value="expired">منتهي</option>
-                        <option value="none">بدون ضمان</option>
-                    </select>
+            </div>
+
+            <!-- Tab Contents -->
+            <div id="newTab" class="tab-content active">
+                <div class="orders-container">
+                    <div id="newOrdersContent">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            <p>جاري التحميل...</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="control-group">
-                    <label>من تاريخ</label>
-                    <input type="date" class="control-input" id="dateFrom">
+            </div>
+
+            <div id="activeTab" class="tab-content">
+                <div class="orders-container">
+                    <div id="activeOrdersContent">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            <p>جاري التحميل...</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="control-group">
-                    <label>إلى تاريخ</label>
-                    <input type="date" class="control-input" id="dateTo">
-                </div>
-                <div class="control-group">
-                    <label>السعر</label>
-                    <select class="control-input" id="priceFilter">
-                        <option value="">جميع الأسعار</option>
-                        <option value="with">محدد السعر</option>
-                        <option value="without">لم يحدد</option>
-                    </select>
+            </div>
+
+            <div id="allTab" class="tab-content">
+                <div class="orders-container">
+                    <div id="allOrdersContent">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            <p>جاري التحميل...</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
 
-    <!-- Actions Bar -->
-    <section class="actions-bar">
-        <div class="actions-card fade-in">
-            <div class="selected-info">
-                <span id="selectedCount">0 طلب محدد</span>
-            </div>
-            <div class="btn-group">
-                <button class="btn btn-success" id="sendToDeliveryBtn" onclick="sendSelectedToDelivery()" disabled>
-                    <span>🚚</span>
-                    <span>إرسال للمندوب</span>
-                </button>
-                <button class="btn btn-info" onclick="exportToExcel()">
-                    <span>📥</span>
-                    <span>تصدير Excel</span>
-                </button>
-                <button class="btn btn-warning" onclick="printSelected()" id="printBtn" disabled>
-                    <span>🖨️</span>
-                    <span>طباعة</span>
-                </button>
-                <button class="btn btn-primary" id="archiveSelectedBtn" onclick="archiveSelected()" disabled>
-                    <span>📦</span>
-                    <span>أرشفة</span>
-                </button>
-                <button class="btn btn-danger" id="deleteSelectedBtn" onclick="deleteSelected()" disabled>
-                    <span>🗑️</span>
-                    <span>حذف</span>
-                </button>
-            </div>
-        </div>
-    </section>
-
-    <!-- Orders Table -->
-    <section class="orders-section">
-        <div class="orders-card fade-in">
-            <div class="orders-header">
-                <h3>قائمة الطلبات</h3>
-                <span class="orders-count" id="ordersCount">0 طلب</span>
-            </div>
-            <div id="ordersContent">
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <p>جاري تحميل الطلبات...</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Order Details Modal -->
-    <div id="orderModal" class="modal" onclick="if(event.target===this) closeOrderModal()">
+    <!-- Order Modal -->
+    <div id="orderModal" class="modal" onclick="if(event.target===this) closeModal()">
         <div class="modal-content">
             <div class="modal-header">
                 <h2>تفاصيل الطلب</h2>
-                <button class="close-btn" onclick="closeOrderModal()">&times;</button>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
             </div>
             <div id="orderDetails"></div>
         </div>
     </div>
 
     <script>
-        // Password protection
-        function checkAdminPassword() {
-            const savedPassword = localStorage.getItem('adminPassword');
-            if (savedPassword === 'admin123') {
-                return true;
-            }
-            
-            const attempts = parseInt(localStorage.getItem('loginAttempts') || '0');
-            if (attempts >= 3) {
-                alert('تم تجاوز عدد المحاولات المسموح بها. يرجى المحاولة لاحقاً.');
-                window.location.href = 'index.html';
-                return false;
-            }
-            
-            const password = prompt('يرجى إدخال كلمة المرور للدخول إلى لوحة الإدارة:');
-            if (password === 'admin123') {
+        // Check password
+        if (localStorage.getItem('adminPassword') !== 'admin123') {
+            const pwd = prompt('كلمة المرور:');
+            if (pwd === 'admin123') {
                 localStorage.setItem('adminPassword', 'admin123');
-                localStorage.setItem('loginAttempts', '0');
-                return true;
             } else {
-                localStorage.setItem('loginAttempts', (attempts + 1).toString());
-                alert('كلمة المرور غير صحيحة');
+                alert('خطأ في كلمة المرور');
                 window.location.href = 'index.html';
-                return false;
             }
         }
 
-        if (!checkAdminPassword()) {
-            throw new Error('Unauthorized access');
-        }
-
-        // Global variables
         let allOrders = [];
-        let filteredOrders = [];
+        let currentTab = 'new';
 
-        // Initialize page
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', () => {
             loadOrders();
-            setupEventListeners();
+            setupFilters();
         });
 
-        function setupEventListeners() {
-            document.getElementById('searchInput').addEventListener('input', debounce(applyFilters, 300));
-            document.getElementById('statusFilter').addEventListener('change', applyFilters);
-            document.getElementById('warrantyFilter').addEventListener('change', applyFilters);
-            document.getElementById('dateFrom').addEventListener('change', applyFilters);
-            document.getElementById('dateTo').addEventListener('change', applyFilters);
-            document.getElementById('priceFilter').addEventListener('change', applyFilters);
-            
-            document.addEventListener('change', function(e) {
-                if (e.target.classList.contains('order-checkbox')) {
-                    updateSelectedCount();
-                }
+        function setupFilters() {
+            ['searchInput', 'dateFrom', 'dateTo', 'priceFilter'].forEach(id => {
+                document.getElementById(id).addEventListener('input', () => renderOrders());
+                document.getElementById(id).addEventListener('change', () => renderOrders());
             });
-        }
 
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
+            document.addEventListener('change', (e) => {
+                if (e.target.classList.contains('order-cb')) updateSelectedCount();
+            });
         }
 
         async function loadOrders() {
             try {
-                const response = await fetch('/api/orders/admin', {
-                    credentials: 'same-origin',
-                    headers: { 'Accept': 'application/json' }
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
+                const res = await fetch('/api/orders/admin');
+                if (res.ok) {
+                    const data = await res.json();
                     allOrders = data.orders || [];
-                    filteredOrders = [...allOrders];
-                } else {
-                    console.warn('Failed to load orders from API');
-                    allOrders = [];
-                    filteredOrders = [];
+                    updateStats();
+                    renderOrders();
                 }
-                
-                updateStats();
-                renderOrders();
-            } catch (error) {
-                console.error('Error loading orders:', error);
-                allOrders = [];
-                filteredOrders = [];
-                updateStats();
-                renderOrders();
+            } catch (err) {
+                console.error('Error:', err);
             }
         }
 
         function updateStats() {
-            const total = filteredOrders.length;
-            const pending = filteredOrders.filter(o => o.status === 'pending').length;
-            const completed = filteredOrders.filter(o => o.status === 'delivered').length;
-            
-            const revenue = filteredOrders.reduce((sum, o) => {
-                const price = o.items && o.items[0] && o.items[0].price ? parseFloat(o.items[0].price) : 0;
-                return sum + price;
-            }, 0);
-
-            const now = new Date();
-            const activeWarranties = filteredOrders.filter(o => {
-                const item = o.items && o.items[0];
-                return item && item.warranty && item.warrantyEndDate && new Date(item.warrantyEndDate) > now;
+            const newOrders = allOrders.filter(o => o.status === 'pending');
+            const activeOrders = allOrders.filter(o => ['confirmed', 'processing', 'shipped'].includes(o.status));
+            const revenue = allOrders.reduce((s, o) => s + (o.items?.[0]?.price || 0), 0);
+            const warranties = allOrders.filter(o => {
+                const item = o.items?.[0];
+                return item?.warranty && item?.warrantyEndDate && new Date(item.warrantyEndDate) > new Date();
             }).length;
 
-            const expiredWarranties = filteredOrders.filter(o => {
-                const item = o.items && o.items[0];
-                return item && item.warranty && item.warrantyEndDate && new Date(item.warrantyEndDate) <= now;
-            }).length;
+            document.getElementById('totalOrders').textContent = allOrders.length;
+            document.getElementById('newOrders').textContent = newOrders.length;
+            document.getElementById('activeOrders').textContent = activeOrders.length;
+            document.getElementById('totalRevenue').textContent = revenue.toFixed(2) + ' ر.س';
+            document.getElementById('activeWarranties').textContent = warranties;
 
-            document.getElementById('totalOrders').textContent = total;
-            document.getElementById('pendingOrders').textContent = pending;
-            document.getElementById('completedOrders').textContent = completed;
-            document.getElementById('totalRevenue').textContent = revenue.toFixed(2) + ' ريال';
-            document.getElementById('activeWarranties').textContent = activeWarranties;
-            document.getElementById('expiredWarranties').textContent = expiredWarranties;
+            document.getElementById('newBadge').textContent = newOrders.length;
+            document.getElementById('activeBadge').textContent = activeOrders.length;
+            document.getElementById('allBadge').textContent = allOrders.length;
         }
 
-        function applyFilters() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const statusFilter = document.getElementById('statusFilter').value;
-            const warrantyFilter = document.getElementById('warrantyFilter').value;
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(tab + 'Tab').classList.add('active');
+
+            renderOrders();
+        }
+
+        function getFilteredOrders() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
             const dateFrom = document.getElementById('dateFrom').value;
             const dateTo = document.getElementById('dateTo').value;
             const priceFilter = document.getElementById('priceFilter').value;
 
-            filteredOrders = allOrders.filter(order => {
-                // Search
-                if (searchTerm) {
-                    const matches = 
-                        order.orderNumber.toLowerCase().includes(searchTerm) ||
-                        order.customerName.toLowerCase().includes(searchTerm) ||
-                        order.customerPhone.includes(searchTerm) ||
-                        (order.carInfo && order.carInfo.fullName && order.carInfo.fullName.toLowerCase().includes(searchTerm));
-                    
-                    if (!matches) return false;
-                }
+            let orders = allOrders;
 
-                // Status
-                if (statusFilter && order.status !== statusFilter) return false;
+            // Tab filter
+            if (currentTab === 'new') {
+                orders = orders.filter(o => o.status === 'pending');
+            } else if (currentTab === 'active') {
+                orders = orders.filter(o => ['confirmed', 'processing', 'shipped'].includes(o.status));
+            }
 
-                // Warranty
-                if (warrantyFilter) {
-                    const item = order.items && order.items[0];
-                    const now = new Date();
-                    
-                    if (warrantyFilter === 'active') {
-                        if (!item || !item.warranty || !item.warrantyEndDate || new Date(item.warrantyEndDate) <= now) return false;
-                    } else if (warrantyFilter === 'expired') {
-                        if (!item || !item.warranty || !item.warrantyEndDate || new Date(item.warrantyEndDate) > now) return false;
-                    } else if (warrantyFilter === 'none') {
-                        if (item && item.warranty) return false;
-                    }
-                }
+            // Search
+            if (search) {
+                orders = orders.filter(o => 
+                    o.orderNumber.toLowerCase().includes(search) ||
+                    o.customerName.toLowerCase().includes(search) ||
+                    o.customerPhone.includes(search)
+                );
+            }
 
-                // Date range
-                if (dateFrom) {
-                    const orderDate = new Date(order.createdAt);
-                    const fromDate = new Date(dateFrom);
-                    if (orderDate < fromDate) return false;
-                }
-                
-                if (dateTo) {
-                    const orderDate = new Date(order.createdAt);
-                    const toDate = new Date(dateTo);
-                    toDate.setHours(23, 59, 59);
-                    if (orderDate > toDate) return false;
-                }
+            // Date
+            if (dateFrom) orders = orders.filter(o => new Date(o.createdAt) >= new Date(dateFrom));
+            if (dateTo) {
+                const to = new Date(dateTo);
+                to.setHours(23, 59, 59);
+                orders = orders.filter(o => new Date(o.createdAt) <= to);
+            }
 
-                // Price
-                if (priceFilter) {
-                    const hasPrice = order.items && order.items[0] && order.items[0].price;
-                    if (priceFilter === 'with' && !hasPrice) return false;
-                    if (priceFilter === 'without' && hasPrice) return false;
-                }
+            // Price
+            if (priceFilter === 'with') orders = orders.filter(o => o.items?.[0]?.price);
+            if (priceFilter === 'without') orders = orders.filter(o => !o.items?.[0]?.price);
 
-                return true;
-            });
-
-            updateStats();
-            renderOrders();
+            return orders;
         }
 
         function renderOrders() {
-            const container = document.getElementById('ordersContent');
-            const count = document.getElementById('ordersCount');
+            const orders = getFilteredOrders();
+            const contentId = currentTab + 'OrdersContent';
+            const container = document.getElementById(contentId);
 
-            count.textContent = `${filteredOrders.length} طلب`;
-
-            if (filteredOrders.length === 0) {
+            if (orders.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
-                        <div class="empty-icon">📦</div>
+                        <div class="icon">📦</div>
                         <h3>لا توجد طلبات</h3>
-                        <p>لا توجد طلبات تطابق معايير البحث</p>
                     </div>
                 `;
                 return;
             }
 
-            const tableHTML = `
+            const html = `
                 <table class="orders-table">
                     <thead>
                         <tr>
-                            <th><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>
+                            <th><input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)"></th>
                             <th>رقم الطلب</th>
                             <th>العميل</th>
                             <th>الجوال</th>
@@ -1006,35 +789,28 @@
                             <th>القطعة</th>
                             <th>السعر</th>
                             <th>الحالة</th>
-                            <th>الضمان</th>
                             <th>التاريخ</th>
                             <th>إجراءات</th>
                         </tr>
                     </thead>
                     <tbody>
-                        ${filteredOrders.map(order => {
-                            const item = order.items && order.items[0];
-                            const warranty = getWarrantyStatus(item);
-                            
+                        ${orders.map(o => {
+                            const item = o.items?.[0];
                             return `
-                                <tr onclick="showOrderDetails('${order._id}')">
+                                <tr onclick="showOrder('${o._id}')">
                                     <td onclick="event.stopPropagation()">
-                                        <input type="checkbox" class="order-checkbox" data-order-id="${order._id}">
+                                        <input type="checkbox" class="order-cb" data-id="${o._id}">
                                     </td>
-                                    <td><strong>${order.orderNumber}</strong></td>
-                                    <td>${order.customerName}</td>
-                                    <td>${order.customerPhone}</td>
-                                    <td>${order.carInfo ? (order.carInfo.fullName || order.carInfo.make + ' ' + order.carInfo.model) : 'غير محدد'}</td>
-                                    <td>${item ? item.partName : 'غير محدد'}</td>
-                                    <td>${item && item.price ? item.price + ' ريال' : '<span style="color: #999;">لم يحدد</span>'}</td>
-                                    <td><span class="status-badge status-${order.status}">${getStatusText(order.status)}</span></td>
-                                    <td><span class="warranty-badge warranty-${warranty.class}">${warranty.text}</span></td>
-                                    <td>${new Date(order.createdAt).toLocaleDateString('ar-SA')}</td>
+                                    <td><strong>${o.orderNumber}</strong></td>
+                                    <td>${o.customerName}</td>
+                                    <td>${o.customerPhone}</td>
+                                    <td>${o.carInfo?.fullName || o.carInfo?.make + ' ' + o.carInfo?.model || '-'}</td>
+                                    <td>${item?.partName || '-'}</td>
+                                    <td>${item?.price ? item.price + ' ر.س' : '<span style="color:#999">لم يحدد</span>'}</td>
+                                    <td><span class="status-badge status-${o.status}">${getStatusText(o.status)}</span></td>
+                                    <td>${new Date(o.createdAt).toLocaleDateString('ar-SA')}</td>
                                     <td onclick="event.stopPropagation()">
-                                        <button class="btn btn-success" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" 
-                                                onclick="openWhatsAppChat('${order.customerPhone}', '${order.orderNumber}', '${order.customerName}', '${item ? item.partName : ''}', '${order.carInfo ? (order.carInfo.fullName || order.carInfo.make + ' ' + order.carInfo.model) : ''}')">
-                                            💬
-                                        </button>
+                                        <button class="btn btn-success" style="padding:0.4rem 0.8rem;font-size:0.8rem" onclick="openWhatsApp('${o.customerPhone}', '${o.orderNumber}', '${o.customerName}')">💬</button>
                                     </td>
                                 </tr>
                             `;
@@ -1043,11 +819,11 @@
                 </table>
             `;
 
-            container.innerHTML = tableHTML;
+            container.innerHTML = html;
         }
 
-        function getStatusText(status) {
-            const statuses = {
+        function getStatusText(s) {
+            const map = {
                 'pending': 'جديد',
                 'confirmed': 'مؤكد',
                 'processing': 'قيد المعالجة',
@@ -1055,623 +831,277 @@
                 'delivered': 'تم التسليم',
                 'cancelled': 'ملغي'
             };
-            return statuses[status] || status;
+            return map[s] || s;
         }
 
-        function getWarrantyStatus(item) {
-            if (!item || !item.warranty) {
-                return { text: 'بدون', class: 'none' };
-            }
+        function toggleSelectAll(cb) {
+            document.querySelectorAll('.order-cb').forEach(c => c.checked = cb.checked);
+            updateSelectedCount();
+        }
 
-            const now = new Date();
-            const endDate = new Date(item.warrantyEndDate);
+        function updateSelectedCount() {
+            const count = document.querySelectorAll('.order-cb:checked').length;
+            document.getElementById('selectedCount').textContent = `${count} طلب محدد`;
             
-            if (endDate > now) {
-                const daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
-                return { text: `✅ ${daysLeft}ي`, class: 'active' };
-            } else {
-                return { text: '❌ منتهي', class: 'expired' };
-            }
+            ['deliveryBtn', 'archiveBtn', 'deleteBtn'].forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) btn.disabled = count === 0;
+            });
         }
 
-        function showOrderDetails(orderId) {
-            const order = allOrders.find(o => o._id === orderId);
+        function showOrder(id) {
+            const order = allOrders.find(o => o._id === id);
             if (!order) return;
 
-            const item = order.items && order.items[0];
-            const warranty = getWarrantyStatus(item);
-            
-            // 🔥 التحسين المطلوب: عرض الصورة من imageUrl أو partImage
-            const imageUrl = item ? (item.imageUrl || item.partImage) : null;
+            const item = order.items?.[0];
+            const imageUrl = item?.imageUrl || item?.partImage;
 
-            let warrantySection = '';
-            if (item && item.warranty && item.warrantyEndDate) {
-                const isExpired = new Date() > new Date(item.warrantyEndDate);
-                const bgColor = isExpired ? '#fee' : '#efe';
-                const borderColor = isExpired ? '#f44' : '#4a4';
-                const icon = isExpired ? '❌' : '✅';
-                const statusText = isExpired ? 'منتهي' : 'ساري';
-                
-                let timeLeftText = '';
-                if (!isExpired) {
-                    const daysLeft = Math.ceil((new Date(item.warrantyEndDate) - new Date()) / (1000 * 60 * 60 * 24));
-                    timeLeftText = `<div style="margin-top: 0.5rem; font-weight: 600; color: #2e7d32;">🕐 باقي ${daysLeft} يوم</div>`;
-                }
-                
-                warrantySection = `
-                    <div style="background: ${bgColor}; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 2px solid ${borderColor};">
-                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                            <span style="font-size: 1.5rem;">${icon}</span>
-                            <strong style="font-size: 1.1rem;">حالة الضمان: ${statusText}</strong>
-                        </div>
-                        <div style="font-size: 0.9rem; color: #666;">
-                            <div>📅 بدأ: ${new Date(item.warrantyStartDate).toLocaleDateString('ar-SA')}</div>
-                            <div>📅 ينتهي: ${new Date(item.warrantyEndDate).toLocaleDateString('ar-SA')}</div>
-                            <div>⏱️ المدة: ${item.warrantyDuration}</div>
-                            ${timeLeftText}
-                        </div>
+            let warrantyInfo = '';
+            if (item?.warranty && item?.warrantyEndDate) {
+                const expired = new Date() > new Date(item.warrantyEndDate);
+                const daysLeft = Math.ceil((new Date(item.warrantyEndDate) - new Date()) / 86400000);
+                warrantyInfo = `
+                    <div style="background:${expired?'#fee':'#efe'};padding:1rem;border-radius:8px;margin:1rem 0;">
+                        <strong>${expired?'❌ منتهي':'✅ ساري'}</strong> - ${item.warrantyDuration}
+                        ${!expired ? `<div>⏱️ باقي ${daysLeft} يوم</div>` : ''}
                     </div>
                 `;
             }
 
-            const detailsHTML = `
+            const html = `
                 <div class="detail-section">
-                    <h4 class="detail-title">معلومات الطلب</h4>
+                    <h4>معلومات الطلب</h4>
                     <div class="detail-grid">
-                        <div class="detail-item">
-                            <span class="detail-label">رقم الطلب</span>
-                            <span class="detail-value"><strong>${order.orderNumber}</strong></span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">الحالة</span>
-                            <span class="detail-value"><span class="status-badge status-${order.status}">${getStatusText(order.status)}</span></span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">تاريخ الطلب</span>
-                            <span class="detail-value">${new Date(order.createdAt).toLocaleString('ar-SA')}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="detail-section">
-                    <h4 class="detail-title">معلومات العميل</h4>
-                    <div class="detail-grid">
-                        <div class="detail-item">
-                            <span class="detail-label">الاسم</span>
-                            <span class="detail-value">${order.customerName}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">رقم الجوال</span>
-                            <span class="detail-value">${order.customerPhone}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">السيارة</span>
-                            <span class="detail-value">${order.carInfo ? (order.carInfo.fullName || order.carInfo.make + ' ' + order.carInfo.model + ' ' + (order.carInfo.year || '')) : 'غير محدد'}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="detail-section">
-                    <h4 class="detail-title">تفاصيل القطعة</h4>
-                    <div class="detail-grid">
-                        <div class="detail-item">
-                            <span class="detail-label">القطعة المطلوبة</span>
-                            <span class="detail-value">${item ? item.partName : 'غير محدد'}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">الكمية</span>
-                            <span class="detail-value">${item && item.quantity ? item.quantity : 1}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">طريقة التوصيل</span>
-                            <span class="detail-value">${getDeliveryText(order.deliveryOption)}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">المبلغ الإجمالي</span>
-                            <span class="detail-value">${order.totalAmount ? order.totalAmount + ' ريال' : 'لم يحدد بعد'}</span>
-                        </div>
+                        <div class="detail-item"><label>رقم الطلب</label><div class="value">${order.orderNumber}</div></div>
+                        <div class="detail-item"><label>العميل</label><div class="value">${order.customerName}</div></div>
+                        <div class="detail-item"><label>الجوال</label><div class="value">${order.customerPhone}</div></div>
+                        <div class="detail-item"><label>السيارة</label><div class="value">${order.carInfo?.fullName || order.carInfo?.make + ' ' + order.carInfo?.model || '-'}</div></div>
+                        <div class="detail-item"><label>القطعة</label><div class="value">${item?.partName || '-'}</div></div>
+                        <div class="detail-item"><label>الحالة</label><div class="value"><span class="status-badge status-${order.status}">${getStatusText(order.status)}</span></div></div>
                     </div>
                 </div>
 
                 ${imageUrl ? `
                 <div class="detail-section">
-                    <h4 class="detail-title">صورة القطعة</h4>
-                    <img src="${imageUrl}" alt="صورة القطعة" class="order-image" 
-                         onclick="window.open('${imageUrl}', '_blank')"
-                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                    <div style="display: none; padding: 1rem; background: #f5f5f5; border-radius: 8px; text-align: center; color: #999;">
-                        ❌ فشل في تحميل الصورة
-                    </div>
+                    <h4>صورة القطعة</h4>
+                    <img src="${imageUrl}" class="order-image" onclick="window.open('${imageUrl}','_blank')" onerror="this.style.display='none'">
                 </div>
                 ` : ''}
 
-                ${order.notes ? `
-                <div class="detail-section">
-                    <h4 class="detail-title">ملاحظات</h4>
-                    <div class="detail-item">
-                        <span class="detail-value">${order.notes}</span>
-                    </div>
-                </div>
-                ` : ''}
+                ${order.notes ? `<div class="detail-section"><h4>ملاحظات</h4><p>${order.notes}</p></div>` : ''}
 
                 <div class="detail-section">
-                    <h4 class="detail-title">تحديد السعر والضمان</h4>
-                    ${warrantySection}
-                    <div class="status-actions">
-                        <div class="control-group">
-                            <label>سعر القطعة (ريال)</label>
-                            <input type="number" class="control-input" id="partPrice" placeholder="0.00" 
-                                   value="${item && item.price ? item.price : ''}" step="0.01">
-                        </div>
-                        <div class="control-group">
-                            <label>مدة الضمان</label>
-                            <input type="text" class="control-input" id="warrantyDuration" 
-                                   placeholder="مثال: 3 أشهر، 6 أشهر، سنة" 
-                                   value="${(item && item.warrantyDuration) ? item.warrantyDuration : ''}">
-                            <small style="color: #999; font-size: 0.75rem;">اتركه فارغاً إذا لم يكن هناك ضمان</small>
-                        </div>
-                        <div class="control-group">
-                            <label>&nbsp;</label>
-                            <button class="btn btn-primary" onclick="updatePricing('${order._id}')" style="width: 100%;">
-                                💰 تحديث السعر والضمان
-                            </button>
-                        </div>
+                    <h4>تحديد السعر والضمان</h4>
+                    ${warrantyInfo}
+                    <div style="display:grid;gap:1rem;">
+                        <div><label>السعر (ريال)</label><input type="number" class="form-control" id="price" value="${item?.price||''}" step="0.01"></div>
+                        <div><label>مدة الضمان</label><input type="text" class="form-control" id="warranty" value="${item?.warrantyDuration||''}" placeholder="مثال: 3 أشهر"></div>
+                        <button class="btn btn-primary" onclick="updatePricing('${order._id}')" style="width:100%">💰 تحديث السعر والضمان</button>
                     </div>
                 </div>
 
                 <div class="detail-section">
-                    <h4 class="detail-title">تحديث حالة الطلب</h4>
-                    <div class="status-actions">
-                        <div class="control-group">
-                            <label>الحالة الجديدة</label>
-                            <select class="control-input" id="newStatus">
-                                <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>جديد</option>
-                                <option value="confirmed" ${order.status === 'confirmed' ? 'selected' : ''}>مؤكد</option>
-                                <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>قيد المعالجة</option>
-                                <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>في الطريق</option>
-                                <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>تم التسليم</option>
-                                <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>ملغي</option>
-                            </select>
-                        </div>
-                        <div class="control-group">
-                            <label>&nbsp;</label>
-                            <button class="btn btn-info" onclick="updateOrderStatus('${order._id}')" style="width: 100%;">
-                                🔄 تحديث الحالة
-                            </button>
-                        </div>
+                    <h4>تحديث الحالة</h4>
+                    <div style="display:grid;gap:1rem;">
+                        <select class="form-control" id="status">
+                            <option value="pending" ${order.status==='pending'?'selected':''}>جديد</option>
+                            <option value="confirmed" ${order.status==='confirmed'?'selected':''}>مؤكد</option>
+                            <option value="processing" ${order.status==='processing'?'selected':''}>قيد المعالجة</option>
+                            <option value="shipped" ${order.status==='shipped'?'selected':''}>في الطريق</option>
+                            <option value="delivered" ${order.status==='delivered'?'selected':''}>تم التسليم</option>
+                            <option value="cancelled" ${order.status==='cancelled'?'selected':''}>ملغي</option>
+                        </select>
+                        <button class="btn btn-info" onclick="updateStatus('${order._id}')" style="width:100%">🔄 تحديث الحالة</button>
                     </div>
                 </div>
 
-                <div class="detail-section">
-                    <div class="btn-group" style="width: 100%; justify-content: space-between;">
-                        <button class="btn btn-success" onclick="openWhatsAppChat('${order.customerPhone}', '${order.orderNumber}', '${order.customerName}', '${item ? item.partName : ''}', '${order.carInfo ? (order.carInfo.fullName || order.carInfo.make + ' ' + order.carInfo.model) : ''}')">
-                            💬 تواصل واتساب
-                        </button>
-                        <button class="btn btn-warning" onclick="archiveOrder('${order._id}', event)">
-                            📦 أرشفة
-                        </button>
-                        <button class="btn btn-danger" onclick="deleteOrder('${order._id}', event)">
-                            🗑️ حذف
-                        </button>
-                    </div>
+                <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:1rem;">
+                    <button class="btn btn-success" onclick="openWhatsApp('${order.customerPhone}','${order.orderNumber}','${order.customerName}')">💬 واتساب</button>
+                    <button class="btn btn-warning" onclick="archiveOne('${order._id}')">📦 أرشفة</button>
+                    <button class="btn btn-danger" onclick="deleteOne('${order._id}')">🗑️ حذف</button>
                 </div>
             `;
 
-            document.getElementById('orderDetails').innerHTML = detailsHTML;
+            document.getElementById('orderDetails').innerHTML = html;
             document.getElementById('orderModal').classList.add('active');
         }
 
-        function closeOrderModal() {
+        function closeModal() {
             document.getElementById('orderModal').classList.remove('active');
         }
 
-        function getDeliveryText(option) {
-            const options = {
-                'free': 'عادي (12-24 ساعة) - مجاني',
-                'standard': 'سريع (3-5 ساعات) - 25 ريال',
-                'express': 'مستعجل (1-2 ساعة) - 50 ريال'
-            };
-            return options[option] || option;
-        }
+        async function updatePricing(id) {
+            const price = document.getElementById('price').value;
+            const warranty = document.getElementById('warranty').value.trim();
 
-        async function updatePricing(orderId) {
-            const price = document.getElementById('partPrice').value;
-            const warrantyDuration = document.getElementById('warrantyDuration').value.trim();
-            
-            if (!price || parseFloat(price) <= 0) {
-                alert('يرجى إدخال سعر صحيح');
-                return;
-            }
-            
-            const warranty = !!warrantyDuration;
-            
-            console.log('📝 Sending pricing update:', { price: parseFloat(price), warranty, warrantyDuration });
-            
+            if (!price || price <= 0) return alert('أدخل سعر صحيح');
+
             try {
-                const response = await fetch(`/api/orders/admin/${orderId}/pricing`, {
+                const res = await fetch(`/api/orders/admin/${id}/pricing`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        price: parseFloat(price),
-                        warranty: warranty,
-                        warrantyDuration: warrantyDuration || ''
-                    })
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({price: parseFloat(price), warranty: !!warranty, warrantyDuration: warranty})
                 });
-                
-                if (response.ok) {
-                    const result = await response.json();
-                    console.log('✅ Pricing updated:', result);
-                    alert(`✅ تم تحديث السعر: ${price} ريال${warrantyDuration ? '\nالضمان: ' + warrantyDuration : '\nبدون ضمان'}`);
+
+                if (res.ok) {
+                    alert('✅ تم التحديث');
                     await loadOrders();
-                    closeOrderModal();
+                    closeModal();
                 } else {
-                    const error = await response.json();
-                    console.error('❌ Update failed:', error);
-                    alert('❌ فشل التحديث: ' + error.message);
+                    alert('❌ فشل التحديث');
                 }
-            } catch (error) {
-                console.error('❌ Error updating pricing:', error);
-                alert('حدث خطأ في تحديث السعر');
+            } catch (err) {
+                alert('حدث خطأ');
             }
         }
 
-        async function updateOrderStatus(orderId) {
-            const newStatus = document.getElementById('newStatus').value;
-            
-            if (!confirm(`هل تريد تحديث حالة الطلب إلى "${getStatusText(newStatus)}"؟`)) {
-                return;
-            }
-            
+        async function updateStatus(id) {
+            const status = document.getElementById('status').value;
+            if (!confirm(`تحديث الحالة إلى "${getStatusText(status)}"؟`)) return;
+
             try {
-                const response = await fetch(`/api/orders/admin/${orderId}/status`, {
+                const res = await fetch(`/api/orders/admin/${id}/status`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ status: newStatus })
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({status})
                 });
-                
-                if (response.ok) {
-                    alert('✅ تم تحديث حالة الطلب بنجاح');
+
+                if (res.ok) {
+                    alert('✅ تم التحديث');
                     await loadOrders();
-                    closeOrderModal();
+                    closeModal();
                 } else {
-                    alert('❌ فشل في تحديث الحالة');
+                    alert('❌ فشل التحديث');
                 }
-            } catch (error) {
-                console.error('Error updating status:', error);
-                alert('حدث خطأ في تحديث حالة الطلب');
+            } catch (err) {
+                alert('حدث خطأ');
             }
         }
 
-        // 🔥 التحسين المطلوب: إصلاح إرسال للمندوب
-        async function sendSelectedToDelivery() {
-            const checkboxes = document.querySelectorAll('.order-checkbox:checked');
-            const orderIds = Array.from(checkboxes).map(cb => cb.dataset.orderId);
-            
-            if (orderIds.length === 0) {
-                alert('يرجى تحديد طلبات أولاً');
-                return;
-            }
-            
-            const deliveryPhone = prompt('أدخل رقم المندوب (اتركه فارغاً للرقم الافتراضي 966545376792):', '');
-            if (deliveryPhone === null) return;
-            
-            if (!confirm(`هل تريد إرسال ${orderIds.length} طلب للمندوب؟`)) {
-                return;
-            }
-            
-            const btn = document.getElementById('sendToDeliveryBtn');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<span>⏳</span><span>جاري الإرسال...</span>';
+        async function sendToDelivery() {
+            const ids = Array.from(document.querySelectorAll('.order-cb:checked')).map(c => c.dataset.id);
+            if (ids.length === 0) return alert('حدد طلبات أولاً');
+
+            const phone = prompt('رقم المندوب (اترك فارغاً للرقم الافتراضي 966545376792):', '');
+            if (phone === null) return;
+
+            if (!confirm(`إرسال ${ids.length} طلب للمندوب؟`)) return;
+
+            const btn = document.getElementById('deliveryBtn');
+            btn.textContent = '⏳ جاري الإرسال...';
             btn.disabled = true;
-            
+
             try {
-                console.log('📤 Sending to delivery:', { orderIds, deliveryPhone: deliveryPhone || '966545376792' });
-                
-                const response = await fetch('/api/orders/admin/send-to-delivery', {
+                console.log('📤 Sending:', {orderIds: ids, deliveryPhone: phone || '966545376792'});
+
+                const res = await fetch('/api/orders/admin/send-to-delivery', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'same-origin',
-                    body: JSON.stringify({ 
-                        orderIds,
-                        deliveryPhone: deliveryPhone || undefined
-                    })
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({orderIds: ids, deliveryPhone: phone || undefined})
                 });
-                
-                const result = await response.json();
+
+                const result = await res.json();
                 console.log('📥 Response:', result);
-                
-                if (response.ok && result.success) {
-                    alert(`✅ تم إرسال ${result.orderCount} طلب للمندوب بنجاح!\n\nرقم المندوب: ${result.deliveryNumber}`);
-                    checkboxes.forEach(cb => cb.checked = false);
+
+                if (res.ok && result.success) {
+                    alert(`✅ تم الإرسال!\nعدد: ${result.orderCount}\nرقم: ${result.deliveryNumber}`);
+                    document.querySelectorAll('.order-cb:checked').forEach(c => c.checked = false);
                     updateSelectedCount();
                 } else {
-                    console.error('❌ Error response:', result);
+                    console.error('❌ Error:', result);
                     alert('❌ ' + (result.message || 'فشل الإرسال'));
                 }
-            } catch (error) {
-                console.error('❌ Error sending to delivery:', error);
-                alert('حدث خطأ في إرسال الطلبات للمندوب');
+            } catch (err) {
+                console.error('❌ Error:', err);
+                alert('حدث خطأ في الإرسال');
             } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = orderIds.length === 0;
-            }
-        }
-
-        function exportToExcel() {
-            if (filteredOrders.length === 0) {
-                alert('لا توجد طلبات للتصدير');
-                return;
-            }
-
-            let csv = '\ufeffرقم الطلب,العميل,الجوال,السيارة,القطعة,السعر,الحالة,الضمان,التاريخ\n';
-            
-            filteredOrders.forEach(order => {
-                const item = order.items && order.items[0];
-                const warranty = getWarrantyStatus(item);
-                
-                csv += `${order.orderNumber},`;
-                csv += `${order.customerName},`;
-                csv += `${order.customerPhone},`;
-                csv += `${order.carInfo ? (order.carInfo.fullName || order.carInfo.make + ' ' + order.carInfo.model) : 'غير محدد'},`;
-                csv += `${item ? item.partName : 'غير محدد'},`;
-                csv += `${item && item.price ? item.price : 'لم يحدد'},`;
-                csv += `${getStatusText(order.status)},`;
-                csv += `${warranty.text},`;
-                csv += `${new Date(order.createdAt).toLocaleDateString('ar-SA')}\n`;
-            });
-
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `orders_${new Date().toISOString().split('T')[0]}.csv`;
-            link.click();
-        }
-
-        function printSelected() {
-            const checkboxes = document.querySelectorAll('.order-checkbox:checked');
-            if (checkboxes.length === 0) {
-                alert('يرجى تحديد طلبات للطباعة');
-                return;
-            }
-
-            const selectedOrders = Array.from(checkboxes).map(cb => {
-                return allOrders.find(o => o._id === cb.dataset.orderId);
-            });
-
-            const printWindow = window.open('', '_blank');
-            let printContent = '<html><head><title>طباعة الطلبات</title><style>body{font-family:Arial;direction:rtl;}div{border:2px solid #333;padding:20px;margin-bottom:20px;page-break-after:always;}</style></head><body>';
-            
-            selectedOrders.forEach(order => {
-                const item = order.items && order.items[0];
-                printContent += `
-                    <div>
-                        <h2>طلب رقم: ${order.orderNumber}</h2>
-                        <p><strong>العميل:</strong> ${order.customerName}</p>
-                        <p><strong>الجوال:</strong> ${order.customerPhone}</p>
-                        <p><strong>السيارة:</strong> ${order.carInfo ? (order.carInfo.fullName || order.carInfo.make + ' ' + order.carInfo.model) : 'غير محدد'}</p>
-                        <p><strong>القطعة:</strong> ${item ? item.partName : 'غير محدد'}</p>
-                        <p><strong>السعر:</strong> ${item && item.price ? item.price + ' ريال' : 'لم يحدد'}</p>
-                        <p><strong>الحالة:</strong> ${getStatusText(order.status)}</p>
-                        <p><strong>التاريخ:</strong> ${new Date(order.createdAt).toLocaleString('ar-SA')}</p>
-                    </div>
-                `;
-            });
-
-            printContent += '</body></html>';
-            printWindow.document.write(printContent);
-            printWindow.document.close();
-            printWindow.print();
-        }
-
-        async function archiveOrder(orderId, event) {
-            event.stopPropagation();
-            
-            if (!confirm('هل أنت متأكد من أرشفة هذا الطلب؟')) {
-                return;
-            }
-
-            try {
-                const response = await fetch(`/api/orders/admin/${orderId}/archive`, {
-                    method: 'PUT',
-                    credentials: 'same-origin'
-                });
-
-                if (response.ok) {
-                    alert('✅ تم أرشفة الطلب بنجاح');
-                    await loadOrders();
-                    closeOrderModal();
-                } else {
-                    alert('❌ فشل في أرشفة الطلب');
-                }
-            } catch (error) {
-                console.error('Error archiving order:', error);
-                alert('حدث خطأ في أرشفة الطلب');
-            }
-        }
-
-        async function deleteOrder(orderId, event) {
-            event.stopPropagation();
-            
-            if (!confirm('⚠️ هل أنت متأكد من حذف هذا الطلب نهائياً؟\n\nلا يمكن التراجع عن هذا الإجراء!')) {
-                return;
-            }
-
-            try {
-                const response = await fetch(`/api/orders/admin/${orderId}`, {
-                    method: 'DELETE',
-                    credentials: 'same-origin'
-                });
-
-                if (response.ok) {
-                    alert('✅ تم حذف الطلب نهائياً');
-                    await loadOrders();
-                    closeOrderModal();
-                } else {
-                    alert('❌ فشل في حذف الطلب');
-                }
-            } catch (error) {
-                console.error('Error deleting order:', error);
-                alert('حدث خطأ في حذف الطلب');
+                btn.textContent = '🚚 إرسال للمندوب';
+                btn.disabled = false;
             }
         }
 
         async function archiveSelected() {
-            const checkboxes = document.querySelectorAll('.order-checkbox:checked');
-            const orderIds = Array.from(checkboxes).map(cb => cb.dataset.orderId);
-            
-            if (orderIds.length === 0) {
-                alert('يرجى تحديد طلبات أولاً');
-                return;
+            const ids = Array.from(document.querySelectorAll('.order-cb:checked')).map(c => c.dataset.id);
+            if (ids.length === 0) return alert('حدد طلبات أولاً');
+            if (!confirm(`أرشفة ${ids.length} طلب؟`)) return;
+
+            let success = 0;
+            for (const id of ids) {
+                try {
+                    const res = await fetch(`/api/orders/admin/${id}/archive`, {method: 'PUT'});
+                    if (res.ok) success++;
+                } catch (err) {}
             }
-            
-            if (!confirm(`هل تريد أرشفة ${orderIds.length} طلب؟`)) {
-                return;
-            }
-            
-            const btn = document.getElementById('archiveSelectedBtn');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<span>⏳</span><span>جاري الأرشفة...</span>';
-            btn.disabled = true;
-            
-            try {
-                let successCount = 0;
-                let failCount = 0;
-                
-                for (const orderId of orderIds) {
-                    try {
-                        const response = await fetch(`/api/orders/admin/${orderId}/archive`, {
-                            method: 'PUT',
-                            credentials: 'same-origin'
-                        });
-                        
-                        if (response.ok) successCount++;
-                        else failCount++;
-                    } catch (error) {
-                        failCount++;
-                    }
-                }
-                
-                alert(`✅ تم أرشفة ${successCount} طلب${failCount > 0 ? `\n❌ فشل ${failCount} طلب` : ''}`);
-                await loadOrders();
-                updateSelectedCount();
-            } catch (error) {
-                console.error('Error archiving orders:', error);
-                alert('حدث خطأ في أرشفة الطلبات');
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = true;
-            }
+
+            alert(`✅ تم أرشفة ${success} طلب`);
+            await loadOrders();
         }
 
         async function deleteSelected() {
-            const checkboxes = document.querySelectorAll('.order-checkbox:checked');
-            const orderIds = Array.from(checkboxes).map(cb => cb.dataset.orderId);
-            
-            if (orderIds.length === 0) {
-                alert('يرجى تحديد طلبات أولاً');
-                return;
+            const ids = Array.from(document.querySelectorAll('.order-cb:checked')).map(c => c.dataset.id);
+            if (ids.length === 0) return alert('حدد طلبات أولاً');
+            if (!confirm(`⚠️ حذف ${ids.length} طلب نهائياً؟`)) return;
+
+            let success = 0;
+            for (const id of ids) {
+                try {
+                    const res = await fetch(`/api/orders/admin/${id}`, {method: 'DELETE'});
+                    if (res.ok) success++;
+                } catch (err) {}
             }
-            
-            if (!confirm(`⚠️ تحذير: هل تريد حذف ${orderIds.length} طلب نهائياً؟\n\nلا يمكن التراجع عن هذا الإجراء!`)) {
-                return;
-            }
-            
-            const btn = document.getElementById('deleteSelectedBtn');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<span>⏳</span><span>جاري الحذف...</span>';
-            btn.disabled = true;
-            
+
+            alert(`✅ تم حذف ${success} طلب`);
+            await loadOrders();
+        }
+
+        async function archiveOne(id) {
+            if (!confirm('أرشفة الطلب؟')) return;
             try {
-                let successCount = 0;
-                let failCount = 0;
-                
-                for (const orderId of orderIds) {
-                    try {
-                        const response = await fetch(`/api/orders/admin/${orderId}`, {
-                            method: 'DELETE',
-                            credentials: 'same-origin'
-                        });
-                        
-                        if (response.ok) successCount++;
-                        else failCount++;
-                    } catch (error) {
-                        failCount++;
-                    }
+                const res = await fetch(`/api/orders/admin/${id}/archive`, {method: 'PUT'});
+                if (res.ok) {
+                    alert('✅ تم الأرشفة');
+                    await loadOrders();
+                    closeModal();
                 }
-                
-                alert(`✅ تم حذف ${successCount} طلب${failCount > 0 ? `\n❌ فشل ${failCount} طلب` : ''}`);
-                await loadOrders();
-                updateSelectedCount();
-            } catch (error) {
-                console.error('Error deleting orders:', error);
-                alert('حدث خطأ في حذف الطلبات');
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = true;
-            }
+            } catch (err) {}
         }
 
-        function toggleSelectAll(checkbox) {
-            const checkboxes = document.querySelectorAll('.order-checkbox');
-            checkboxes.forEach(cb => cb.checked = checkbox.checked);
-            updateSelectedCount();
+        async function deleteOne(id) {
+            if (!confirm('⚠️ حذف نهائياً؟')) return;
+            try {
+                const res = await fetch(`/api/orders/admin/${id}`, {method: 'DELETE'});
+                if (res.ok) {
+                    alert('✅ تم الحذف');
+                    await loadOrders();
+                    closeModal();
+                }
+            } catch (err) {}
         }
 
-        function updateSelectedCount() {
-            const checkboxes = document.querySelectorAll('.order-checkbox:checked');
-            const count = checkboxes.length;
-            
-            document.getElementById('selectedCount').textContent = `${count} طلب محدد`;
-            
-            const deliveryBtn = document.getElementById('sendToDeliveryBtn');
-            const archiveBtn = document.getElementById('archiveSelectedBtn');
-            const deleteBtn = document.getElementById('deleteSelectedBtn');
-            const printBtn = document.getElementById('printBtn');
-            
-            if (deliveryBtn) deliveryBtn.disabled = count === 0;
-            if (archiveBtn) archiveBtn.disabled = count === 0;
-            if (deleteBtn) deleteBtn.disabled = count === 0;
-            if (printBtn) printBtn.disabled = count === 0;
-            
-            const selectAllCheckbox = document.getElementById('selectAll');
-            if (selectAllCheckbox) {
-                const allCheckboxes = document.querySelectorAll('.order-checkbox');
-                selectAllCheckbox.checked = count === allCheckboxes.length && count > 0;
-            }
+        function openWhatsApp(phone, orderNum, name) {
+            let clean = phone.replace(/[^0-9]/g, '');
+            if (clean.startsWith('0')) clean = clean.substring(1);
+            if (!clean.startsWith('966')) clean = '966' + clean;
+
+            const msg = `مرحباً ${name}،\n\nبخصوص طلبك رقم: ${orderNum}\n\nسنتواصل معك قريباً.\n\nشكراً - تشاليح تبوك`;
+            window.open(`https://wa.me/${clean}?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
-        function openWhatsAppChat(phone, orderNumber, customerName, partName, carName) {
-            let cleanPhone = (phone || '').replace(/[^0-9]/g, '');
-            if (cleanPhone.startsWith('0')) {
-                cleanPhone = cleanPhone.substring(1);
-            }
-            if (!cleanPhone.startsWith('966') && cleanPhone.length >= 9) {
-                cleanPhone = '966' + cleanPhone;
-            }
+        function exportToExcel() {
+            const orders = getFilteredOrders();
+            if (orders.length === 0) return alert('لا توجد طلبات');
 
-            const message = `مرحباً ${customerName || ''}،
+            let csv = '\ufeffرقم الطلب,العميل,الجوال,السيارة,القطعة,السعر,الحالة,التاريخ\n';
+            orders.forEach(o => {
+                const item = o.items?.[0];
+                csv += `${o.orderNumber},${o.customerName},${o.customerPhone},${o.carInfo?.fullName||'-'},${item?.partName||'-'},${item?.price||'-'},${getStatusText(o.status)},${new Date(o.createdAt).toLocaleDateString('ar-SA')}\n`;
+            });
 
-بخصوص طلبك رقم: ${orderNumber || ''}
-
-🚗 السيارة: ${carName || ''}
-🔧 القطعة: ${partName || ''}
-
-سنقوم بالتواصل معك قريباً لتأكيد توفر القطعة والسعر.
-
-شكراً لثقتك بنا - تشاليح تبوك`;
-
-            const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
-            window.open(whatsappUrl, '_blank');
-        }
-
-        function refreshData() {
-            document.getElementById('ordersContent').innerHTML = `
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <p>جاري تحديث البيانات...</p>
-                </div>
-            `;
-            loadOrders();
+            const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `orders_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
         }
     </script>
 </body>

@@ -893,8 +893,7 @@ router.post('/admin/send-to-delivery', async (req, res) => {
 router.put('/admin/:id/pricing', async (req, res) => {
     try {
         const { price, warranty, warrantyDuration } = req.body;
-        
-        // التحقق من البيانات
+
         if (!price || parseFloat(price) <= 0) {
             return res.status(400).json({ message: 'يرجى إدخال سعر صحيح' });
         }
@@ -910,28 +909,40 @@ router.put('/admin/:id/pricing', async (req, res) => {
         if (order.items && order.items[0]) {
             order.items[0].price = parseFloat(price);
             order.items[0].warranty = warranty;
-            order.items[0].warrantyDuration = warrantyDuration || '';
             
             // حساب تاريخ انتهاء الضمان
             if (warranty && warrantyDuration) {
-                const startDate = new Date();
-                order.items[0].warrantyStartDate = startDate;
+                // تحويل warrantyDuration إلى رقم (عدد الأيام)
+                const daysNumber = parseInt(warrantyDuration);
                 
-                const endDate = new Date(startDate);
-                const durationMatch = warrantyDuration.match(/(\d+)/);
-                const durationNumber = durationMatch ? parseInt(durationMatch[1]) : 0;
-                
-                if (warrantyDuration.includes('يوم')) {
-                    endDate.setDate(endDate.getDate() + durationNumber);
-                } else if (warrantyDuration.includes('أسبوع')) {
-                    endDate.setDate(endDate.getDate() + (durationNumber * 7));
-                } else if (warrantyDuration.includes('شهر')) {
-                    endDate.setMonth(endDate.getMonth() + durationNumber);
-                } else if (warrantyDuration.includes('سنة')) {
-                    endDate.setFullYear(endDate.getFullYear() + durationNumber);
+                if (isNaN(daysNumber) || daysNumber <= 0) {
+                    return res.status(400).json({ message: 'يرجى إدخال عدد أيام صحيح' });
                 }
                 
+                // الحصول على التاريخ الحالي بالتوقيت السعودي
+                const now = new Date();
+                const saudiOffset = 3 * 60; // +3 ساعات بالدقائق
+                const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
+                const saudiTime = new Date(utcTime + (saudiOffset * 60000));
+                
+                // تعيين بداية اليوم (00:00:00)
+                const startDate = new Date(saudiTime);
+                startDate.setHours(0, 0, 0, 0);
+                
+                // حساب تاريخ الانتهاء
+                const endDate = new Date(startDate);
+                endDate.setDate(endDate.getDate() + daysNumber);
+                endDate.setHours(23, 59, 59, 999); // نهاية اليوم
+                
+                order.items[0].warrantyDuration = `${daysNumber} يوم`;
+                order.items[0].warrantyStartDate = startDate;
                 order.items[0].warrantyEndDate = endDate;
+                
+                console.log('✅ تواريخ الضمان:', {
+                    start: startDate.toISOString(),
+                    end: endDate.toISOString(),
+                    days: daysNumber
+                });
             } else {
                 // إزالة معلومات الضمان إذا لم يتم تحديده
                 order.items[0].warranty = false;
@@ -945,10 +956,11 @@ router.put('/admin/:id/pricing', async (req, res) => {
         order.totalAmount = (parseFloat(price) || 0) + (order.deliveryFee || 0);
         
         // إضافة للخط الزمني
+        const warrantyText = warranty && warrantyDuration ? ` - مع ضمان ${warrantyDuration} يوم` : ' - بدون ضمان';
         order.timeline.push({
             status: 'pricing_updated',
             date: new Date(),
-            description: `تم تحديث السعر: ${price} ريال${warranty && warrantyDuration ? ' - مع ضمان ' + warrantyDuration : ' - بدون ضمان'}`
+            description: `تم تحديث السعر: ${price} ريال${warrantyText}`
         });
 
         await order.save();

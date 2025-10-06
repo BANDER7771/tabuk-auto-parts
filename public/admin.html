@@ -1029,7 +1029,7 @@
                                     <td>${item && item.price ? item.price + ' ريال' : '<span style="color: #999;">لم يحدد</span>'}</td>
                                     <td><span class="status-badge status-${order.status}">${getStatusText(order.status)}</span></td>
                                     <td><span class="warranty-badge warranty-${warranty.class}">${warranty.text}</span></td>
-                                    <td>${new Date(order.createdAt).toLocaleDateString('ar-SA')}</td>
+                                    <td>${formatDateGregorian(order.createdAt)}</td>
                                     <td onclick="event.stopPropagation()">
                                         <button class="btn btn-success" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" 
                                                 onclick="openWhatsAppChat('${order.customerPhone}', '${order.orderNumber}', '${order.customerName}', '${item ? item.partName : ''}', '${order.carInfo ? (order.carInfo.fullName || order.carInfo.make + ' ' + order.carInfo.model) : ''}')">
@@ -1063,17 +1063,31 @@
                 return { text: 'بدون', class: 'none' };
             }
 
+            // الحصول على التاريخ الحالي بالتوقيت السعودي
             const now = new Date();
+            const saudiOffset = 3 * 60;
+            const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
+            const saudiNow = new Date(utcTime + (saudiOffset * 60000));
+            saudiNow.setHours(0, 0, 0, 0); // بداية اليوم
+
             const endDate = new Date(item.warrantyEndDate);
-            
-            if (endDate > now) {
-                const daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
-                return { text: `✅ ${daysLeft}ي`, class: 'active' };
+            endDate.setHours(0, 0, 0, 0); // بداية اليوم
+
+            if (endDate >= saudiNow) {
+                const daysLeft = Math.ceil((endDate - saudiNow) / (1000 * 60 * 60 * 24));
+                return { text: `✅ ${daysLeft} يوم`, class: 'active' };
             } else {
                 return { text: '❌ منتهي', class: 'expired' };
             }
         }
-
+        function formatDateGregorian(dateString) {
+            if (!dateString) return '-';
+            const date = new Date(dateString);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}/${month}/${day}`;
+        }
         function showOrderDetails(orderId) {
             const order = allOrders.find(o => o._id === orderId);
             if (!order) return;
@@ -1086,7 +1100,17 @@
 
             let warrantySection = '';
             if (item && item.warranty && item.warrantyEndDate) {
-                const isExpired = new Date() > new Date(item.warrantyEndDate);
+                // الحصول على التاريخ الحالي بالتوقيت السعودي
+                const now = new Date();
+                const saudiOffset = 3 * 60;
+                const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
+                const saudiNow = new Date(utcTime + (saudiOffset * 60000));
+                saudiNow.setHours(0, 0, 0, 0);
+                
+                const endDate = new Date(item.warrantyEndDate);
+                endDate.setHours(0, 0, 0, 0);
+                
+                const isExpired = endDate < saudiNow;
                 const bgColor = isExpired ? '#fee' : '#efe';
                 const borderColor = isExpired ? '#f44' : '#4a4';
                 const icon = isExpired ? '❌' : '✅';
@@ -1094,7 +1118,7 @@
                 
                 let timeLeftText = '';
                 if (!isExpired) {
-                    const daysLeft = Math.ceil((new Date(item.warrantyEndDate) - new Date()) / (1000 * 60 * 60 * 24));
+                    const daysLeft = Math.ceil((endDate - saudiNow) / (1000 * 60 * 60 * 24));
                     timeLeftText = `<div style="margin-top: 0.5rem; font-weight: 600; color: #2e7d32;">🕐 باقي ${daysLeft} يوم</div>`;
                 }
                 
@@ -1105,8 +1129,8 @@
                             <strong style="font-size: 1.1rem;">حالة الضمان: ${statusText}</strong>
                         </div>
                         <div style="font-size: 0.9rem; color: #666;">
-                            <div>📅 بدأ: ${new Date(item.warrantyStartDate).toLocaleDateString('ar-SA')}</div>
-                            <div>📅 ينتهي: ${new Date(item.warrantyEndDate).toLocaleDateString('ar-SA')}</div>
+                            <div>📅 بدأ: ${formatDateGregorian(item.warrantyStartDate)}</div>
+                            <div>📅 ينتهي: ${formatDateGregorian(item.warrantyEndDate)}</div>
                             <div>⏱️ المدة: ${item.warrantyDuration}</div>
                             ${timeLeftText}
                         </div>
@@ -1195,20 +1219,22 @@
                 ` : ''}
 
                 <div class="detail-section">
-                    <h4 class="detail-title">تحديد السعر والضمان</h4>
-                    ${warrantySection}
-                    <div class="status-actions">
+                    <h4 class="detail-title">تحديث السعر والضمان</h4>
+                    <div class="pricing-controls">
                         <div class="control-group">
-                            <label>سعر القطعة (ريال)</label>
-                            <input type="number" class="control-input" id="partPrice" placeholder="0.00" 
+                            <label>السعر (ريال)</label>
+                            <input type="number" class="control-input" id="partPrice" 
+                                   placeholder="مثال: 500" 
                                    value="${item && item.price ? item.price : ''}" step="0.01">
                         </div>
                         <div class="control-group">
-                            <label>مدة الضمان</label>
-                            <input type="text" class="control-input" id="warrantyDuration" 
-                                   placeholder="مثال: 3 أشهر، 6 أشهر، سنة" 
-                                   value="${(item && item.warrantyDuration) ? item.warrantyDuration : ''}">
-                            <small style="color: #999; font-size: 0.75rem;">اتركه فارغاً إذا لم يكن هناك ضمان</small>
+                            <label>مدة الضمان (بالأيام)</label>
+                            <input type="number" class="control-input" id="warrantyDuration" 
+                                   placeholder="مثال: 7 أو 30 أو 90 أو 180" 
+                                   value="${item && item.warrantyDuration ? item.warrantyDuration.replace(/[^0-9]/g, '') : ''}">
+                            <small style="color: #999; font-size: 0.75rem; display: block; margin-top: 0.3rem;">
+                                💡 أمثلة: 7 (أسبوع)، 30 (شهر)، 90 (3 أشهر)، 180 (6 أشهر)، 365 (سنة). اتركه فارغاً للطلبات بدون ضمان
+                            </small>
                         </div>
                         <div class="control-group">
                             <label>&nbsp;</label>
@@ -1301,7 +1327,8 @@
                 if (response.ok) {
                     const result = await response.json();
                     console.log('✅ Pricing updated:', result);
-                    alert(`✅ تم تحديث السعر: ${price} ريال${warrantyDuration ? '\nالضمان: ' + warrantyDuration : '\nبدون ضمان'}`);
+                    const warrantyText = warrantyDuration ? `\nالضمان: ${warrantyDuration} يوم` : '\nبدون ضمان';
+                    alert(`✅ تم تحديث السعر: ${price} ريال${warrantyText}`);
                     await loadOrders();
                     closeOrderModal();
                 } else {

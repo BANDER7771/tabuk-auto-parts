@@ -400,9 +400,19 @@
                 
                 let warrantyStatus = '';
                 if (warranty && warrantyEndDate) {
-                    const isExpired = new Date() > new Date(warrantyEndDate);
-                    const daysLeft = Math.ceil((new Date(warrantyEndDate) - new Date()) / (1000 * 60 * 60 * 24));
-                    
+                    // الحصول على التاريخ الحالي بالتوقيت السعودي
+                    const now = new Date();
+                    const saudiOffset = 3 * 60;
+                    const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
+                    const saudiNow = new Date(utcTime + (saudiOffset * 60000));
+                    saudiNow.setHours(0, 0, 0, 0);
+
+                    const endDate = new Date(warrantyEndDate);
+                    endDate.setHours(0, 0, 0, 0);
+
+                    const isExpired = endDate < saudiNow;
+                    const daysLeft = Math.ceil((endDate - saudiNow) / (1000 * 60 * 60 * 24));
+
                     if (isExpired) {
                         warrantyStatus = '<span style="background: #fee; color: #d32f2f; padding: 0.3rem 0.6rem; border-radius: 12px; font-size: 0.8rem;">❌ منتهي</span>';
                     } else if (daysLeft <= 7) {
@@ -437,12 +447,12 @@
         }
 
         function formatDate(dateStr) {
+            if (!dateStr) return '-';
             const date = new Date(dateStr);
-            return date.toLocaleDateString('ar-SA', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit'
-            });
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}/${month}/${day}`;
         }
 
         function refreshData() {

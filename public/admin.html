@@ -644,6 +644,35 @@
         .loading {
             animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
+        /* إضافة في نهاية قسم الـ CSS */
+@keyframes slideDown {
+    from {
+        transform: translateX(-50%) translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
+}
+
+/* تحسين شكل الجدول عند التمرير */
+.data-table tbody tr {
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.data-table tbody tr:hover {
+    background: var(--gray-50);
+    transform: translateX(-2px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* Modal Overlay Animation */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
     </style>
 </head>
 <body>
@@ -969,6 +998,438 @@
                 // هنا يتم تنفيذ البحث
             });
         });
+        // ============= متغيرات عامة =============
+let allOrders = [];
+let filteredOrders = [];
+
+// ============= التحقق من كلمة المرور =============
+function checkAdminPassword() {
+    const savedPassword = localStorage.getItem('adminPassword');
+    if (savedPassword === '8899') return true;
+    
+    const password = prompt('أدخل كلمة مرور الإدارة:');
+    if (password === '8899') {
+        localStorage.setItem('adminPassword', '8899');
+        return true;
+    } else {
+        alert('كلمة مرور خاطئة!');
+        window.location.href = 'index.html';
+        return false;
+    }
+}
+
+// ============= تحميل الطلبات =============
+async function loadOrders() {
+    try {
+        const response = await fetch('/api/orders/admin');
+        const data = await response.json();
+        
+        if (data.orders) {
+            allOrders = data.orders;
+            
+            // فلترة الطلبات حسب الحالة
+            const activeOrders = allOrders.filter(order => 
+                order.status !== 'cancelled' && 
+                order.status !== 'delivered' && 
+                order.status !== 'archived'
+            );
+            
+            filteredOrders = activeOrders;
+            displayOrders(activeOrders);
+            updateStatistics(allOrders);
+        }
+    } catch (error) {
+        console.error('خطأ في تحميل الطلبات:', error);
+    }
+}
+
+// ============= عرض الطلبات في الجدول =============
+function displayOrders(orders) {
+    const tbody = document.getElementById('ordersTableBody');
+    if (!tbody) return;
+    
+    if (orders.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="10" style="text-align: center; padding: 3rem; color: #666;">
+                    <div>📦 لا توجد طلبات</div>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    tbody.innerHTML = orders.map(order => `
+        <tr onclick="showOrderDetails('${order._id || order.orderNumber}')" style="cursor: pointer;">
+            <td><input type="checkbox" class="order-checkbox" onclick="event.stopPropagation()"></td>
+            <td><span class="order-id">#${order.orderNumber || 'غير محدد'}</span></td>
+            <td>${order.fullName || 'غير محدد'}</td>
+            <td>
+                <a href="#" onclick="openWhatsApp('${order.phone}', '${order.orderNumber}', '${order.fullName}', '${order.partDetails}'); event.stopPropagation(); return false;" 
+                   style="color: #25D366; text-decoration: none; font-weight: bold;">
+                    ${formatPhone(order.phone)}
+                </a>
+            </td>
+            <td>${order.carNameCategory || ''} ${order.carYear || ''}</td>
+            <td title="${order.partDetails || ''}">${truncateText(order.partDetails || '', 30)}</td>
+            <td>${order.price ? `${order.price} ريال` : 'لم يحدد'}</td>
+            <td>${getStatusBadge(order.status)}</td>
+            <td>${formatDate(order.createdAt)}</td>
+            <td>
+                <div class="action-buttons">
+                    <button class="action-btn-sm btn-view" onclick="showOrderDetails('${order._id || order.orderNumber}'); event.stopPropagation();">👁️</button>
+                    <button class="action-btn-sm btn-edit" onclick="editOrder('${order._id || order.orderNumber}'); event.stopPropagation();">✏️</button>
+                    <button class="action-btn-sm btn-delete" onclick="deleteOrder('${order._id || order.orderNumber}'); event.stopPropagation();">🗑️</button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// ============= تحديث الإحصائيات =============
+function updateStatistics(orders) {
+    // إحصائيات عامة
+    document.getElementById('totalOrders').textContent = orders.length;
+    
+    // الطلبات حسب الحالة
+    const pending = orders.filter(o => o.status === 'pending').length;
+    const completed = orders.filter(o => o.status === 'delivered').length;
+    const processing = orders.filter(o => ['confirmed', 'processing', 'shipped'].includes(o.status)).length;
+    
+    document.getElementById('pendingOrders').textContent = pending;
+    document.getElementById('completedOrders').textContent = completed;
+    
+    // حساب الإيرادات
+    const revenue = orders
+        .filter(o => o.price && o.status === 'delivered')
+        .reduce((sum, o) => sum + parseFloat(o.price), 0);
+    document.getElementById('totalRevenue').textContent = `${revenue.toFixed(0)} ريال`;
+    
+    // الضمانات
+    const activeWarranties = orders.filter(o => {
+        if (!o.warrantyEndDate) return false;
+        return new Date(o.warrantyEndDate) > new Date();
+    }).length;
+    
+    const expiredWarranties = orders.filter(o => {
+        if (!o.warrantyEndDate) return false;
+        return new Date(o.warrantyEndDate) <= new Date();
+    }).length;
+    
+    document.getElementById('activeWarranties').textContent = activeWarranties;
+    document.getElementById('expiredWarranties').textContent = expiredWarranties;
+}
+
+// ============= عرض تفاصيل الطلب =============
+function showOrderDetails(orderId) {
+    const order = allOrders.find(o => o._id === orderId || o.orderNumber === orderId);
+    if (!order) return;
+    
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    `;
+    
+    modal.innerHTML = `
+        <div style="background: white; border-radius: 16px; padding: 2rem; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2 style="color: #333; font-size: 1.5rem;">تفاصيل الطلب #${order.orderNumber}</h2>
+                <button onclick="this.closest('div[style*=\"position: fixed\"]').remove()" 
+                        style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">✖️</button>
+            </div>
+            
+            <div style="display: grid; gap: 1rem;">
+                <div style="padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+                    <strong>معلومات العميل:</strong><br>
+                    الاسم: ${order.fullName}<br>
+                    الجوال: <a href="tel:${order.phone}">${order.phone}</a><br>
+                    ${order.city ? `المدينة: ${order.city}<br>` : ''}
+                </div>
+                
+                <div style="padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+                    <strong>معلومات السيارة:</strong><br>
+                    السيارة: ${order.carNameCategory}<br>
+                    الموديل: ${order.carYear}<br>
+                    ${order.vinNumber ? `رقم الشاسيه: ${order.vinNumber}<br>` : ''}
+                </div>
+                
+                <div style="padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+                    <strong>تفاصيل القطعة:</strong><br>
+                    ${order.partDetails}
+                </div>
+                
+                ${order.partType ? `
+                <div style="padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+                    <strong>نوع القطعة:</strong> ${order.partType === 'new' ? 'جديد' : order.partType === 'used' ? 'مستعمل' : 'تشليح'}
+                </div>
+                ` : ''}
+                
+                ${order.deliveryMethod ? `
+                <div style="padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+                    <strong>طريقة التوصيل:</strong> ${order.deliveryMethod === 'delivery' ? 'توصيل' : 'استلام من المحل'}
+                    ${order.address ? `<br>العنوان: ${order.address}` : ''}
+                </div>
+                ` : ''}
+                
+                <div style="padding: 1rem; background: #e3f2fd; border-radius: 8px;">
+                    <strong>الحالة:</strong> ${getStatusText(order.status)}<br>
+                    <strong>السعر:</strong> ${order.price ? `${order.price} ريال` : 'لم يحدد بعد'}<br>
+                    <strong>التاريخ:</strong> ${formatDate(order.createdAt)}
+                </div>
+                
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button onclick="updateOrderStatus('${order._id}', 'confirmed')" 
+                            style="flex: 1; padding: 0.8rem; background: #4caf50; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                        تأكيد الطلب
+                    </button>
+                    <button onclick="openWhatsApp('${order.phone}', '${order.orderNumber}', '${order.fullName}', '${order.partDetails}')" 
+                            style="flex: 1; padding: 0.8rem; background: #25D366; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                        واتساب
+                    </button>
+                    <button onclick="updateOrderStatus('${order._id}', 'cancelled')" 
+                            style="flex: 1; padding: 0.8rem; background: #f44336; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                        إلغاء
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+// ============= فتح واتساب =============
+function openWhatsApp(phone, orderNumber, customerName, partDetails) {
+    // تنظيف رقم الهاتف
+    let cleanPhone = phone.replace(/\D/g, '');
+    if (cleanPhone.startsWith('0')) {
+        cleanPhone = '966' + cleanPhone.substring(1);
+    }
+    
+    // إعداد الرسالة
+    const message = `مرحباً ${customerName}
+    
+بخصوص طلبك رقم #${orderNumber}
+القطعة المطلوبة: ${truncateText(partDetails, 50)}
+
+نود إبلاغك بأن...`;
+    
+    // فتح واتساب
+    const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+}
+
+// ============= تحديث حالة الطلب =============
+async function updateOrderStatus(orderId, newStatus) {
+    try {
+        const response = await fetch(`/api/orders/${orderId}/status`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: newStatus })
+        });
+        
+        if (response.ok) {
+            // إغلاق النافذة المنبثقة
+            const modal = document.querySelector('div[style*="position: fixed"]');
+            if (modal) modal.remove();
+            
+            // إعادة تحميل البيانات
+            await loadOrders();
+            
+            // إظهار رسالة نجاح
+            showNotification(`تم تحديث حالة الطلب إلى ${getStatusText(newStatus)}`, 'success');
+        }
+    } catch (error) {
+        console.error('خطأ في تحديث الحالة:', error);
+        showNotification('حدث خطأ في تحديث الحالة', 'error');
+    }
+}
+
+// ============= الفلاتر =============
+function applyFilters() {
+    let filtered = [...allOrders];
+    
+    // فلتر الحالة
+    const statusFilter = document.getElementById('statusFilter').value;
+    if (statusFilter) {
+        filtered = filtered.filter(o => o.status === statusFilter);
+    } else {
+        // عرض الطلبات النشطة فقط (غير الملغية وغير المكتملة)
+        filtered = filtered.filter(o => 
+            o.status !== 'cancelled' && 
+            o.status !== 'delivered' && 
+            o.status !== 'archived'
+        );
+    }
+    
+    // فلتر الضمان
+    const warrantyFilter = document.getElementById('warrantyFilter').value;
+    if (warrantyFilter === 'active') {
+        filtered = filtered.filter(o => o.warrantyEndDate && new Date(o.warrantyEndDate) > new Date());
+    } else if (warrantyFilter === 'expired') {
+        filtered = filtered.filter(o => o.warrantyEndDate && new Date(o.warrantyEndDate) <= new Date());
+    } else if (warrantyFilter === 'none') {
+        filtered = filtered.filter(o => !o.warrantyEndDate);
+    }
+    
+    // فلتر التاريخ
+    const dateFrom = document.getElementById('dateFrom').value;
+    const dateTo = document.getElementById('dateTo').value;
+    if (dateFrom) {
+        filtered = filtered.filter(o => new Date(o.createdAt) >= new Date(dateFrom));
+    }
+    if (dateTo) {
+        filtered = filtered.filter(o => new Date(o.createdAt) <= new Date(dateTo));
+    }
+    
+    // البحث العام
+    const searchTerm = document.getElementById('globalSearch').value.toLowerCase();
+    if (searchTerm) {
+        filtered = filtered.filter(o => 
+            o.orderNumber?.toLowerCase().includes(searchTerm) ||
+            o.fullName?.toLowerCase().includes(searchTerm) ||
+            o.phone?.includes(searchTerm) ||
+            o.carNameCategory?.toLowerCase().includes(searchTerm) ||
+            o.partDetails?.toLowerCase().includes(searchTerm)
+        );
+    }
+    
+    filteredOrders = filtered;
+    displayOrders(filtered);
+}
+
+// ============= وظائف مساعدة =============
+function formatPhone(phone) {
+    if (!phone) return 'غير محدد';
+    return phone.replace(/(\d{4})(\d{3})(\d{4})/, '$1 $2 $3');
+}
+
+function formatDate(date) {
+    if (!date) return 'غير محدد';
+    return new Date(date).toLocaleDateString('ar-SA');
+}
+
+function truncateText(text, length) {
+    if (!text) return '';
+    return text.length > length ? text.substring(0, length) + '...' : text;
+}
+
+function getStatusBadge(status) {
+    const statusMap = {
+        pending: '<span class="status-badge status-pending">جديد</span>',
+        confirmed: '<span class="status-badge status-processing">مؤكد</span>',
+        processing: '<span class="status-badge status-processing">قيد المعالجة</span>',
+        shipped: '<span class="status-badge status-shipped">في الطريق</span>',
+        delivered: '<span class="status-badge status-delivered">تم التسليم</span>',
+        cancelled: '<span class="status-badge status-cancelled">ملغي</span>'
+    };
+    return statusMap[status] || status;
+}
+
+function getStatusText(status) {
+    const statusMap = {
+        pending: 'جديد',
+        confirmed: 'مؤكد',
+        processing: 'قيد المعالجة',
+        shipped: 'في الطريق',
+        delivered: 'تم التسليم',
+        cancelled: 'ملغي'
+    };
+    return statusMap[status] || status;
+}
+
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 1rem 2rem;
+        background: ${type === 'success' ? '#4caf50' : type === 'error' ? '#f44336' : '#2196f3'};
+        color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        z-index: 10000;
+        animation: slideDown 0.3s ease;
+    `;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => notification.remove(), 3000);
+}
+
+// ============= وظائف الأزرار السريعة =============
+function exportToExcel() {
+    // تصدير البيانات إلى Excel
+    const headers = ['رقم الطلب', 'العميل', 'الجوال', 'السيارة', 'القطعة', 'السعر', 'الحالة', 'التاريخ'];
+    const data = filteredOrders.map(o => [
+        o.orderNumber,
+        o.fullName,
+        o.phone,
+        `${o.carNameCategory} ${o.carYear}`,
+        o.partDetails,
+        o.price || 'لم يحدد',
+        getStatusText(o.status),
+        formatDate(o.createdAt)
+    ]);
+    
+    // إنشاء CSV
+    const csv = [headers, ...data].map(row => row.join(',')).join('\n');
+    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `orders_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+}
+
+// ============= تهيئة الصفحة =============
+document.addEventListener('DOMContentLoaded', function() {
+    // التحقق من كلمة المرور
+    if (!checkAdminPassword()) return;
+    
+    // تحميل البيانات
+    loadOrders();
+    refreshData();
+    
+    // إعداد المستمعين
+    document.getElementById('selectAll').addEventListener('change', function(e) {
+        const checkboxes = document.querySelectorAll('.order-checkbox');
+        checkboxes.forEach(cb => cb.checked = e.target.checked);
+    });
+    
+    // الفلاتر
+    ['statusFilter', 'warrantyFilter', 'priceFilter', 'dateFrom', 'dateTo'].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.addEventListener('change', applyFilters);
+        }
+    });
+    
+    // البحث العام
+    const globalSearch = document.getElementById('globalSearch');
+    if (globalSearch) {
+        globalSearch.addEventListener('input', applyFilters);
+    }
+    
+    // تحديث تلقائي كل 30 ثانية
+    setInterval(loadOrders, 30000);
+});
+
+// ============= تحديث البيانات =============
+function refreshData() {
+    loadOrders();
+    showNotification('تم تحديث البيانات', 'success');
+}
     </script>
 </body>
 </html>

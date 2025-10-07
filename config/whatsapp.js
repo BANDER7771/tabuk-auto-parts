@@ -1,5 +1,5 @@
+// config/whatsapp.js
 // إعدادات إشعارات الواتساب
-const axios = require('axios');
 
 function parseAdminNumbers() {
     const numbers = [];
@@ -18,23 +18,15 @@ function parseAdminNumbers() {
 
     const uniqueNumbers = [...new Set(numbers.filter(Boolean))];
 
-    if (uniqueNumbers.length === 0 && process.env.NODE_ENV !== 'production') {
-        console.warn('⚠️ لم يتم تعريف أرقام واتساب في المتغيرات البيئية. سيتم استخدام رقم افتراضي للتطوير فقط.');
-        return ['966545376792'];
+    if (uniqueNumbers.length === 0) {
+        console.warn('⚠️ لم يتم تعريف أرقام واتساب. سيتم استخدام رقم افتراضي.');
+        return ['966511780209']; // رقمك المسجل
     }
 
     return uniqueNumbers;
 }
 
 const ADMIN_WHATSAPP_NUMBERS = parseAdminNumbers();
-
-const hasConfiguredProvider = () => {
-    return Boolean(
-        process.env.CALLMEBOT_API_KEY ||
-        (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) ||
-        process.env.WHATSAPP_WEB_API_URL
-    );
-};
 
 class WhatsAppConfigurationError extends Error {
     constructor(message) {
@@ -43,55 +35,17 @@ class WhatsAppConfigurationError extends Error {
     }
 }
 
-// إرسال رسالة واتساب باستخدام WhatsApp Business API أو خدمة خارجية
+// إرسال إشعار واتساب باستخدام Template المعتمد
 const sendWhatsAppNotification = async (orderData) => {
     console.log('🔍 WhatsApp Debug - بدء إرسال الإشعار');
     console.log('📱 أرقام الإدارة:', ADMIN_WHATSAPP_NUMBERS);
-    console.log('🔑 طرق الإرسال المتاحة:', {
-        ADMIN_WHATSAPP_NUMBERS: ADMIN_WHATSAPP_NUMBERS.length,
-        CALLMEBOT_API_KEY: !!process.env.CALLMEBOT_API_KEY,
-        TWILIO: !!process.env.TWILIO_ACCOUNT_SID && !!process.env.TWILIO_AUTH_TOKEN,
-        WHATSAPP_WEB_API_URL: !!process.env.WHATSAPP_WEB_API_URL
-    });
     
+    if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN) {
+        throw new WhatsAppConfigurationError('إعدادات Twilio غير مُعرفة');
+    }
+
     if (ADMIN_WHATSAPP_NUMBERS.length === 0) {
-        throw new WhatsAppConfigurationError('لا توجد أرقام واتساب مُعرفة للإدارة. يرجى ضبط ADMIN_WHATSAPP_NUMBERS أو ADMIN_WHATSAPP_1.');
-    }
-
-    if (!hasConfiguredProvider()) {
-        throw new WhatsAppConfigurationError('لا توجد طريقة إرسال واتساب مفعلة. يرجى تفعيل CALLMEBOT_API_KEY أو إعداد Twilio أو ضبط WHATSAPP_WEB_API_URL.');
-    }
-
-    let message;
-    
-    if (orderData.orderType === 'تحديث حالة الطلب') {
-        message = `
-🔄 *تحديث حالة طلب - تشاليح تبوك*
-
-📋 *رقم الطلب:* ${orderData.orderNumber}
-👤 *العميل:* ${orderData.customerName}
-📱 *الجوال:* ${orderData.customerPhone}
-
-📊 *التحديث:* ${orderData.description}
-
-📅 *وقت التحديث:* ${new Date(orderData.createdAt).toLocaleString('ar-SA')}
-        `.trim();
-    } else {
-        message = `
-🚨 *طلب جديد - تشاليح تبوك*
-
-📋 *رقم الطلب:* ${orderData.orderNumber}
-👤 *اسم العميل:* ${orderData.customerName}
-📱 *رقم الجوال:* ${orderData.customerPhone}
-🚗 *نوع الطلب:* ${orderData.orderType}
-
-🔧 *تفاصيل الطلب:*
-${orderData.description}
-
-📅 *تاريخ الطلب:* ${new Date(orderData.createdAt).toLocaleString('ar-SA')}
-
-⚡ *يرجى المتابعة مع العميل في أقرب وقت*
-        `.trim();
+        throw new WhatsAppConfigurationError('لا توجد أرقام واتساب مُعرفة');
     }
 
     let successCount = 0;
@@ -99,13 +53,13 @@ ${orderData.description}
 
     for (const phoneNumber of ADMIN_WHATSAPP_NUMBERS) {
         try {
-            await sendToWhatsApp(phoneNumber, message);
+            await sendTemplateMessage(phoneNumber, orderData);
             successCount += 1;
-            console.log(`✅ تم إرسال إشعار واتساب إلى: ${phoneNumber.substring(0, 4)}****`);
+            console.log(`✅ تم إرسال إشعار واتساب إلى: ${phoneNumber.substring(0, 6)}****`);
         } catch (error) {
-            const errorMessage = error.response?.data || error.message;
+            const errorMessage = error.message || error.toString();
             errors.push(`${phoneNumber}: ${errorMessage}`);
-            console.error(`❌ خطأ في إرسال واتساب إلى ${phoneNumber.substring(0, 4)}****:`, errorMessage);
+            console.error(`❌ خطأ في إرسال واتساب إلى ${phoneNumber.substring(0, 6)}****:`, errorMessage);
         }
     }
 
@@ -114,60 +68,78 @@ ${orderData.description}
     }
 };
 
-// دالة إرسال الرسالة (يمكن استخدام خدمات مختلفة)
-const sendToWhatsApp = async (phoneNumber, message) => {
-    const cleanPhone = phoneNumber.replace(/[^0-9]/g, '');
-
+// إرسال رسالة باستخدام Template
+const sendTemplateMessage = async (phoneNumber, orderData) => {
     try {
-        if (process.env.CALLMEBOT_API_KEY) {
-            const apiKey = process.env.CALLMEBOT_API_KEY;
-            
-            const url = `https://api.callmebot.com/whatsapp.php?phone=${cleanPhone}&text=${encodeURIComponent(message)}&apikey=${apiKey}`;
-            
-            console.log(`📞 محاولة إرسال واتساب إلى: ${phoneNumber}`);
-            console.log(`🔗 URL: ${url.substring(0, 80)}...`);
-            
-            const response = await axios.get(url, { timeout: 10000 });
-            const responseText = typeof response.data === 'string' ? response.data.toLowerCase() : '';
-            if (responseText.includes('error') || responseText.includes('not accepted')) {
-                throw new Error(`CallMeBot returned an error: ${response.data}`);
-            }
-            console.log(`✅ تم إرسال واتساب تلقائي إلى: ${phoneNumber}`);
-            console.log(`📊 استجابة CallMeBot:`, response.status, response.statusText);
-            return response.data;
+        const twilioClient = require('twilio')(
+            process.env.TWILIO_ACCOUNT_SID,
+            process.env.TWILIO_AUTH_TOKEN
+        );
+
+        // تنظيف رقم الهاتف وإضافة +
+        let cleanPhone = phoneNumber.replace(/[^0-9]/g, '');
+        if (!cleanPhone.startsWith('+')) {
+            cleanPhone = '+' + cleanPhone;
         }
 
-        if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
-            const twilioClient = require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-            const { sendViaTwilio } = require('../utils/waSender');
+        console.log(`📞 إرسال Template Message إلى: ${cleanPhone}`);
 
-            console.log(`📞 إرسال Twilio واتساب إلى: ${phoneNumber}`);
+        // حساب المبلغ (إذا كان موجوداً)
+        const amount = orderData.totalAmount || orderData.price || '0';
+        
+        // تحديد الحالة
+        const status = orderData.status || 'قيد المراجعة';
 
-            const result = await sendViaTwilio(twilioClient, cleanPhone, message);
+        // رقم واتساب المسجل في Twilio
+        const fromNumber = process.env.TWILIO_FROM_WHATSAPP || 'whatsapp:+966511780209';
+        const fromFormatted = fromNumber.startsWith('whatsapp:') ? fromNumber : `whatsapp:${fromNumber}`;
 
-            console.log(`✅ تم إرسال واتساب Twilio بنجاح!`);
-            console.log(`📊 Message SID: ${result.sid}`);
-            return result;
-        }
+        // معاملات Template حسب قالبك:
+        // {{1}} = رقم الطلب
+        // {{2}} = المبلغ
+        // {{3}} = الحالة
+        const contentVariables = {
+            "1": orderData.orderNumber || 'N/A',
+            "2": amount.toString(),
+            "3": status
+        };
 
-        if (process.env.WHATSAPP_WEB_API_URL) {
-            const response = await axios.post(process.env.WHATSAPP_WEB_API_URL, {
-                phone: cleanPhone,
-                message: message
-            });
-            console.log(`✅ تم إرسال واتساب Web API إلى: ${phoneNumber}`);
-            return response.data;
-        }
+        console.log('📋 Content Variables:', JSON.stringify(contentVariables));
+        console.log('📤 From:', fromFormatted);
+        console.log('📥 To:', `whatsapp:${cleanPhone}`);
 
-        throw new WhatsAppConfigurationError('لا توجد طريقة متاحة لإرسال رسائل واتساب. يرجى تفعيل CallMeBot أو Twilio أو API خارجي.');
+        // إرسال الرسالة باستخدام Content Template
+        const message = await twilioClient.messages.create({
+            from: fromFormatted,
+            to: `whatsapp:${cleanPhone}`,
+            contentSid: 'HX1a819c43fcfcebe0b1c1e10b98f848aa', // Template SID
+            contentVariables: JSON.stringify(contentVariables)
+        });
+
+        console.log(`✅ تم إرسال واتساب Twilio بنجاح!`);
+        console.log(`📊 Message SID: ${message.sid}`);
+        console.log(`📊 Status: ${message.status}`);
+
+        return message;
 
     } catch (error) {
-        console.error(`❌ خطأ في إرسال واتساب إلى ${phoneNumber}:`, error.message);
+        console.error(`❌ Twilio Error:`, error.message);
+        
+        if (error.code) {
+            console.error(`📋 Error Code: ${error.code}`);
+        }
+        
+        if (error.moreInfo) {
+            console.error(`📖 More Info: ${error.moreInfo}`);
+        }
+
+        if (error.status) {
+            console.error(`📊 HTTP Status: ${error.status}`);
+        }
+        
         throw error;
     }
 };
-
-// تم إزالة دالة البريد الإلكتروني - نستخدم الواتساب فقط
 
 module.exports = {
     sendWhatsAppNotification

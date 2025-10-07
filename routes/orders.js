@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const Order = require('../models/Order');
-const { sendWhatsAppNotification } = require('../config/whatsapp');
+const { sendOrderNotification } = require('../config/whatsapp-meta');
 const upload = require('../middleware/upload');
 // تم إزالة استيراد البريد الإلكتروني - نستخدم الواتساب فقط
 
@@ -369,13 +369,12 @@ router.put('/admin/:id/status', async (req, res) => {
 
         // إرسال إشعار واتساب للإدارة عن تحديث الحالة
         try {
-            await sendWhatsAppNotification({
+            await sendOrderNotification({
                 orderNumber: order.orderNumber,
                 customerName: order.customerName,
                 customerPhone: order.customerPhone,
-                orderType: 'تحديث حالة الطلب',
-                description: `تم تحديث حالة الطلب إلى: ${status}`,
-                createdAt: new Date()
+                partDetails: status,
+                description: `تم تحديث حالة الطلب إلى: ${status}`
             });
         } catch (whatsappError) {
             console.error('❌ WhatsApp notification error:', whatsappError);

@@ -11,9 +11,8 @@ dotenv.config();
 const app = express();
 
 // ============================================
-// Health Check - يجب أن يكون أول endpoint
+// 1. Health Check - أول شيء (قبل أي middleware)
 // ============================================
-// Health check بسيط جداً بدون أي middleware
 app.get('/health', (req, res) => {
     res.status(200).json({
         status: 'OK',
@@ -25,7 +24,6 @@ app.get('/health', (req, res) => {
     });
 });
 
-// Simple test endpoint - بدون middleware
 app.get('/api/test-cors', (req, res) => {
     res.json({
         status: 'OK',
@@ -34,397 +32,182 @@ app.get('/api/test-cors', (req, res) => {
     });
 });
 
-// ============================================
-// إعداد trust proxy - الآن بعد health endpoint
-// ============================================
-try {
-    if (process.env.NODE_ENV === 'production') {
-        app.set('trust proxy', 1);
-        console.log('✅ تم تفعيل trust proxy للإنتاج (1 hop)');
-    } else {
-        app.set('trust proxy', false);
-        console.log('✅ تم إلغاء trust proxy للتطوير');
-    }
-} catch (trustProxyError) {
-    console.error('❌ خطأ في إعداد trust proxy:', trustProxyError.message);
-    app.set('trust proxy', false);
-    console.warn('⚠️ تم استخدام إعداد trust proxy آمن كبديل');
-}
+console.log('✅ Health endpoints registered');
 
-// باقي الكود كما هو...
-// إعداد trust proxy آمن للعمل مع Railway و Render
-// بدلاً من true، نحدد عدد proxy hops المتوقعة
-try {
-    if (process.env.NODE_ENV === 'production') {
-        // في الإنتاج، نثق في proxy واحد فقط (Railway/Render)
-        app.set('trust proxy', 1);
-        console.log('✅ تم تفعيل trust proxy للإنتاج (1 hop)');
-    } else {
-        // في التطوير، لا نثق في أي proxy
-        app.set('trust proxy', false);
-        console.log('✅ تم إلغاء trust proxy للتطوير');
-    }
-} catch (trustProxyError) {
-    console.error('❌ خطأ في إعداد trust proxy:', trustProxyError.message);
-    // استخدام إعداد آمن كبديل
+// ============================================
+// 2. Trust Proxy - مرة واحدة فقط
+// ============================================
+if (process.env.NODE_ENV === 'production') {
+    app.set('trust proxy', 1);
+    console.log('✅ Trust proxy enabled');
+} else {
     app.set('trust proxy', false);
-    console.warn('⚠️ تم استخدام إعداد trust proxy آمن كبديل');
 }
 
 // ============================================
-// تثبيت الحزم الجديدة المطلوبة
+// 3. Security & Compression
 // ============================================
-// يجب تشغيل: npm install express-rate-limit compression helmet
+try {
+    const rateLimit = require('express-rate-limit');
+    const compression = require('compression');
+    const helmet = require('helmet');
 
-const rateLimit = require('express-rate-limit');
-const { ipKeyGenerator } = rateLimit;
-const compression = require('compression');
-const helmet = require('helmet');
-
-const getClientIp = (req) => {
-    if (Array.isArray(req.ips) && req.ips.length > 0) {
-        return req.ips[0];
-    }
-    return req.ip || req.socket?.remoteAddress || req.connection?.remoteAddress;
-};
-
-const RATE_LIMIT_IPV6_SUBNET = 56;
-
-const rateLimitKeyGenerator = (req) => {
-    const clientIp = getClientIp(req);
-    try {
-        return ipKeyGenerator(clientIp, RATE_LIMIT_IPV6_SUBNET);
-    } catch (error) {
-        console.error('⚠️ Rate limit ipKeyGenerator error:', {
-            clientIp,
-            message: error.message
-        });
-        return ipKeyGenerator('127.0.0.1', false);
-    }
-};
+    app.use(helmet({ contentSecurityPolicy: false }));
+    app.use(compression());
+    
+    const limiter = rateLimit({
+        windowMs: 15 * 60 * 1000,
+        max: 100,
+        skip: (req) => req.path === '/health' || req.path === '/api/test-cors'
+    });
+    
+    app.use('/api/', limiter);
+    console.log('✅ Security middleware loaded');
+} catch (err) {
+    console.warn('⚠️ Some security packages not available:', err.message);
+}
 
 // ============================================
-// إعدادات الأمان والحماية
+// 4. CORS
 // ============================================
-
-// تطبيق Helmet للحماية الأساسية
-app.use(helmet({
-    contentSecurityPolicy: false, // للسماح بتحميل الموارد الخارجية
-}));
-
-// تطبيق Compression لضغط البيانات
-app.use(compression());
-
-// إعدادات CORS محسنة
 const corsOptions = {
     origin: function (origin, callback) {
-        const allowedOrigins = [
-            'http://localhost:3000',
-            'http://localhost:5000',
-            'http://localhost:10000',
-            'https://tabuk-auto-parts.onrender.com',
-            'https://www.tabuk-auto-parts.onrender.com',
-            'http://tabuk-auto-parts.onrender.com',
-            'http://www.tabuk-auto-parts.onrender.com',
-            // إضافة نطاقات Railway
-            'https://tabuk-auto-parts-production.up.railway.app',
-            'https://www.tabuk-auto-parts-production.up.railway.app',
-            'http://tabuk-auto-parts-production.up.railway.app',
-            'http://www.tabuk-auto-parts-production.up.railway.app'
-        ];
-        
-        // السماح للطلبات بدون origin (مثل Postman أو same-origin)
-        if (!origin) {
-            return callback(null, true);
-        }
-        
-        // السماح لجميع subdomains من onrender.com و railway.app في الإنتاج
-        if (process.env.NODE_ENV === 'production') {
-            if (origin.includes('.onrender.com') || origin.includes('.railway.app')) {
-                return callback(null, true);
-            }
-        }
-        
-        // التحقق من القائمة المسموحة
-        if (allowedOrigins.indexOf(origin) !== -1) {
+        if (!origin || 
+            origin.includes('.railway.app') || 
+            origin.includes('.onrender.com') ||
+            origin.includes('localhost')) {
             callback(null, true);
         } else {
-            console.log('❌ CORS Error - Origin not allowed:', origin);
-            console.log('🔍 Current origin:', origin);
-            console.log('✅ Allowed origins:', allowedOrigins);
-            // في الإنتاج، نسمح بالطلب حتى لو لم يكن في القائمة (للتجربة)
-            if (process.env.NODE_ENV === 'production') {
-                console.log('⚠️ Allowing request in production mode');
-                return callback(null, true);
-            }
-            callback(new Error('Not allowed by CORS'));
+            callback(null, true); // في الإنتاج، نسمح بكل شيء مؤقتاً
         }
     },
     credentials: true,
-    optionsSuccessStatus: 200,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+    optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions));
-
-// إضافة headers CORS إضافية مع دعم UTF-8
-app.use((req, res, next) => {
-    const origin = req.headers.origin;
-    
-    // السماح لجميع النطاقات في الإنتاج (حل مؤقت)
-    if (process.env.NODE_ENV === 'production') {
-        res.header('Access-Control-Allow-Origin', origin || '*');
-    }
-    
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    
-    // تعيين Content-Type فقط للـ API responses وليس للملفات الثابتة
-    if (req.path.startsWith('/api/')) {
-        res.header('Content-Type', 'application/json; charset=utf-8');
-    }
-    
-    // التعامل مع preflight requests
-    if (req.method === 'OPTIONS') {
-        res.sendStatus(200);
-    } else {
-        next();
-    }
-});
+console.log('✅ CORS configured');
 
 // ============================================
-// Rate Limiting
+// 5. Body Parsers
 // ============================================
-
-// حماية عامة مع إعدادات trust proxy آمنة
-const generalLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 دقيقة
-    max: 100, // حد أقصى 100 طلب
-    message: 'تم تجاوز الحد المسموح من الطلبات، حاول مرة أخرى لاحقاً',
-    standardHeaders: true,
-    legacyHeaders: false,
-    keyGenerator: rateLimitKeyGenerator,
-    skip: (req) => {
-        // تخطي rate limiting للـ health checks
-        return req.path === '/health' || req.path === '/api/test-cors';
-    }
-});
-
-// حماية تسجيل الدخول
-const authLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 5, // 5 محاولات كحد أقصى
-    skipSuccessfulRequests: true,
-    message: 'محاولات دخول كثيرة، حاول بعد 15 دقيقة',
-    standardHeaders: true,
-    legacyHeaders: false,
-    keyGenerator: rateLimitKeyGenerator
-});
-
-// تطبيق Rate Limiting مع معالجة الأخطاء
-try {
-    app.use('/api/', generalLimiter);
-    app.use('/api/auth/login', authLimiter);
-    app.use('/api/auth/register', authLimiter);
-    console.log('✅ تم تطبيق Rate Limiting بنجاح');
-} catch (rateLimitError) {
-    console.error('❌ خطأ في تطبيق Rate Limiting:', rateLimitError.message);
-    console.warn('⚠️ سيتم تشغيل الخادم بدون Rate Limiting');
-}
-
-// ============================================
-// Middleware العام - يجب أن يكون قبل CORS
-// ============================================
-// Twilio webhooks need raw body for signature validation
 app.use('/webhooks/twilio', express.raw({ type: '*/*' }));
-// زيادة حد البيانات مع دعم UTF-8 للنصوص العربية
-app.use(express.json({ 
-    limit: '10mb',
-    verify: (req, res, buf) => {
-        req.rawBody = buf.toString('utf8');
-    }
-}));
-app.use(express.urlencoded({ 
-    extended: true, 
-    limit: '10mb',
-    parameterLimit: 50000
-}));
-
-// إزالة middleware المتضارب - سيتم التعامل مع multipart في routes/orders.js
-
-// Serve static files مع إعدادات صحيحة
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use(express.static(path.join(__dirname, 'public'), {
-    setHeaders: (res, path) => {
-        // تعيين Content-Type الصحيح للملفات HTML
-        if (path.endsWith('.html')) {
-            res.setHeader('Content-Type', 'text/html; charset=utf-8');
-        }
-        // تعيين Content-Type للملفات CSS
-        if (path.endsWith('.css')) {
-            res.setHeader('Content-Type', 'text/css; charset=utf-8');
-        }
-        // تعيين Content-Type للملفات JavaScript
-        if (path.endsWith('.js')) {
-            res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
-        }
-    }
-}));
-
-// Middleware للتشخيص (فقط في التطوير)
-if (process.env.NODE_ENV !== 'production') {
-    app.use((req, res, next) => {
-        console.log(`📥 ${req.method} ${req.path}`);
-        console.log('📋 Headers:', req.headers);
-        if (req.body && Object.keys(req.body).length > 0) {
-            console.log('📦 Body:', req.body);
-        }
-        next();
-    });
-}
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+console.log('✅ Body parsers configured');
 
 // ============================================
-// إنشاء مجلد uploads تلقائياً
+// 6. Static Files
 // ============================================
 const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });
-    console.log('✅ تم إنشاء مجلد uploads');
+    console.log('✅ Uploads directory created');
 }
 
-// ============================================
-// اتصال محسن بقاعدة البيانات
-// ============================================
-const MONGODB_URI = process.env.MONGODB_URI || process.env.DATABASE_URL || process.env.MONGO_URL;
+app.use('/uploads', express.static(uploadsDir));
+app.use(express.static(path.join(__dirname, 'public')));
+console.log('✅ Static files configured');
 
-if (!MONGODB_URI) {
-    console.error('❌ متغير قاعدة البيانات غير محدد');
-    console.error('💡 يرجى إضافة أحد المتغيرات التالية:');
-    console.error('   - MONGODB_URI');
-    console.error('   - DATABASE_URL');
-    console.error('   - MONGO_URL');
-    console.error('🌐 البيئة الحالية:', process.env.NODE_ENV || 'development');
-    console.error('🔧 المنصة:', process.env.RAILWAY_ENVIRONMENT ? 'Railway' : (process.env.RENDER ? 'Render' : 'Local'));
-    
-    // في بيئة الإنتاج، لا نوقف الخادم بل نستخدم نظام احتياطي
-    if (process.env.NODE_ENV === 'production') {
-        console.warn('⚠️ سيتم تشغيل الخادم بدون قاعدة بيانات (وضع احتياطي)');
-    } else {
-        process.exit(1);
-    }
-}
+// ============================================
+// 7. Database Connection (Non-blocking)
+// ============================================
+const MONGODB_URI = process.env.MONGODB_URI || process.env.DATABASE_URL;
 
-// محاولة الاتصال بقاعدة البيانات فقط إذا كان MONGODB_URI متاحاً
 if (MONGODB_URI) {
     mongoose.connect(MONGODB_URI, {
         serverSelectionTimeoutMS: 5000,
-        socketTimeoutMS: 10000,
-        retryWrites: true,
-        w: 'majority',
-        maxPoolSize: 10
+        socketTimeoutMS: 10000
     })
     .then(() => {
-        console.log('✅ تم الاتصال بقاعدة البيانات MongoDB');
-        console.log('🌐 قاعدة البيانات جاهزة ودائمة');
-        console.log('🔗 الرابط:', MONGODB_URI.replace(/\/\/.*:.*@/, '//***:***@')); // إخفاء كلمة المرور
+        console.log('✅ MongoDB connected');
     })
     .catch(err => {
-        console.error('❌ خطأ في الاتصال بقاعدة البيانات:', err.message);
-        
-        // معالجة أخطاء SSL/TLS
-        if (err.code === 'ERR_SSL_TLSV1_ALERT_INTERNAL_ERROR' || 
-            err.message.includes('SSL') || 
-            err.message.includes('TLS')) {
-            console.error('🔒 خطأ SSL/TLS - تحقق من إعدادات MongoDB Atlas');
-            console.error('💡 تأكد من أن IP Address مُضاف في Network Access');
-            console.error('💡 تأكد من أن المستخدم له صلاحيات كافية');
-        }
-        
-        console.warn('⚠️ سيتم تشغيل الخادم في الوضع الاحتياطي (بدون قاعدة بيانات)');
+        console.error('❌ MongoDB connection failed:', err.message);
+        console.warn('⚠️ Server will continue without database');
     });
 } else {
-    console.warn('⚠️ لا يوجد رابط قاعدة بيانات - سيتم تشغيل الخادم في الوضع الاحتياطي');
+    console.warn('⚠️ No MONGODB_URI found - running without database');
 }
 
-// معالجة انقطاع الاتصال
 mongoose.connection.on('disconnected', () => {
-    console.warn('⚠️ انقطع الاتصال بقاعدة البيانات');
+    console.warn('⚠️ MongoDB disconnected');
 });
 
 mongoose.connection.on('reconnected', () => {
-    console.log('✅ تم إعادة الاتصال بقاعدة البيانات');
+    console.log('✅ MongoDB reconnected');
 });
 
 // ============================================
-// Routes - مع المصادقة
+// 8. Webhooks (before other routes)
 // ============================================
-
-// Twilio WhatsApp Webhooks
 app.post('/webhooks/twilio/whatsapp', (req, res) => {
-    const url = 'https://tabuk-auto-parts-production.up.railway.app/webhooks/twilio/whatsapp';
-    try {
-        console.log('📥 Received Twilio WhatsApp webhook');
-        res.sendStatus(200);
-    } catch (e) {
-        console.error('❌ Twilio WhatsApp webhook error:', e.message);
-        res.sendStatus(200);
-    }
-});
-
-app.post('/webhooks/twilio/whatsapp-fallback', (req, res) => {
-    return res.sendStatus(200);
-});
-
-app.post('/webhooks/twilio/status', (req, res) => {
-    try {
-        const params = new URLSearchParams(req.body.toString());
-        const MessageSid = params.get('MessageSid');
-        const MessageStatus = params.get('MessageStatus');
-        const To = params.get('To');
-        console.log('📡 Twilio Status Callback:', { MessageSid, MessageStatus, To });
-    } catch (err) {
-        console.error('⚠️ Twilio Status parse error:', err.message);
-    }
+    console.log('📥 Twilio webhook received');
     res.sendStatus(200);
 });
 
-// Health check endpoint لـ Railway
-app.get('/health', (req, res) => {
-    res.status(200).json({
-        status: 'OK',
-        timestamp: new Date().toISOString(),
-        uptime: process.uptime(),
-        environment: process.env.NODE_ENV,
-        database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
-        port: process.env.PORT || 3000
-    });
+app.post('/webhooks/twilio/whatsapp-fallback', (req, res) => {
+    res.sendStatus(200);
 });
 
-// Route للتحقق من CORS
-app.get('/api/test-cors', (req, res) => {
-    res.json({
-        message: 'CORS is working!',
-        origin: req.headers.origin,
-        timestamp: new Date().toISOString(),
-        environment: process.env.NODE_ENV
-    });
+app.post('/webhooks/twilio/status', (req, res) => {
+    res.sendStatus(200);
 });
 
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/parts', require('./routes/parts'));
-app.use('/api/orders', require('./routes/orders'));
-app.use('/api/shops', require('./routes/shops'));
-app.use('/api/users', require('./routes/users'));
-app.use('/api/admin', require('./routes/admin'));
+console.log('✅ Webhooks registered');
 
-// Route للصفحة الرئيسية
+// ============================================
+// 9. API Routes (with error handling)
+// ============================================
+try {
+    app.use('/api/auth', require('./routes/auth'));
+    console.log('✅ Auth routes loaded');
+} catch (err) {
+    console.error('❌ Auth routes failed:', err.message);
+}
+
+try {
+    app.use('/api/parts', require('./routes/parts'));
+    console.log('✅ Parts routes loaded');
+} catch (err) {
+    console.error('❌ Parts routes failed:', err.message);
+}
+
+try {
+    app.use('/api/orders', require('./routes/orders'));
+    console.log('✅ Orders routes loaded');
+} catch (err) {
+    console.error('❌ Orders routes failed:', err.message);
+}
+
+try {
+    app.use('/api/shops', require('./routes/shops'));
+    console.log('✅ Shops routes loaded');
+} catch (err) {
+    console.error('❌ Shops routes failed:', err.message);
+}
+
+try {
+    app.use('/api/users', require('./routes/users'));
+    console.log('✅ Users routes loaded');
+} catch (err) {
+    console.error('❌ Users routes failed:', err.message);
+}
+
+try {
+    app.use('/api/admin', require('./routes/admin'));
+    console.log('✅ Admin routes loaded');
+} catch (err) {
+    console.error('❌ Admin routes failed:', err.message);
+}
+
+// ============================================
+// 10. HTML Pages
+// ============================================
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Routes للصفحات الأخرى
 app.get('/request', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'request.html'));
 });
@@ -433,78 +216,80 @@ app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
-// Static files already configured above
+console.log('✅ HTML routes registered');
 
 // ============================================
-// معالجة الأخطاء الموحدة
+// 11. Error Handlers
 // ============================================
-
-// Global Error Handler
 app.use((err, req, res, next) => {
-    console.error('Error:', err.stack);
-    
-    // معالجة أخطاء Rate Limiting
-    if (err.code === 'ERR_ERL_PERMISSIVE_TRUST_PROXY') {
-        console.error('❌ Trust proxy configuration error:', err.message);
-        return res.status(500).json({ 
-            message: 'خطأ في إعدادات الخادم',
-            error: 'Server configuration error'
-        });
-    }
-    
-    // معالجة أخطاء Multer
-    if (err.code === 'LIMIT_FILE_SIZE') {
-        return res.status(400).json({ message: 'حجم الملف كبير جداً' });
-    }
-    
-    if (err.name === 'ValidationError') {
-        return res.status(400).json({ 
-            message: 'خطأ في البيانات المدخلة',
-            errors: Object.values(err.errors).map(e => e.message)
-        });
-    }
-    
-    if (err.name === 'CastError') {
-        return res.status(400).json({ message: 'معرف غير صحيح' });
-    }
-    
-    // خطأ عام
+    console.error('❌ Error:', err.message);
     res.status(err.status || 500).json({
-        message: err.message || 'حدث خطأ في الخادم',
-        ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+        message: err.message || 'خطأ في الخادم',
+        error: process.env.NODE_ENV === 'development' ? err.stack : undefined
     });
 });
 
-// 404 Handler
 app.use((req, res) => {
     res.status(404).json({ message: 'الصفحة غير موجودة' });
 });
 
+console.log('✅ Error handlers registered');
+
 // ============================================
-// تشغيل الخادم
+// 12. Start Server
 // ============================================
-const DEFAULT_PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 10000;
-const PORT = DEFAULT_PORT;
+const PORT = process.env.PORT || 3000;
 
 const server = app.listen(PORT, '0.0.0.0', () => {
+    console.log('='.repeat(50));
     console.log(`🚀 السيرفر يعمل على البورت ${PORT}`);
-    console.log(`🌐 البيئة: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`🌐 البيئة: ${process.env.NODE_ENV || 'production'}`);
     console.log(`🔧 المنصة: ${process.env.RAILWAY_ENVIRONMENT ? 'Railway' : 'Local'}`);
+    console.log(`📊 Database: ${mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected'}`);
+    console.log('='.repeat(50));
 });
 
-// معالجة إشارات النظام
+// ============================================
+// 13. Graceful Shutdown
+// ============================================
 process.on('SIGTERM', () => {
-    console.log('📡 تم استلام SIGTERM - إغلاق الخادم بأمان...');
+    console.log('📡 SIGTERM received - shutting down gracefully...');
     server.close(() => {
-        console.log('✅ تم إغلاق الخادم بنجاح');
-        process.exit(0);
+        console.log('✅ Server closed');
+        mongoose.connection.close(false, () => {
+            console.log('✅ MongoDB connection closed');
+            process.exit(0);
+        });
     });
 });
 
 process.on('SIGINT', () => {
-    console.log('📡 تم استلام SIGINT - إغلاق الخادم بأمان...');
+    console.log('📡 SIGINT received - shutting down gracefully...');
     server.close(() => {
-        console.log('✅ تم إغلاق الخادم بنجاح');
-        process.exit(0);
+        console.log('✅ Server closed');
+        mongoose.connection.close(false, () => {
+            console.log('✅ MongoDB connection closed');
+            process.exit(0);
+        });
     });
 });
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (err) => {
+    console.error('💥 Uncaught Exception:', err);
+    // لا نوقف السيرفر في الإنتاج
+    if (process.env.NODE_ENV !== 'production') {
+        process.exit(1);
+    }
+});
+
+process.on('unhandledRejection', (err) => {
+    console.error('💥 Unhandled Rejection:', err);
+    // لا نوقف السيرفر في الإنتاج
+    if (process.env.NODE_ENV !== 'production') {
+        process.exit(1);
+    }
+});
+
+console.log('✅ Process handlers registered');
+console.log('🎉 Server initialization complete!');

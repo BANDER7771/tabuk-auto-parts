@@ -1,14 +1,7 @@
 node_modules
 npm-debug.log
+.env
+.env.local
 .git
 .gitignore
-README.md
-.env
-.nyc_output
-coverage
-.nyc_output
-.vscode
-.DS_Store
 *.log
-logs
-backup_orders.json

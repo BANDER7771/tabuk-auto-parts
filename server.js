@@ -10,6 +10,48 @@ dotenv.config();
 
 const app = express();
 
+// ============================================
+// Health Check - يجب أن يكون أول endpoint
+// ============================================
+// Health check بسيط جداً بدون أي middleware
+app.get('/health', (req, res) => {
+    res.status(200).json({
+        status: 'OK',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        environment: process.env.NODE_ENV || 'production',
+        database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+        port: process.env.PORT || 3000
+    });
+});
+
+// Simple test endpoint - بدون middleware
+app.get('/api/test-cors', (req, res) => {
+    res.json({
+        status: 'OK',
+        message: 'CORS is working!',
+        timestamp: new Date().toISOString()
+    });
+});
+
+// ============================================
+// إعداد trust proxy - الآن بعد health endpoint
+// ============================================
+try {
+    if (process.env.NODE_ENV === 'production') {
+        app.set('trust proxy', 1);
+        console.log('✅ تم تفعيل trust proxy للإنتاج (1 hop)');
+    } else {
+        app.set('trust proxy', false);
+        console.log('✅ تم إلغاء trust proxy للتطوير');
+    }
+} catch (trustProxyError) {
+    console.error('❌ خطأ في إعداد trust proxy:', trustProxyError.message);
+    app.set('trust proxy', false);
+    console.warn('⚠️ تم استخدام إعداد trust proxy آمن كبديل');
+}
+
+// باقي الكود كما هو...
 // إعداد trust proxy آمن للعمل مع Railway و Render
 // بدلاً من true، نحدد عدد proxy hops المتوقعة
 try {

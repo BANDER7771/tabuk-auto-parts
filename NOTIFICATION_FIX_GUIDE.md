@@ -54,7 +54,7 @@ const { sendWhatsAppNotification } = require('./config/whatsapp');
 sendWhatsAppNotification({
   orderNumber: 'TEST-001',
   customerName: 'اختبار',
-  customerPhone: '0555123456',
+  customerPhone: '0545376792',
   orderType: 'طلب قطعة غيار',
   description: 'اختبار الواتساب',
   createdAt: new Date()

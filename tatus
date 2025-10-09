@@ -1,0 +1,156 @@
+[1mdiff --git a/routes/orders.js b/routes/orders.js[m
+[1mindex 9c2f9a2..c4a56e5 100644[m
+[1m--- a/routes/orders.js[m
+[1m+++ b/routes/orders.js[m
+[36m@@ -193,6 +193,28 @@[m [mrouter.post('/', (req, res, next) => {[m
+             }[m
+         }[m
+ [m
+[32m+[m[32m        // ===== WA: notify on order created =====[m
+[32m+[m[32m        try {[m
+[32m+[m[32m            const sendWA = req.app?.locals?.sendWhatsApp;[m
+[32m+[m[32m            if (typeof sendWA === 'function') {[m
+[32m+[m[32m                const orderId = (order?._id || '').toString();[m
+[32m+[m[32m                const orderNo = order?.orderNumber || orderId.slice(-6);[m
+[32m+[m
+[32m+[m[32m                const phone =[m
+[32m+[m[32m                    String(order?.customerPhone || order?.customer?.phone || order?.phone || '').replace(/\D/g, '');[m
+[32m+[m
+[32m+[m[32m                if (phone) {[m
+[32m+[m[32m                    const link = process.env.APP_PUBLIC_URL ? `${process.env.APP_PUBLIC_URL}/orders/${orderId}` : '';[m
+[32m+[m[32m                    const msg = `تم استلام طلبك رقم ${orderNo}. سنتواصل معك خلال أوقات العمل 8ص–8م (عدا الجمعة).${link ? '\nرابط الطلب: ' + link : ''}`;[m
+[32m+[m[32m                    await sendWA(phone, msg);[m
+[32m+[m[32m                } else {[m
+[32m+[m[32m                    console.warn('WA skip (create): no customer phone on order');[m
+[32m+[m[32m                }[m
+[32m+[m[32m            }[m
+[32m+[m[32m        } catch (e) {[m
+[32m+[m[32m            console.error('WA error (create):', e?.message);[m
+[32m+[m[32m        }[m
+[32m+[m
+         // إرسال إشعار واتساب فقط[m
+         const deliveryText = deliveryOption === 'express' ? 'مستعجل (1-2 ساعة) - 50 ريال' : [m
+                            deliveryOption === 'standard' ? 'سريع (3-5 ساعات) - 25 ريال' : [m
+[36m@@ -367,17 +389,24 @@[m [mrouter.put('/admin/:id/status', async (req, res) => {[m
+         await order.save();[m
+         console.log('✅ Order status updated:', order.orderNumber, 'to', status);[m
+ [m
+[31m-        // إرسال إشعار واتساب للإدارة عن تحديث الحالة[m
+[32m+[m[32m        // ===== WA: notify on status updated =====[m
+         try {[m
+[31m-            await sendOrderNotification({[m
+[31m-                orderNumber: order.orderNumber,[m
+[31m-                customerName: order.customerName,[m
+[31m-                customerPhone: order.customerPhone,[m
+[31m-                partDetails: status,[m
+[31m-                description: `تم تحديث حالة الطلب إلى: ${status}`[m
+[31m-            });[m
+[31m-        } catch (whatsappError) {[m
+[31m-            console.error('❌ WhatsApp notification error:', whatsappError);[m
+[32m+[m[32m            const sendWA = req.app?.locals?.sendWhatsApp;[m
+[32m+[m[32m            if (typeof sendWA === 'function') {[m
+[32m+[m[32m                const orderId = (order?._id || '').toString();[m
+[32m+[m[32m                const orderNo = order?.orderNumber || orderId.slice(-6);[m
+[32m+[m
+[32m+[m[32m                const phone =[m
+[32m+[m[32m                    String(order?.customerPhone || order?.customer?.phone || order?.phone || '').replace(/\D/g, '');[m
+[32m+[m
+[32m+[m[32m                if (phone) {[m
+[32m+[m[32m                    const link = process.env.APP_PUBLIC_URL ? `${process.env.APP_PUBLIC_URL}/orders/${orderId}` : '';[m
+[32m+[m[32m                    const msg = `تم تحديث حالة طلبك رقم ${orderNo} إلى: ${order?.status || 'غير محددة'}.${link ? '\nرابط الطلب: ' + link : ''}`;[m
+[32m+[m[32m                    await sendWA(phone, msg);[m
+[32m+[m[32m                }[m
+[32m+[m[32m            }[m
+[32m+[m[32m        } catch (e) {[m
+[32m+[m[32m            console.error('WA error (status):', e?.message);[m
+         }[m
+ [m
+         res.json({[m
+[36m@@ -473,6 +502,26 @@[m [mrouter.put('/:orderNumber/status', async (req, res) => {[m
+         await order.save();[m
+         console.log('✅ Order status updated:', order.orderNumber, 'to', status);[m
+ [m
+[32m+[m[32m        // ===== WA: notify on status updated =====[m
+[32m+[m[32m        try {[m
+[32m+[m[32m            const sendWA = req.app?.locals?.sendWhatsApp;[m
+[32m+[m[32m            if (typeof sendWA === 'function') {[m
+[32m+[m[32m                const orderId = (order?._id || '').toString();[m
+[32m+[m[32m                const orderNo = order?.orderNumber || orderId.slice(-6);[m
+[32m+[m
+[32m+[m[32m                const phone =[m
+[32m+[m[32m                    String(order?.customerPhone || order?.customer?.phone || order?.phone || '').replace(/\D/g, '');[m
+[32m+[m
+[32m+[m[32m                if (phone) {[m
+[32m+[m[32m                    const link = process.env.APP_PUBLIC_URL ? `${process.env.APP_PUBLIC_URL}/orders/${orderId}` : '';[m
+[32m+[m[32m                    const msg = `تم تحديث حالة طلبك رقم ${orderNo} إلى: ${order?.status || 'غير محددة'}.${link ? '\nرابط الطلب: ' + link : ''}`;[m
+[32m+[m[32m                    await sendWA(phone, msg);[m
+[32m+[m[32m                }[m
+[32m+[m[32m            }[m
+[32m+[m[32m        } catch (e) {[m
+[32m+[m[32m            console.error('WA error (status):', e?.message);[m
+[32m+[m[32m        }[m
+[32m+[m
+         res.json({[m
+             message: 'تم تحديث حالة الطلب',[m
+             order[m
+[1mdiff --git a/server.js b/server.js[m
+[1mindex 33c64a3..d7e8c49 100644[m
+[1m--- a/server.js[m
+[1m+++ b/server.js[m
+[36m@@ -10,6 +10,46 @@[m [mdotenv.config();[m
+ [m
+ const app = express();[m
+ [m
+[32m+[m[32m// ===== WhatsApp (Twilio) bootstrap - minimal =====[m
+[32m+[m[32mconst twilio = require('twilio');[m
+[32m+[m
+[32m+[m[32mconst TW_SID   = process.env.TWILIO_ACCOUNT_SID;[m
+[32m+[m[32mconst TW_TOKEN = process.env.TWILIO_AUTH_TOKEN;[m
+[32m+[m[32mconst TW_FROM  = process.env.TWILIO_FROM_WHATSAPP; // يجب أن تبدأ بـ whatsapp:+[m
+[32m+[m
+[32m+[m[32mconst waEnabled = Boolean([m
+[32m+[m[32m  TW_SID && TW_TOKEN && /^whatsapp:\+\d{8,15}$/.test(String(TW_FROM || ''))[m
+[32m+[m[32m);[m
+[32m+[m
+[32m+[m[32mconst waClient = waEnabled ? twilio(TW_SID, TW_TOKEN) : null;[m
+[32m+[m
+[32m+[m[32masync function sendWhatsApp(toE164, body) {[m
+[32m+[m[32m  if (!waClient) return { ok: false, reason: 'wa_disabled' };[m
+[32m+[m[32m  const msisdn = String(toE164 || '').replace(/\D/g, '');[m
+[32m+[m[32m  if (!msisdn) return { ok: false, reason: 'invalid_msisdn' };[m
+[32m+[m
+[32m+[m[32m  const to = `whatsapp:+${msisdn}`;[m
+[32m+[m[32m  try {[m
+[32m+[m[32m    const msg = await waClient.messages.create({ from: TW_FROM, to, body });[m
+[32m+[m[32m    return { ok: true, sid: msg.sid };[m
+[32m+[m[32m  } catch (e) {[m
+[32m+[m[32m    console.error('WA send failed:', e?.message);[m
+[32m+[m[32m    return { ok: false, reason: 'twilio_error', error: e?.message };[m
+[32m+[m[32m  }[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32m// إتاحة الدالة للراوترات[m
+[32m+[m[32mapp.locals.sendWhatsApp = sendWhatsApp;[m
+[32m+[m
+[32m+[m[32m// نقطة فحص للتطوير فقط[m
+[32m+[m[32mif (process.env.NODE_ENV !== 'production') {[m
+[32m+[m[32m  app.get('/dev/wa-ping', async (req, res) => {[m
+[32m+[m[32m    const to = req.query.to || '';[m
+[32m+[m[32m    const r = await sendWhatsApp(to, 'Test: WhatsApp is working ✅');[m
+[32m+[m[32m    res.json({ enabled: waEnabled, ...r });[m
+[32m+[m[32m  });[m
+[32m+[m[32m}[m
+[32m+[m
+ // ============================================[m
+ // 1. Health Check - أول شيء (قبل أي middleware)[m
+ // ============================================[m
+[36m@@ -20,7 +60,8 @@[m [mapp.get('/health', (req, res) => {[m
+         uptime: process.uptime(),[m
+         environment: process.env.NODE_ENV || 'production',[m
+         database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',[m
+[31m-        port: process.env.PORT || 3000[m
+[32m+[m[32m        port: process.env.PORT || 3000,[m
+[32m+[m[32m        whatsapp: /^whatsapp:\+/.test(String(process.env.TWILIO_FROM_WHATSAPP || '')) ? 'enabled' : 'disabled'[m
+     });[m
+ });[m
+ [m

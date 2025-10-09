@@ -193,6 +193,28 @@ router.post('/', (req, res, next) => {
             }
         }
 
+        // ===== WA: notify on order created =====
+        try {
+            const sendWA = req.app?.locals?.sendWhatsApp;
+            if (typeof sendWA === 'function') {
+                const orderId = (order?._id || '').toString();
+                const orderNo = order?.orderNumber || orderId.slice(-6);
+
+                const phone =
+                    String(order?.customerPhone || order?.customer?.phone || order?.phone || '').replace(/\D/g, '');
+
+                if (phone) {
+                    const link = process.env.APP_PUBLIC_URL ? `${process.env.APP_PUBLIC_URL}/orders/${orderId}` : '';
+                    const msg = `تم استلام طلبك رقم ${orderNo}. سنتواصل معك خلال أوقات العمل 8ص–8م (عدا الجمعة).${link ? '\nرابط الطلب: ' + link : ''}`;
+                    await sendWA(phone, msg);
+                } else {
+                    console.warn('WA skip (create): no customer phone on order');
+                }
+            }
+        } catch (e) {
+            console.error('WA error (create):', e?.message);
+        }
+
         // إرسال إشعار واتساب فقط
         const deliveryText = deliveryOption === 'express' ? 'مستعجل (1-2 ساعة) - 50 ريال' : 
                            deliveryOption === 'standard' ? 'سريع (3-5 ساعات) - 25 ريال' : 
@@ -367,17 +389,24 @@ router.put('/admin/:id/status', async (req, res) => {
         await order.save();
         console.log('✅ Order status updated:', order.orderNumber, 'to', status);
 
-        // إرسال إشعار واتساب للإدارة عن تحديث الحالة
+        // ===== WA: notify on status updated =====
         try {
-            await sendOrderNotification({
-                orderNumber: order.orderNumber,
-                customerName: order.customerName,
-                customerPhone: order.customerPhone,
-                partDetails: status,
-                description: `تم تحديث حالة الطلب إلى: ${status}`
-            });
-        } catch (whatsappError) {
-            console.error('❌ WhatsApp notification error:', whatsappError);
+            const sendWA = req.app?.locals?.sendWhatsApp;
+            if (typeof sendWA === 'function') {
+                const orderId = (order?._id || '').toString();
+                const orderNo = order?.orderNumber || orderId.slice(-6);
+
+                const phone =
+                    String(order?.customerPhone || order?.customer?.phone || order?.phone || '').replace(/\D/g, '');
+
+                if (phone) {
+                    const link = process.env.APP_PUBLIC_URL ? `${process.env.APP_PUBLIC_URL}/orders/${orderId}` : '';
+                    const msg = `تم تحديث حالة طلبك رقم ${orderNo} إلى: ${order?.status || 'غير محددة'}.${link ? '\nرابط الطلب: ' + link : ''}`;
+                    await sendWA(phone, msg);
+                }
+            }
+        } catch (e) {
+            console.error('WA error (status):', e?.message);
         }
 
         res.json({
@@ -472,6 +501,26 @@ router.put('/:orderNumber/status', async (req, res) => {
 
         await order.save();
         console.log('✅ Order status updated:', order.orderNumber, 'to', status);
+
+        // ===== WA: notify on status updated =====
+        try {
+            const sendWA = req.app?.locals?.sendWhatsApp;
+            if (typeof sendWA === 'function') {
+                const orderId = (order?._id || '').toString();
+                const orderNo = order?.orderNumber || orderId.slice(-6);
+
+                const phone =
+                    String(order?.customerPhone || order?.customer?.phone || order?.phone || '').replace(/\D/g, '');
+
+                if (phone) {
+                    const link = process.env.APP_PUBLIC_URL ? `${process.env.APP_PUBLIC_URL}/orders/${orderId}` : '';
+                    const msg = `تم تحديث حالة طلبك رقم ${orderNo} إلى: ${order?.status || 'غير محددة'}.${link ? '\nرابط الطلب: ' + link : ''}`;
+                    await sendWA(phone, msg);
+                }
+            }
+        } catch (e) {
+            console.error('WA error (status):', e?.message);
+        }
 
         res.json({
             message: 'تم تحديث حالة الطلب',

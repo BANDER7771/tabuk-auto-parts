@@ -10,6 +10,46 @@ dotenv.config();
 
 const app = express();
 
+// ===== WhatsApp (Twilio) bootstrap - minimal =====
+const twilio = require('twilio');
+
+const TW_SID   = process.env.TWILIO_ACCOUNT_SID;
+const TW_TOKEN = process.env.TWILIO_AUTH_TOKEN;
+const TW_FROM  = process.env.TWILIO_FROM_WHATSAPP; // يجب أن تبدأ بـ whatsapp:+
+
+const waEnabled = Boolean(
+  TW_SID && TW_TOKEN && /^whatsapp:\+\d{8,15}$/.test(String(TW_FROM || ''))
+);
+
+const waClient = waEnabled ? twilio(TW_SID, TW_TOKEN) : null;
+
+async function sendWhatsApp(toE164, body) {
+  if (!waClient) return { ok: false, reason: 'wa_disabled' };
+  const msisdn = String(toE164 || '').replace(/\D/g, '');
+  if (!msisdn) return { ok: false, reason: 'invalid_msisdn' };
+
+  const to = `whatsapp:+${msisdn}`;
+  try {
+    const msg = await waClient.messages.create({ from: TW_FROM, to, body });
+    return { ok: true, sid: msg.sid };
+  } catch (e) {
+    console.error('WA send failed:', e?.message);
+    return { ok: false, reason: 'twilio_error', error: e?.message };
+  }
+}
+
+// إتاحة الدالة للراوترات
+app.locals.sendWhatsApp = sendWhatsApp;
+
+// نقطة فحص للتطوير فقط
+if (process.env.NODE_ENV !== 'production') {
+  app.get('/dev/wa-ping', async (req, res) => {
+    const to = req.query.to || '';
+    const r = await sendWhatsApp(to, 'Test: WhatsApp is working ✅');
+    res.json({ enabled: waEnabled, ...r });
+  });
+}
+
 // ============================================
 // 1. Health Check - أول شيء (قبل أي middleware)
 // ============================================
@@ -20,7 +60,8 @@ app.get('/health', (req, res) => {
         uptime: process.uptime(),
         environment: process.env.NODE_ENV || 'production',
         database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
-        port: process.env.PORT || 3000
+        port: process.env.PORT || 3000,
+        whatsapp: /^whatsapp:\+/.test(String(process.env.TWILIO_FROM_WHATSAPP || '')) ? 'enabled' : 'disabled'
     });
 });
 

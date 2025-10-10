@@ -10,6 +10,26 @@ dotenv.config();
 
 const app = express();
 
+// ===== Brand upload (minimal, no new files) =====
+let multer;
+try { multer = require('multer'); } catch (_) {
+  console.log('Multer not installed, brand upload disabled');
+}
+
+const UPLOAD_DIR = path.join(__dirname, 'uploads');
+if (!fs.existsSync(UPLOAD_DIR)) { 
+  try { fs.mkdirSync(UPLOAD_DIR, { recursive: true }); } catch (_) {} 
+}
+
+function findBrandLogoPath() {
+  const exts = ['png','jpg','jpeg','svg','webp'];
+  try {
+    const files = fs.readdirSync(UPLOAD_DIR);
+    const hit = files.find(f => /^brand-logo\.(png|jpg|jpeg|svg|webp)$/i.test(f));
+    return hit ? path.join(UPLOAD_DIR, hit) : null;
+  } catch { return null; }
+}
+
 // ===== WhatsApp (Twilio) bootstrap - minimal =====
 const twilio = require('twilio');
 
@@ -258,8 +278,140 @@ try {
 }
 
 // ============================================
-// 10. HTML Pages
+// 10. HTML Pages & Brand Logo Routes
 // ============================================
+
+// خدمة الشعار بدون امتداد
+app.get('/brand-logo', (req, res) => {
+  const p = findBrandLogoPath();
+  if (!p) return res.status(404).end();
+  res.setHeader('Cache-Control', 'no-cache');
+  res.sendFile(p);
+});
+
+// صفحة رفع سريعة (admin)
+app.get('/admin/brand', (req, res) => {
+  res.type('html').send(`<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>رفع شعار المنصة</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #f5f5f5; margin: 0; padding: 20px; }
+    .container { max-width: 560px; margin: 24px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    h2 { color: #333; margin-bottom: 20px; }
+    form { display: grid; gap: 16px; }
+    input[type="file"] { padding: 12px; border: 2px dashed #ddd; border-radius: 8px; }
+    button { padding: 12px 20px; border-radius: 8px; border: none; background: #667eea; color: white; font-size: 16px; cursor: pointer; transition: background 0.3s; }
+    button:hover { background: #5a67d8; }
+    .info { color: #666; font-size: 14px; margin-top: 10px; line-height: 1.5; }
+    .current-logo { margin: 20px 0; text-align: center; }
+    .current-logo img { max-width: 200px; max-height: 200px; border: 1px solid #eee; border-radius: 8px; padding: 10px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>رفع شعار المنصة</h2>
+    <div class="current-logo" id="currentLogo"></div>
+    <form action="/admin/brand/upload" method="post" enctype="multipart/form-data">
+      <input type="file" name="brand" accept=".png,.jpg,.jpeg,.svg,.webp,image/*" required />
+      <button type="submit">رفع الشعار</button>
+    </form>
+    <p class="info">
+      • الحد الأقصى 2MB<br>
+      • الصيغ المدعومة: PNG, JPG, JPEG, SVG, WEBP<br>
+      • سيتم استبدال الشعار الحالي إن وجد
+    </p>
+  </div>
+  <script>
+    // Check if logo exists
+    fetch('/brand-logo')
+      .then(res => {
+        if (res.ok) {
+          document.getElementById('currentLogo').innerHTML = '<p style="color:#666;margin-bottom:10px;">الشعار الحالي:</p><img src="/brand-logo?' + Date.now() + '" alt="الشعار الحالي">';
+        } else {
+          document.getElementById('currentLogo').innerHTML = '<p style="color:#999;">لا يوجد شعار حالياً</p>';
+        }
+      })
+      .catch(() => {
+        document.getElementById('currentLogo').innerHTML = '<p style="color:#999;">لا يوجد شعار حالياً</p>';
+      });
+  </script>
+</body>
+</html>`);
+});
+
+// معالج رفع الشعار
+if (multer) {
+  const storage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, UPLOAD_DIR),
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname).toLowerCase();
+      if (!/\.(png|jpg|jpeg|svg|webp)$/i.test(ext)) {
+        return cb(new Error('Invalid file type'));
+      }
+      // حذف أي شعار سابق
+      const oldLogo = findBrandLogoPath();
+      if (oldLogo) {
+        try { fs.unlinkSync(oldLogo); } catch (_) {}
+      }
+      cb(null, 'brand-logo' + ext);
+    }
+  });
+
+  const upload = multer({ 
+    storage,
+    limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
+    fileFilter: (req, file, cb) => {
+      const ext = path.extname(file.originalname).toLowerCase();
+      if (/\.(png|jpg|jpeg|svg|webp)$/i.test(ext)) {
+        cb(null, true);
+      } else {
+        cb(new Error('يُسمح فقط بملفات الصور (PNG, JPG, JPEG, SVG, WEBP)'));
+      }
+    }
+  });
+
+  app.post('/admin/brand/upload', upload.single('brand'), (req, res) => {
+    if (!req.file) {
+      return res.status(400).send(`
+        <html dir="rtl">
+        <body style="font-family: system-ui; text-align: center; padding: 50px;">
+          <h3 style="color: #d32f2f;">فشل الرفع</h3>
+          <p>لم يتم رفع أي ملف</p>
+          <a href="/admin/brand" style="color: #667eea;">العودة</a>
+        </body>
+        </html>
+      `);
+    }
+    res.send(`
+      <html dir="rtl">
+      <body style="font-family: system-ui; text-align: center; padding: 50px;">
+        <h3 style="color: #00c853;">تم رفع الشعار بنجاح!</h3>
+        <img src="/brand-logo?${Date.now()}" style="max-width: 200px; margin: 20px 0; border: 1px solid #eee; border-radius: 8px; padding: 10px;">
+        <br>
+        <a href="/admin/brand" style="color: #667eea; margin-right: 20px;">رفع شعار آخر</a>
+        <a href="/" style="color: #667eea;">الصفحة الرئيسية</a>
+      </body>
+      </html>
+    `);
+  });
+} else {
+  app.post('/admin/brand/upload', (req, res) => {
+    res.status(503).send(`
+      <html dir="rtl">
+      <body style="font-family: system-ui; text-align: center; padding: 50px;">
+        <h3 style="color: #ff6f00;">الخدمة غير متاحة</h3>
+        <p>يجب تثبيت مكتبة multer لتفعيل رفع الصور</p>
+        <code style="background: #f5f5f5; padding: 10px; display: block; margin: 20px;">npm install multer</code>
+        <a href="/admin/brand" style="color: #667eea;">العودة</a>
+      </body>
+      </html>
+    `);
+  });
+}
+
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });

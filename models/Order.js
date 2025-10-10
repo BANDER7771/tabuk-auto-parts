@@ -6,6 +6,13 @@ const orderSchema = new mongoose.Schema({
         unique: true,
         required: true
     },
+    // رقم الطلب المتسلسل القصير
+    number: {
+        type: Number,
+        unique: true,
+        sparse: true,  // السماح بـ null للطلبات القديمة
+        index: true
+    },
     customerName: {
         type: String,
         required: true

@@ -78,8 +78,11 @@
             position: relative;
         }
 
-        .logo-icon img {
-            display: none;               /* نعتمد SVG الافتراضي الآن */
+        .logo-icon img#brandLogo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
         }
 
         /* العلامة تملأ المربع بالكامل */
@@ -1121,6 +1124,7 @@
         <div class="nav-container">
             <div class="logo">
                 <div class="logo-icon" id="logoIcon">
+                    <img id="brandLogo" alt="شعار المنصة" style="display:none;" onerror="this.style.display='none'; document.getElementById('defaultIcon').style.display='block';">
                     <svg id="defaultIcon" class="brand-svg" viewBox="0 0 24 24" aria-hidden="true">
                         <!-- علامة أحادية باللون الأبيض تُناسب قطع الغيار + تحديد الموقع -->
                         <!-- إطار دبوس الموقع ممتد للحواف لملء المربع -->
@@ -1588,16 +1592,15 @@
         // Load brand logo
         async function loadBrandLogo() {
             try {
-                const response = await fetch('/api/admin/brand-image');
+                const response = await fetch('/brand-logo');
                 if (response.ok) {
-                    const data = await response.json();
-                    if (data.exists) {
-                        const brandLogo = document.getElementById('brandLogo');
-                        const defaultIcon = document.getElementById('defaultIcon');
-                        
-                        brandLogo.src = data.imageUrl + '?t=' + Date.now();
+                    const brandLogo = document.getElementById('brandLogo');
+                    const defaultIcon = document.getElementById('defaultIcon');
+                    
+                    if (brandLogo) {
+                        brandLogo.src = '/brand-logo?t=' + Date.now();
                         brandLogo.style.display = 'block';
-                        defaultIcon.style.display = 'none';
+                        if (defaultIcon) defaultIcon.style.display = 'none';
                     }
                 }
             } catch (error) {

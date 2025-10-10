@@ -90,6 +90,46 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
+// ===== Email (nodemailer) bootstrap - minimal =====
+const nodemailer = require('nodemailer');
+let mailer = null;
+try {
+  if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+    const secure = String(process.env.SMTP_SECURE || 'true') === 'true';
+    const port = parseInt(process.env.SMTP_PORT || (secure ? 465 : 587), 10);
+    mailer = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port,
+      secure,
+      auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
+    });
+    console.log('✅ Email enabled (SMTP)');
+  } else if (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) {
+    mailer = nodemailer.createTransport({
+      service: 'gmail',
+      auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_APP_PASSWORD }
+    });
+    console.log('✅ Email enabled (Gmail)');
+  } else {
+    console.warn('⚠️ Email disabled: no SMTP/Gmail env found');
+  }
+} catch (e) {
+  console.error('❌ Email transport error:', e?.message);
+}
+
+async function sendEmail(to, subject, text, html) {
+  if (!mailer) return { ok: false, reason: 'mail_disabled' };
+  try {
+    const from = process.env.MAIL_FROM || process.env.SMTP_USER || process.env.GMAIL_USER || 'no-reply@localhost';
+    const info = await mailer.sendMail({ from, to, subject, text, html });
+    return { ok: true, id: info.messageId };
+  } catch (e) {
+    console.error('email send failed:', e?.message);
+    return { ok: false, reason: 'mailer_error', error: e?.message };
+  }
+}
+app.locals.sendEmail = sendEmail;
+
 // ============================================
 // 1. Health Check - أول شيء (قبل أي middleware)
 // ============================================
@@ -101,7 +141,8 @@ app.get('/health', (req, res) => {
         environment: process.env.NODE_ENV || 'production',
         database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
         port: process.env.PORT || 3000,
-        whatsapp: /^whatsapp:\+/.test(String(process.env.TWILIO_FROM_WHATSAPP || '')) ? 'enabled' : 'disabled'
+        whatsapp: /^whatsapp:\+/.test(String(process.env.TWILIO_FROM_WHATSAPP || '')) ? 'enabled' : 'disabled',
+        email: !!mailer ? 'enabled' : 'disabled'
     });
 });
 

@@ -23,14 +23,29 @@ const waEnabled = Boolean(
 
 const waClient = waEnabled ? twilio(TW_SID, TW_TOKEN) : null;
 
-async function sendWhatsApp(toE164, body) {
+function normalizeMsisdn(input) {
+  let d = String(input || '').replace(/\D/g, '');
+  // أزل 00 الدولية إن وجدت
+  if (d.startsWith('00')) d = d.slice(2);
+  // صيغة السعودية المحلية 05XXXXXXXX -> 9665XXXXXXXX
+  if (d.startsWith('0') && d.length === 10) d = '966' + d.slice(1);
+  // لو صار 9660 بالغلط (بعض الإدخالات) صححه
+  if (d.startsWith('9660')) d = '966' + d.slice(4);
+  return d;
+}
+
+async function sendWhatsApp(toE164, body, opts = {}) {
   if (!waClient) return { ok: false, reason: 'wa_disabled' };
-  const msisdn = String(toE164 || '').replace(/\D/g, '');
+  const msisdn = normalizeMsisdn(toE164);
   if (!msisdn) return { ok: false, reason: 'invalid_msisdn' };
 
   const to = `whatsapp:+${msisdn}`;
   try {
-    const msg = await waClient.messages.create({ from: TW_FROM, to, body });
+    const msg = await waClient.messages.create(
+      opts.contentSid
+        ? { from: TW_FROM, to, contentSid: opts.contentSid, contentVariables: JSON.stringify(opts.vars || {}) }
+        : { from: TW_FROM, to, body }
+    );
     return { ok: true, sid: msg.sid };
   } catch (e) {
     console.error('WA send failed:', e?.message);

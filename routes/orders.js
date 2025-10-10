@@ -1,8 +1,26 @@
 const router = require('express').Router();
+const mongoose = require('mongoose');
 const Order = require('../models/Order');
 const { sendOrderNotification } = require('../config/whatsapp-meta');
 const upload = require('../middleware/upload');
 // تم إزالة استيراد البريد الإلكتروني - نستخدم الواتساب فقط
+
+// Helper function: جلب رقم الطلب التالي بشكل ذري
+async function nextOrderNumber() {
+    const col = mongoose.connection.collection('counters');
+    const result = await col.findOneAndUpdate(
+        { _id: 'orders' },
+        { 
+            $inc: { seq: 1 },
+            $setOnInsert: { seq: 99 } // البدء من 99، أول زيادة = 100
+        },
+        { 
+            upsert: true,
+            returnDocument: 'after'
+        }
+    );
+    return result.value.seq;
+}
 
 // فحص صحة الخدمة
 router.get('/health', (req, res) => res.json({ ok: true, route: 'orders' }));
@@ -101,8 +119,21 @@ router.post('/', (req, res, next) => {
             });
         }
 
+        // الحصول على رقم متسلسل قصير للطلب
+        let sequentialNumber;
+        try {
+            sequentialNumber = await nextOrderNumber();
+            console.log('✅ رقم الطلب المتسلسل:', sequentialNumber);
+        } catch (seqError) {
+            console.warn('⚠️ فشل الحصول على رقم متسلسل، استخدام fallback:', seqError?.message);
+            // في حالة الفشل، استخدام رقم عشوائي
+            sequentialNumber = null;
+        }
+
         // إنشاء رقم طلب فريد
-        const orderNumber = 'ORD-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4).toUpperCase();
+        const orderNumber = sequentialNumber 
+            ? `ORD-${sequentialNumber}` 
+            : 'ORD-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4).toUpperCase();
 
         // حساب رسوم التوصيل
         let deliveryFee = 0;
@@ -128,7 +159,8 @@ router.post('/', (req, res, next) => {
 
         // إنشاء طلب جديد
         const order = new Order({
-            orderNumber: `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+            orderNumber: orderNumber,
+            number: sequentialNumber,  // الرقم المتسلسل القصير
             customerName: fullName,
             customerPhone: phone,
             customerEmail: '',
@@ -782,8 +814,25 @@ router.post('/sell-car', upload.array('images', 10), async (req, res) => {
             return `/uploads/${file.filename || file.originalname}`;
         }) : [];
 
+        // الحصول على رقم متسلسل قصير للطلب
+        let sequentialNumber;
+        try {
+            sequentialNumber = await nextOrderNumber();
+            console.log('✅ رقم طلب بيع السيارة المتسلسل:', sequentialNumber);
+        } catch (seqError) {
+            console.warn('⚠️ فشل الحصول على رقم متسلسل، استخدام fallback:', seqError?.message);
+            sequentialNumber = null;
+        }
+
+        // إنشاء رقم طلب فريد
+        const orderNumber = sequentialNumber 
+            ? `ORD-${sequentialNumber}` 
+            : 'ORD-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4).toUpperCase();
+
         // إنشاء طلب بيع سيارة
         const order = new Order({
+            orderNumber: orderNumber,
+            number: sequentialNumber,  // الرقم المتسلسل القصير
             customerName: fullName,
             customerPhone: phone,
             items: [{

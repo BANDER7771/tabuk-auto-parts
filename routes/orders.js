@@ -236,9 +236,18 @@ router.post('/', (req, res, next) => {
 
         // إرسال إشعار واتساب
         try {
-            await sendWhatsAppNotification(notificationData);
+            const sendWA = req.app?.locals?.sendWhatsApp;
+            const phone = String(order?.customer?.phone || order?.customerPhone || order?.phone || '').trim();
+            if (typeof sendWA === 'function' && phone) {
+                const msgText = notificationData.description
+                    ? `طلبك ${notificationData.orderNumber}\n${notificationData.description}`
+                    : `تم استلام طلبك رقم ${notificationData.orderNumber}.`;
+                await sendWA(phone, msgText);
+            } else {
+                console.warn('WA skip (create): no sender or phone');
+            }
         } catch (whatsappError) {
-            console.error('خطأ في إرسال إشعار الواتساب:', whatsappError);
+            console.error('خطأ في إرسال إشعار الواتساب:', whatsappError?.message || whatsappError);
         }
 
         res.status(201).json({
@@ -823,9 +832,16 @@ router.post('/sell-car', upload.array('images', 10), async (req, res) => {
 
         // إرسال إشعار واتساب
         try {
-            await sendWhatsAppNotification(notificationData);
+            const sendWA = req.app?.locals?.sendWhatsApp;
+            const phone = String(order?.customer?.phone || order?.customerPhone || order?.phone || '').trim();
+            if (typeof sendWA === 'function' && phone) {
+                const msgText = `تم استلام طلب بيع سيارتك رقم ${order.orderNumber}. سنراجع التفاصيل ونتواصل معك.`;
+                await sendWA(phone, msgText);
+            } else {
+                console.warn('WA skip (sell-car): no sender or phone');
+            }
         } catch (whatsappError) {
-            console.error('خطأ في إرسال إشعار الواتساب:', whatsappError);
+            console.error('خطأ في إرسال إشعار الواتساب:', whatsappError?.message || whatsappError);
         }
 
         res.status(201).json({
@@ -906,14 +922,12 @@ router.post('/admin/send-to-delivery', async (req, res) => {
         message += `📞 *للاستفسار:* تواصل مع الإدارة`;
 
         try {
-            await sendWhatsAppNotification({
-                orderNumber: `BULK-${Date.now()}`,
-                customerName: 'المندوب',
-                customerPhone: deliveryNumber,
-                orderType: 'تحويل للتوصيل',
-                description: message,
-                createdAt: new Date()
-            });
+            const sendWA = req.app?.locals?.sendWhatsApp;
+            if (typeof sendWA === 'function' && deliveryNumber) {
+                await sendWA(deliveryNumber, message);
+            } else {
+                console.warn('WA skip (delivery): no sender or phone');
+            }
 
             res.json({
                 message: `تم إرسال ${orders.length} طلب للمندوب بنجاح`,

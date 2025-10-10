@@ -225,6 +225,48 @@ router.post('/', (req, res, next) => {
             }
         }
 
+        // ===== Email notify (admin) =====
+        let emailNotify = { ok: false, reason: 'no_action' };
+        try {
+            const sendEmail = req.app?.locals?.sendEmail;
+            const to = process.env.NOTIFY_EMAIL; // بريد المستلم
+            if (typeof sendEmail === 'function' && to) {
+                const orderId  = (order?._id || '').toString();
+                const orderNo  = order?.orderNumber || order?.number || orderId.slice(-6);
+                const parts    = [
+                    `طلب جديد #${orderNo}`,
+                    `الاسم: ${order?.customerName || '-'}`,
+                    `الجوال: ${order?.customerPhone || '-'}`,
+                    `المدينة: ${order?.shippingAddress?.city || '-'}`,
+                    `السيارة: ${order?.carInfo?.fullName || `${order?.carInfo?.make || ''} ${order?.carInfo?.model || ''}`} ${order?.carInfo?.year || ''}`,
+                    `القطعة: ${order?.items?.[0]?.partName || partDetails || '-'}`,
+                    `التوصيل: ${order?.deliveryOption || delivery || '-'}`,
+                    `ملاحظات: ${order?.notes || notes || '-'}`
+                ];
+                const subject = `طلب جديد #${orderNo}`;
+                const text    = parts.join('\n');
+                const link    = process.env.APP_PUBLIC_URL ? `${process.env.APP_PUBLIC_URL}/orders/${orderId}` : '';
+                const html    = `<div style="font-family:system-ui,sans-serif;direction:rtl;">
+                    <h3>طلب جديد #${orderNo}</h3>
+                    <ul>
+                        <li><b>الاسم:</b> ${order?.customerName || '-'}</li>
+                        <li><b>الجوال:</b> ${order?.customerPhone || '-'}</li>
+                        <li><b>المدينة:</b> ${order?.shippingAddress?.city || '-'}</li>
+                        <li><b>السيارة:</b> ${order?.carInfo?.fullName || `${order?.carInfo?.make || ''} ${order?.carInfo?.model || ''}`} ${order?.carInfo?.year || ''}</li>
+                        <li><b>القطعة:</b> ${order?.items?.[0]?.partName || partDetails || '-'}</li>
+                        <li><b>التوصيل:</b> ${order?.deliveryOption || delivery || '-'}</li>
+                        <li><b>ملاحظات:</b> ${order?.notes || notes || '-'}</li>
+                    </ul>
+                    ${link ? `<p><a href="${link}">فتح الطلب</a></p>` : ''}
+                </div>`;
+                emailNotify = await sendEmail(to, subject, text, html);
+                console.log('Email notify result:', emailNotify);
+            }
+        } catch (e) {
+            console.error('email notify error:', e?.message);
+            emailNotify = { ok: false, reason: 'error', error: e?.message };
+        }
+
         // ===== WA: notify delivery and customer on order created =====
         const sendWA = req.app?.locals?.sendWhatsApp;
         let waToDriver = { ok: false, reason: 'no_action' };
@@ -312,7 +354,8 @@ router.post('/', (req, res, next) => {
                 createdAt: order.createdAt
             },
             driverNotify: waToDriver,
-            customerNotify: waToCustomer
+            customerNotify: waToCustomer,
+            emailNotify: emailNotify
         });
     } catch (error) {
         console.error('❌ خطأ في إنشاء الطلب:', error);
@@ -893,6 +936,55 @@ router.post('/sell-car', upload.array('images', 10), async (req, res) => {
             }
         }
 
+        // ===== Email notify (admin) for sell-car =====
+        let emailNotify = { ok: false, reason: 'no_action' };
+        try {
+            const sendEmail = req.app?.locals?.sendEmail;
+            const to = process.env.NOTIFY_EMAIL; // بريد المستلم
+            if (typeof sendEmail === 'function' && to) {
+                const orderId  = (order?._id || '').toString();
+                const orderNo  = order?.orderNumber || order?.number || orderId.slice(-6);
+                const parts    = [
+                    `طلب بيع سيارة جديد #${orderNo}`,
+                    `الاسم: ${order?.customerName || fullName || '-'}`,
+                    `الجوال: ${order?.customerPhone || phone || '-'}`,
+                    `المدينة: ${city || '-'}`,
+                    `السيارة: ${carMake} ${carModel} ${carYear}`,
+                    `الحالة: ${condition || '-'}`,
+                    `الكيلومترات: ${mileage || '-'}`,
+                    `نوع الجير: ${transmission || '-'}`,
+                    `السعر المتوقع: ${expectedPrice || '-'} ريال`,
+                    `سبب البيع: ${sellReason || '-'}`,
+                    `المخالفات: ${violations || '-'}`
+                ];
+                const subject = `طلب بيع سيارة #${orderNo}`;
+                const text    = parts.join('\n');
+                const link    = process.env.APP_PUBLIC_URL ? `${process.env.APP_PUBLIC_URL}/orders/${orderId}` : '';
+                const html    = `<div style="font-family:system-ui,sans-serif;direction:rtl;">
+                    <h3>طلب بيع سيارة جديد #${orderNo}</h3>
+                    <ul>
+                        <li><b>الاسم:</b> ${order?.customerName || fullName || '-'}</li>
+                        <li><b>الجوال:</b> ${order?.customerPhone || phone || '-'}</li>
+                        <li><b>المدينة:</b> ${city || '-'}</li>
+                        <li><b>السيارة:</b> ${carMake} ${carModel} ${carYear}</li>
+                        <li><b>الحالة:</b> ${condition || '-'}</li>
+                        <li><b>الكيلومترات:</b> ${mileage || '-'}</li>
+                        <li><b>نوع الجير:</b> ${transmission || '-'}</li>
+                        <li><b>السعر المتوقع:</b> ${expectedPrice || '-'} ريال</li>
+                        <li><b>سبب البيع:</b> ${sellReason || '-'}</li>
+                        <li><b>المخالفات:</b> ${violations || '-'}</li>
+                        <li><b>عدد الصور:</b> ${images.length}</li>
+                    </ul>
+                    ${link ? `<p><a href="${link}">فتح الطلب</a></p>` : ''}
+                </div>`;
+                emailNotify = await sendEmail(to, subject, text, html);
+                console.log('Email notify result (sell-car):', emailNotify);
+            }
+        } catch (e) {
+            console.error('email notify error (sell-car):', e?.message);
+            emailNotify = { ok: false, reason: 'error', error: e?.message };
+        }
+
         // إرسال إشعار واتساب فقط
         const notificationData = {
             orderNumber: order.orderNumber,
@@ -928,7 +1020,8 @@ router.post('/sell-car', upload.array('images', 10), async (req, res) => {
                 customerName: order.customerName,
                 status: order.status,
                 createdAt: order.createdAt
-            }
+            },
+            emailNotify: emailNotify
         });
     } catch (error) {
         console.error('❌ Error in POST /sell-car:', error);

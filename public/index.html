@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تشاليح تبوك - منصة قطع غيار السيارات الرائدة في تبوك</title>
+    <title>تشاليح تبوك - منصة قطع غيار تشاليح السيارات الموحدة في تبوك</title>
     <style>
         * {
             margin: 0;
@@ -84,6 +84,23 @@
             height: 100%;
             object-fit: contain;
             border-radius: 8px;
+        }
+
+        /* Brand mark SVG (fits the square beside the name) */
+        .logo-icon .brand-svg {
+            width: 70%;
+            height: 70%;
+            display: block;
+        }
+        .logo-icon .brand-svg path {
+            stroke: #fff;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
+        }
+        .logo-icon .brand-svg circle {
+            fill: #fff;
         }
 
         .logo-icon::after {
@@ -1126,7 +1143,12 @@
             <div class="logo">
                 <div class="logo-icon" id="logoIcon">
                     <img id="brandLogo" src="/uploads/brand-logo.png" alt="شعار تشاليح تبوك" style="display: none;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                    <span id="defaultIcon" style="display: block;">🔧</span>
+                    <svg id="defaultIcon" class="brand-svg" viewBox="0 0 24 24" aria-hidden="true">
+                        <!-- Location pin outline -->
+                        <path d="M12 2c-4.4 0-8 3.6-8 8 0 5.5 8 12 8 12s8-6.5 8-12c0-4.4-3.6-8-8-8z"/>
+                        <!-- Inner part (piece/gear hint) -->
+                        <circle cx="12" cy="10" r="3"/>
+                    </svg>
                 </div>
                 <span>تشاليح تبوك</span>
                 <span class="beta-badge">إطلاق تجريبي</span>

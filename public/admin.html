@@ -609,6 +609,25 @@
         </div>
     </header>
 
+    <!-- Brand Upload Section -->
+    <section class="stats-section">
+        <div class="stat-card fade-in" style="grid-column: span 2;">
+            <div class="stat-header">
+                <span class="stat-title">رفع شعار المنصة</span>
+                <div class="stat-icon" style="background: #e8f5e9; color: #388e3c;">🖼️</div>
+            </div>
+            <form id="brandUpload" enctype="multipart/form-data" style="display:flex;gap:12px;align-items:center;margin-top:1rem;">
+                <input type="file" name="brand" accept=".png,.jpg,.jpeg,.svg,.webp" required style="flex:1;padding:0.5rem;border:1px solid #ddd;border-radius:8px;">
+                <button type="submit" class="btn btn-success" style="padding:0.5rem 1rem;">رفع</button>
+                <span id="brandMsg" style="margin-inline-start:8px;color:#888;font-size:0.9rem;"></span>
+            </form>
+            <div style="margin-top:1rem;">
+                <img id="brandPreview" src="/brand-logo" onerror="this.style.display='none'" 
+                     style="max-width:160px;border:1px solid #eee;border-radius:8px;padding:6px;background:white;"/>
+            </div>
+        </div>
+    </section>
+
     <!-- Stats Section -->
     <section class="stats-section">
         <div class="stat-card fade-in">
@@ -826,7 +845,48 @@
         document.addEventListener('DOMContentLoaded', function() {
             loadOrders();
             setupEventListeners();
+            setupBrandUpload();
         });
+
+        function setupBrandUpload() {
+            document.getElementById('brandUpload')?.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const fd = new FormData(e.target);
+                const btn = e.target.querySelector('button[type="submit"]');
+                const msg = document.getElementById('brandMsg');
+                
+                btn.disabled = true;
+                btn.textContent = 'جاري الرفع...';
+                msg.textContent = '';
+                
+                try {
+                    const res = await fetch('/admin/brand/upload', { 
+                        method: 'POST', 
+                        body: fd 
+                    });
+                    
+                    if (res.ok) {
+                        msg.textContent = '✅ تم الرفع بنجاح';
+                        msg.style.color = '#4caf50';
+                        const img = document.getElementById('brandPreview');
+                        if (img) { 
+                            img.src = '/brand-logo?ts=' + Date.now(); 
+                            img.style.display = ''; 
+                        }
+                        e.target.reset();
+                    } else {
+                        msg.textContent = '❌ فشل الرفع';
+                        msg.style.color = '#f44336';
+                    }
+                } catch (error) {
+                    msg.textContent = '❌ خطأ في الاتصال';
+                    msg.style.color = '#f44336';
+                } finally {
+                    btn.disabled = false;
+                    btn.textContent = 'رفع';
+                }
+            });
+        }
 
         function setupEventListeners() {
             document.getElementById('searchInput').addEventListener('input', debounce(applyFilters, 300));

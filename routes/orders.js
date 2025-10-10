@@ -193,26 +193,43 @@ router.post('/', (req, res, next) => {
             }
         }
 
-        // ===== WA: notify on order created =====
+        // ===== WA: notify delivery and customer on order created =====
+        const sendWA = req.app?.locals?.sendWhatsApp;
+        let waToDriver = { ok: false, reason: 'no_action' };
+        let waToCustomer = { ok: false, reason: 'no_action' };
+        
+        // Send to delivery driver
         try {
-            const sendWA = req.app?.locals?.sendWhatsApp;
-            if (typeof sendWA === 'function') {
-                const orderId = (order?._id || '').toString();
-                const orderNo = order?.orderNumber || orderId.slice(-6);
-
-                const phone =
-                    String(order?.customerPhone || order?.customer?.phone || order?.phone || '').replace(/\D/g, '');
-
-                if (phone) {
-                    const link = process.env.APP_PUBLIC_URL ? `${process.env.APP_PUBLIC_URL}/orders/${orderId}` : '';
-                    const msg = `تم استلام طلبك رقم ${orderNo}. سنتواصل معك خلال أوقات العمل 8ص–8م (عدا الجمعة).${link ? '\nرابط الطلب: ' + link : ''}`;
-                    await sendWA(phone, msg);
-                } else {
-                    console.warn('WA skip (create): no customer phone on order');
-                }
+            const drv = process.env.DELIVERY_WHATSAPP; // e.g., 966545376792
+            if (typeof sendWA === 'function' && drv) {
+                const orderNo = order?.orderNumber || (order?._id || '').toString().slice(-6);
+                const text = `تم استلام طلب #${orderNo}. تواصل للتسليم.`;
+                waToDriver = await sendWA(drv, text);
+                console.log('WA to driver result:', waToDriver);
             }
         } catch (e) {
-            console.error('WA error (create):', e?.message);
+            console.error('WA driver err:', e?.message);
+            waToDriver = { ok: false, reason: 'error', error: e?.message };
+        }
+        
+        // Send to customer
+        try {
+            const phone = String(order?.customerPhone || order?.customer?.phone || order?.phone || '');
+            if (typeof sendWA === 'function' && phone) {
+                const orderId = (order?._id || '').toString();
+                const orderNo = order?.orderNumber || orderId.slice(-6);
+                const link = process.env.APP_PUBLIC_URL ? `${process.env.APP_PUBLIC_URL}/orders/${orderId}` : '';
+                const text = `تم استلام طلبك رقم ${orderNo}. سنوافيك بالتحديثات.${link ? '\n' + link : ''}`;
+                const tpl = process.env.WA_TEMPLATE_SID_ORDER_CREATED;
+                
+                waToCustomer = tpl
+                    ? await sendWA(phone, null, { contentSid: tpl, vars: { "1": orderNo, "2": link || "" } })
+                    : await sendWA(phone, text);
+                console.log('WA to customer result:', waToCustomer);
+            }
+        } catch (e) {
+            console.error('WA customer err:', e?.message);
+            waToCustomer = { ok: false, reason: 'error', error: e?.message };
         }
 
         // إرسال إشعار واتساب فقط
@@ -250,6 +267,7 @@ router.post('/', (req, res, next) => {
             console.error('خطأ في إرسال إشعار الواتساب:', whatsappError?.message || whatsappError);
         }
 
+        // Return actual notification status
         res.status(201).json({
             message: 'تم استلام طلبك بنجاح',
             orderNumber: order.orderNumber,
@@ -259,7 +277,9 @@ router.post('/', (req, res, next) => {
                 customerName: order.customerName,
                 status: order.status,
                 createdAt: order.createdAt
-            }
+            },
+            driverNotify: waToDriver,
+            customerNotify: waToCustomer
         });
     } catch (error) {
         console.error('❌ خطأ في إنشاء الطلب:', error);
@@ -399,28 +419,31 @@ router.put('/admin/:id/status', async (req, res) => {
         console.log('✅ Order status updated:', order.orderNumber, 'to', status);
 
         // ===== WA: notify on status updated =====
+        let waStatusUpdate = { ok: false, reason: 'no_action' };
         try {
             const sendWA = req.app?.locals?.sendWhatsApp;
-            if (typeof sendWA === 'function') {
+            const phone = String(order?.customerPhone || order?.customer?.phone || order?.phone || '');
+            if (typeof sendWA === 'function' && phone) {
                 const orderId = (order?._id || '').toString();
                 const orderNo = order?.orderNumber || orderId.slice(-6);
-
-                const phone =
-                    String(order?.customerPhone || order?.customer?.phone || order?.phone || '').replace(/\D/g, '');
-
-                if (phone) {
-                    const link = process.env.APP_PUBLIC_URL ? `${process.env.APP_PUBLIC_URL}/orders/${orderId}` : '';
-                    const msg = `تم تحديث حالة طلبك رقم ${orderNo} إلى: ${order?.status || 'غير محددة'}.${link ? '\nرابط الطلب: ' + link : ''}`;
-                    await sendWA(phone, msg);
-                }
+                const link = process.env.APP_PUBLIC_URL ? `${process.env.APP_PUBLIC_URL}/orders/${orderId}` : '';
+                const txt = `تم تحديث حالة طلبك رقم ${orderNo} إلى: ${order?.status || 'غير محددة'}.${link ? '\n' + link : ''}`;
+                const tpl = process.env.WA_TEMPLATE_SID_STATUS_UPDATED;
+                
+                waStatusUpdate = tpl
+                    ? await sendWA(phone, null, { contentSid: tpl, vars: { "1": orderNo, "2": order.status, "3": link || "" } })
+                    : await sendWA(phone, txt);
+                console.log('WA status update result:', waStatusUpdate);
             }
         } catch (e) {
-            console.error('WA error (status):', e?.message);
+            console.error('WA status err:', e?.message);
+            waStatusUpdate = { ok: false, reason: 'error', error: e?.message };
         }
 
         res.json({
             message: 'تم تحديث حالة الطلب',
-            order
+            order,
+            waStatus: waStatusUpdate
         });
     } catch (error) {
         console.error('❌ Error in PUT /admin/:id/status:', error);
@@ -512,28 +535,31 @@ router.put('/:orderNumber/status', async (req, res) => {
         console.log('✅ Order status updated:', order.orderNumber, 'to', status);
 
         // ===== WA: notify on status updated =====
+        let waStatusUpdate = { ok: false, reason: 'no_action' };
         try {
             const sendWA = req.app?.locals?.sendWhatsApp;
-            if (typeof sendWA === 'function') {
+            const phone = String(order?.customerPhone || order?.customer?.phone || order?.phone || '');
+            if (typeof sendWA === 'function' && phone) {
                 const orderId = (order?._id || '').toString();
                 const orderNo = order?.orderNumber || orderId.slice(-6);
-
-                const phone =
-                    String(order?.customerPhone || order?.customer?.phone || order?.phone || '').replace(/\D/g, '');
-
-                if (phone) {
-                    const link = process.env.APP_PUBLIC_URL ? `${process.env.APP_PUBLIC_URL}/orders/${orderId}` : '';
-                    const msg = `تم تحديث حالة طلبك رقم ${orderNo} إلى: ${order?.status || 'غير محددة'}.${link ? '\nرابط الطلب: ' + link : ''}`;
-                    await sendWA(phone, msg);
-                }
+                const link = process.env.APP_PUBLIC_URL ? `${process.env.APP_PUBLIC_URL}/orders/${orderId}` : '';
+                const txt = `تم تحديث حالة طلبك رقم ${orderNo} إلى: ${order?.status || 'غير محددة'}.${link ? '\n' + link : ''}`;
+                const tpl = process.env.WA_TEMPLATE_SID_STATUS_UPDATED;
+                
+                waStatusUpdate = tpl
+                    ? await sendWA(phone, null, { contentSid: tpl, vars: { "1": orderNo, "2": order.status, "3": link || "" } })
+                    : await sendWA(phone, txt);
+                console.log('WA status update result:', waStatusUpdate);
             }
         } catch (e) {
-            console.error('WA error (status):', e?.message);
+            console.error('WA status err:', e?.message);
+            waStatusUpdate = { ok: false, reason: 'error', error: e?.message };
         }
 
         res.json({
             message: 'تم تحديث حالة الطلب',
-            order
+            order,
+            waStatus: waStatusUpdate
         });
     } catch (error) {
         console.error('❌ Error in PUT /:orderNumber/status:', error);
@@ -921,26 +947,41 @@ router.post('/admin/send-to-delivery', async (req, res) => {
         message += `\n✅ *يرجى البدء بالتوصيل*\n`;
         message += `📞 *للاستفسار:* تواصل مع الإدارة`;
 
+        // Send to delivery with actual status
+        let deliveryResult = { ok: false, reason: 'no_action' };
         try {
             const sendWA = req.app?.locals?.sendWhatsApp;
             if (typeof sendWA === 'function' && deliveryNumber) {
-                await sendWA(deliveryNumber, message);
+                deliveryResult = await sendWA(deliveryNumber, message);
+                console.log('WA to delivery result:', deliveryResult);
             } else {
                 console.warn('WA skip (delivery): no sender or phone');
+                deliveryResult = { ok: false, reason: 'wa_disabled' };
             }
 
-            res.json({
-                message: `تم إرسال ${orders.length} طلب للمندوب بنجاح`,
-                deliveryNumber: deliveryNumber,
-                orderCount: orders.length,
-                success: true
-            });
+            if (deliveryResult.ok) {
+                res.json({
+                    message: `تم إرسال ${orders.length} طلب للمندوب بنجاح`,
+                    deliveryNumber: deliveryNumber,
+                    orderCount: orders.length,
+                    success: true,
+                    driverNotify: deliveryResult
+                });
+            } else {
+                res.status(400).json({
+                    message: 'فشل الإرسال للمندوب',
+                    error: deliveryResult.error || deliveryResult.reason,
+                    success: false,
+                    driverNotify: deliveryResult
+                });
+            }
         } catch (error) {
             console.error('خطأ في إرسال للمندوب:', error);
             res.status(500).json({
                 message: 'فشل الإرسال للمندوب',
                 error: error.message,
-                success: false
+                success: false,
+                driverNotify: { ok: false, reason: 'exception', error: error.message }
             });
         }
     } catch (error) {

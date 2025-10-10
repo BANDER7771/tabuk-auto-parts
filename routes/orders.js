@@ -202,7 +202,7 @@ router.post('/', (req, res, next) => {
         try {
             const drv = process.env.DELIVERY_WHATSAPP; // e.g., 966545376792
             if (typeof sendWA === 'function' && drv) {
-                const orderNo = order?.orderNumber || (order?._id || '').toString().slice(-6);
+                const orderNo = order?.orderNumber || order?.number || (order?._id || '').toString().slice(-6);
                 const text = `تم استلام طلب #${orderNo}. تواصل للتسليم.`;
                 waToDriver = await sendWA(drv, text);
                 console.log('WA to driver result:', waToDriver);
@@ -212,15 +212,15 @@ router.post('/', (req, res, next) => {
             waToDriver = { ok: false, reason: 'error', error: e?.message };
         }
         
-        // Send to customer
+        // Send to customer (يفضّل القوالب إن توفرت لتجاوز نافذة 24 ساعة)
         try {
             const phone = String(order?.customerPhone || order?.customer?.phone || order?.phone || '');
             if (typeof sendWA === 'function' && phone) {
                 const orderId = (order?._id || '').toString();
-                const orderNo = order?.orderNumber || orderId.slice(-6);
+                const orderNo = order?.orderNumber || order?.number || orderId.slice(-6);
                 const link = process.env.APP_PUBLIC_URL ? `${process.env.APP_PUBLIC_URL}/orders/${orderId}` : '';
-                const text = `تم استلام طلبك رقم ${orderNo}. سنوافيك بالتحديثات.${link ? '\n' + link : ''}`;
                 const tpl = process.env.WA_TEMPLATE_SID_ORDER_CREATED;
+                const text = `تم استلام طلبك رقم ${orderNo}. سنوافيك بالتحديثات.${link ? '\n' + link : ''}`;
                 
                 waToCustomer = tpl
                     ? await sendWA(phone, null, { contentSid: tpl, vars: { "1": orderNo, "2": link || "" } })
@@ -272,6 +272,7 @@ router.post('/', (req, res, next) => {
             message: 'تم استلام طلبك بنجاح',
             orderNumber: order.orderNumber,
             id: order.orderNumber,
+            orderId: order._id,
             order: {
                 orderNumber: order.orderNumber,
                 customerName: order.customerName,
@@ -425,10 +426,10 @@ router.put('/admin/:id/status', async (req, res) => {
             const phone = String(order?.customerPhone || order?.customer?.phone || order?.phone || '');
             if (typeof sendWA === 'function' && phone) {
                 const orderId = (order?._id || '').toString();
-                const orderNo = order?.orderNumber || orderId.slice(-6);
+                const orderNo = order?.orderNumber || order?.number || orderId.slice(-6);
                 const link = process.env.APP_PUBLIC_URL ? `${process.env.APP_PUBLIC_URL}/orders/${orderId}` : '';
-                const txt = `تم تحديث حالة طلبك رقم ${orderNo} إلى: ${order?.status || 'غير محددة'}.${link ? '\n' + link : ''}`;
                 const tpl = process.env.WA_TEMPLATE_SID_STATUS_UPDATED;
+                const txt = `تم تحديث حالة طلبك رقم ${orderNo} إلى: ${order?.status || 'غير محددة'}.${link ? '\n' + link : ''}`;
                 
                 waStatusUpdate = tpl
                     ? await sendWA(phone, null, { contentSid: tpl, vars: { "1": orderNo, "2": order.status, "3": link || "" } })
@@ -541,10 +542,10 @@ router.put('/:orderNumber/status', async (req, res) => {
             const phone = String(order?.customerPhone || order?.customer?.phone || order?.phone || '');
             if (typeof sendWA === 'function' && phone) {
                 const orderId = (order?._id || '').toString();
-                const orderNo = order?.orderNumber || orderId.slice(-6);
+                const orderNo = order?.orderNumber || order?.number || orderId.slice(-6);
                 const link = process.env.APP_PUBLIC_URL ? `${process.env.APP_PUBLIC_URL}/orders/${orderId}` : '';
-                const txt = `تم تحديث حالة طلبك رقم ${orderNo} إلى: ${order?.status || 'غير محددة'}.${link ? '\n' + link : ''}`;
                 const tpl = process.env.WA_TEMPLATE_SID_STATUS_UPDATED;
+                const txt = `تم تحديث حالة طلبك رقم ${orderNo} إلى: ${order?.status || 'غير محددة'}.${link ? '\n' + link : ''}`;
                 
                 waStatusUpdate = tpl
                     ? await sendWA(phone, null, { contentSid: tpl, vars: { "1": orderNo, "2": order.status, "3": link || "" } })

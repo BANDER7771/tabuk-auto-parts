@@ -61,11 +61,16 @@ async function sendWhatsApp(toE164, body, opts = {}) {
 
   const to = `whatsapp:+${msisdn}`;
   try {
-    const msg = await waClient.messages.create(
-      opts.contentSid
-        ? { from: TW_FROM, to, contentSid: opts.contentSid, contentVariables: JSON.stringify(opts.vars || {}) }
-        : { from: TW_FROM, to, body }
-    );
+    const payload = opts.contentSid
+      ? { from: TW_FROM, to, contentSid: opts.contentSid, contentVariables: JSON.stringify(opts.vars || {}) }
+      : { from: TW_FROM, to, body };
+    
+    // أضف statusCallback لتتبّع الحالة النهائية
+    if (process.env.APP_PUBLIC_URL) {
+      payload.statusCallback = `${process.env.APP_PUBLIC_URL}/webhooks/wa-status`;
+    }
+    
+    const msg = await waClient.messages.create(payload);
     return { ok: true, sid: msg.sid };
   } catch (e) {
     console.error('WA send failed:', e?.message);
@@ -228,6 +233,15 @@ app.post('/webhooks/twilio/whatsapp-fallback', (req, res) => {
 
 app.post('/webhooks/twilio/status', (req, res) => {
     res.sendStatus(200);
+});
+
+// ويبهوك حالة رسائل واتساب (Twilio يرسل x-www-form-urlencoded)
+app.post('/webhooks/wa-status', express.urlencoded({ extended: false }), (req, res) => {
+    try {
+        const { MessageSid, MessageStatus, ErrorCode, To, From } = req.body || {};
+        console.log('WA STATUS:', { MessageSid, MessageStatus, ErrorCode, To, From });
+    } catch (_) {}
+    res.sendStatus(204);
 });
 
 console.log('✅ Webhooks registered');

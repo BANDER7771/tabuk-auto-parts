@@ -35,13 +35,29 @@ const twilio = require('twilio');
 
 const TW_SID   = process.env.TWILIO_ACCOUNT_SID;
 const TW_TOKEN = process.env.TWILIO_AUTH_TOKEN;
-const TW_FROM  = process.env.TWILIO_FROM_WHATSAPP; // يجب أن تبدأ بـ whatsapp:+
+let TW_FROM  = process.env.TWILIO_FROM_WHATSAPP || ''; // يجب أن تبدأ بـ whatsapp:+
 
+// تحسين التحقق من رقم الواتس اب
+if (TW_FROM && !TW_FROM.startsWith('whatsapp:')) {
+  TW_FROM = `whatsapp:${TW_FROM}`;
+}
+
+// التحقق من تفعيل الواتس اب بشكل أكثر مرونة
 const waEnabled = Boolean(
-  TW_SID && TW_TOKEN && /^whatsapp:\+\d{8,15}$/.test(String(TW_FROM || ''))
+  TW_SID && TW_TOKEN && TW_FROM && TW_FROM.includes('whatsapp:')
 );
 
 const waClient = waEnabled ? twilio(TW_SID, TW_TOKEN) : null;
+
+if (waEnabled) {
+  console.log('✅ WhatsApp notifications enabled via Twilio');
+  console.log('📱 From number:', TW_FROM.replace(/\d{6}$/, '******'));
+} else {
+  console.warn('⚠️ WhatsApp notifications disabled. Check environment variables:');
+  console.warn('  - TWILIO_ACCOUNT_SID:', !!TW_SID);
+  console.warn('  - TWILIO_AUTH_TOKEN:', !!TW_TOKEN);
+  console.warn('  - TWILIO_FROM_WHATSAPP:', !!process.env.TWILIO_FROM_WHATSAPP);
+}
 
 function normalizeMsisdn(input) {
   let d = String(input || '').replace(/\D/g, '');
@@ -55,20 +71,32 @@ function normalizeMsisdn(input) {
 }
 
 async function sendWhatsApp(toE164, body, opts = {}) {
-  if (!waClient) return { ok: false, reason: 'wa_disabled' };
+  if (!waClient) {
+    console.warn('❌ WhatsApp disabled - check Twilio configuration');
+    return { ok: false, reason: 'wa_disabled' };
+  }
+  
   const msisdn = normalizeMsisdn(toE164);
-  if (!msisdn) return { ok: false, reason: 'invalid_msisdn' };
+  if (!msisdn) {
+    console.warn('❌ Invalid phone number:', toE164);
+    return { ok: false, reason: 'invalid_msisdn' };
+  }
 
   const to = `whatsapp:+${msisdn}`;
+  console.log(`📤 Sending WhatsApp to: ${to.substring(0, 15)}****`);
+  
   try {
     const msg = await waClient.messages.create(
       opts.contentSid
         ? { from: TW_FROM, to, contentSid: opts.contentSid, contentVariables: JSON.stringify(opts.vars || {}) }
         : { from: TW_FROM, to, body }
     );
+    console.log(`✅ WhatsApp sent successfully! SID: ${msg.sid}`);
     return { ok: true, sid: msg.sid };
   } catch (e) {
-    console.error('WA send failed:', e?.message);
+    console.error('❌ WhatsApp send failed:', e?.message);
+    console.error('   Error code:', e?.code);
+    console.error('   More info:', e?.moreInfo);
     return { ok: false, reason: 'twilio_error', error: e?.message };
   }
 }

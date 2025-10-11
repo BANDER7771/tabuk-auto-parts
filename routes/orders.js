@@ -225,6 +225,46 @@ router.post('/', (req, res, next) => {
             }
         }
 
+        // ===== Email notify (admin inbox) =====
+        let emailNotify = { ok: false, reason: 'no_action' };
+        try {
+          const sendEmail = req.app?.locals?.sendEmail;
+          const to = process.env.NOTIFY_EMAIL;
+          if (typeof sendEmail === 'function' && to) {
+            const orderId = (order?._id || '').toString();
+            const orderNo = order?.number || orderId.slice(-6);
+            const subject = `طلب جديد #${orderNo}`;
+            const parts = [
+              `طلب جديد #${orderNo}`,
+              `الاسم: ${order?.customerName || order?.fullName || '-'}`,
+              `الجوال: ${order?.customerPhone || order?.phone || '-'}`,
+              `المدينة: ${order?.shippingAddress?.city || '-'}`,
+              `الدفع: ${order?.paymentMethod || '-'}`,
+              `التوصيل: ${order?.deliveryOption || '-'}`,
+              `تفاصيل القطعة: ${order?.items?.[0]?.partName || '-'}`
+            ];
+            const text = parts.join('\n');
+            const link = process.env.APP_PUBLIC_URL ? `${process.env.APP_PUBLIC_URL}/orders/${orderId}` : '';
+            const html = `<div style="font-family:system-ui,sans-serif">
+                <h3>طلب جديد #${orderNo}</h3>
+                <ul>
+                  <li><b>الاسم:</b> ${order?.customerName || order?.fullName || '-'}</li>
+                  <li><b>الجوال:</b> ${order?.customerPhone || order?.phone || '-'}</li>
+                  <li><b>المدينة:</b> ${order?.shippingAddress?.city || '-'}</li>
+                  <li><b>الدفع:</b> ${order?.paymentMethod || '-'}</li>
+                  <li><b>التوصيل:</b> ${order?.deliveryOption || '-'}</li>
+                  <li><b>تفاصيل القطعة:</b> ${order?.items?.[0]?.partName || '-'}</li>
+                </ul>
+                ${link ? `<p><a href="${link}">فتح الطلب</a></p>` : ''}
+              </div>`;
+            emailNotify = await sendEmail(to, subject, text, html);
+            console.log('Email notify result:', emailNotify);
+          }
+        } catch (e) {
+          console.error('email notify error:', e?.message);
+          emailNotify = { ok: false, reason: 'error', error: e?.message };
+        }
+
         // ===== WA: notify delivery and customer on order created =====
         const sendWA = req.app?.locals?.sendWhatsApp;
         let waToDriver = { ok: false, reason: 'no_action' };
@@ -311,6 +351,7 @@ router.post('/', (req, res, next) => {
                 status: order.status,
                 createdAt: order.createdAt
             },
+            emailNotify: emailNotify,
             driverNotify: waToDriver,
             customerNotify: waToCustomer
         });

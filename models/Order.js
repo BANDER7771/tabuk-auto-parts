@@ -13,6 +13,13 @@ const orderSchema = new mongoose.Schema({
         sparse: true,  // السماح بـ null للطلبات القديمة
         index: true
     },
+    // كود الطلب بصيغة ORD-<number>
+    code: {
+        type: String,
+        unique: true,
+        sparse: true,  // السماح بـ null للطلبات القديمة
+        index: true
+    },
     customerName: {
         type: String,
         required: true

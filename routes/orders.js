@@ -8,18 +8,19 @@ const upload = require('../middleware/upload');
 // Helper function: جلب رقم الطلب التالي بشكل ذري
 async function nextOrderNumber() {
     const col = mongoose.connection.collection('counters');
+    // أول مرة: seq=97 ثم نزيد +3 ⇒ 100
     const result = await col.findOneAndUpdate(
         { _id: 'orders' },
         { 
-            $inc: { seq: 1 },
-            $setOnInsert: { seq: 100 } // البدء من 100
+            $inc: { seq: 3 },
+            $setOnInsert: { seq: 97 } // البدء من 97 لأن أول زيادة ستعطي 100
         },
         { 
             upsert: true,
             returnDocument: 'after'
         }
     );
-    return result.value.seq;
+    return result?.value?.seq || 100;
 }
 
 // فحص صحة الخدمة
@@ -119,21 +120,29 @@ router.post('/', (req, res, next) => {
             });
         }
 
-        // الحصول على رقم متسلسل قصير للطلب
+        // الحصول على رقم متسلسل قصير للطلب (100, 103, 106, ...)
         let sequentialNumber;
+        let orderCode;
         try {
             sequentialNumber = await nextOrderNumber();
-            console.log('✅ رقم الطلب المتسلسل:', sequentialNumber);
+            orderCode = `ORD-${sequentialNumber}`; // تنسيق code للواجهة
+            console.log('✅ رقم الطلب المتسلسل:', sequentialNumber, 'الكود:', orderCode);
         } catch (seqError) {
             console.warn('⚠️ فشل الحصول على رقم متسلسل، استخدام fallback:', seqError?.message);
             // في حالة الفشل، استخدام رقم عشوائي
             sequentialNumber = null;
+            orderCode = null;
         }
 
         // إنشاء رقم طلب فريد - استخدام الرقم المتسلسل فقط
         const orderNumber = sequentialNumber 
             ? sequentialNumber.toString() 
             : 'ORD-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4).toUpperCase();
+        
+        // إنشاء code إن لم يكن موجود
+        if (!orderCode) {
+            orderCode = orderNumber.startsWith('ORD-') ? orderNumber : `ORD-${orderNumber}`;
+        }
 
         // حساب رسوم التوصيل
         let deliveryFee = 0;
@@ -161,6 +170,7 @@ router.post('/', (req, res, next) => {
         const order = new Order({
             orderNumber: orderNumber,
             number: sequentialNumber,  // الرقم المتسلسل القصير
+            code: orderCode,           // كود الطلب بصيغة ORD-<number>
             customerName: fullName,
             customerPhone: phone,
             customerEmail: '',
@@ -248,9 +258,10 @@ router.post('/', (req, res, next) => {
                 if (typeof sendEmail === 'function' && to) {
                     const orderId = (order?._id || '').toString();
                     const orderNo = order?.number || orderId.slice(-6);
-                    const subject = `طلب جديد #${orderNo}`;
+                    const orderDisplayCode = order?.code || `ORD-${orderNo}`;
+                    const subject = `طلب جديد ${orderDisplayCode}`;
                     const parts = [
-                        `طلب جديد #${orderNo}`,
+                        `طلب جديد ${orderDisplayCode}`,
                         `الاسم: ${order?.customerName || fullName || '-'}`,
                         `الجوال: ${order?.customerPhone || phone || '-'}`,
                         `المدينة: ${order?.shippingAddress?.city || city || '-'}`,
@@ -261,7 +272,7 @@ router.post('/', (req, res, next) => {
                     const text = parts.join('\n');
                     const link = process.env.APP_PUBLIC_URL ? `${process.env.APP_PUBLIC_URL}/orders/${orderId}` : '';
                     const html = `<div style="font-family:system-ui,sans-serif;direction:rtl;text-align:right;">
-                        <h3 style="color:#667eea;">طلب جديد #${orderNo}</h3>
+                        <h3 style="color:#667eea;">طلب جديد ${orderDisplayCode}</h3>
                         <table style="width:100%;border-collapse:collapse;margin:20px 0;">
                             <tr><td style="padding:8px;border-bottom:1px solid #eee;"><b>الاسم:</b></td><td style="padding:8px;border-bottom:1px solid #eee;">${order?.customerName || fullName || '-'}</td></tr>
                             <tr><td style="padding:8px;border-bottom:1px solid #eee;"><b>الجوال:</b></td><td style="padding:8px;border-bottom:1px solid #eee;">${order?.customerPhone || phone || '-'}</td></tr>
@@ -287,12 +298,13 @@ router.post('/', (req, res, next) => {
                 const phone = String(order?.customerPhone || order?.customer?.phone || order?.phone || '');
                 if (typeof sendWA === 'function' && phone) {
                     const orderId = (order?._id || '').toString();
-                    const orderNo = order?.orderNumber || order?.number || orderId.slice(-6);
+                    const orderNo = order?.number || (order?._id?.toString().slice(-6));
+                    const orderDisplayCode = order?.code || `ORD-${orderNo}`;
                     const deliveryText = deliveryOption === 'express' ? 'مستعجل (1-2 ساعة) - 50 ريال' : 
                                        deliveryOption === 'standard' ? 'سريع (3-5 ساعات) - 25 ريال' : 
                                        'عادي (12-24 ساعة) - مجاني';
                     
-                    const msgText = `✅ تم استلام طلبك رقم ${orderNo}\n\n` +
+                    const msgText = `✅ تم استلام طلبك ${orderDisplayCode}\n\n` +
                                    `🚗 السيارة: ${order?.carInfo?.fullName || carNameCategory}\n` +
                                    `🔧 القطعة: ${order?.items?.[0]?.partName || partDetails}\n` +
                                    `🚚 التوصيل: ${deliveryText}\n` +
@@ -310,8 +322,9 @@ router.post('/', (req, res, next) => {
             try {
                 const drv = process.env.DELIVERY_WHATSAPP;
                 if (typeof sendWA === 'function' && drv) {
-                    const orderNo = order?.orderNumber || order?.number || (order?._id || '').toString().slice(-6);
-                    const text = `📦 طلب جديد #${orderNo}\n` +
+                    const orderNo = order?.number || (order?._id || '').toString().slice(-6);
+                    const orderDisplayCode = order?.code || `ORD-${orderNo}`;
+                    const text = `📦 طلب جديد ${orderDisplayCode}\n` +
                                 `👤 ${order?.customerName}\n` +
                                 `📱 ${order?.customerPhone}\n` +
                                 `🚗 ${order?.carInfo?.fullName || carNameCategory}`;
@@ -466,13 +479,14 @@ router.put('/admin/:id/status', async (req, res) => {
             const phone = String(order?.customerPhone || order?.customer?.phone || order?.phone || '');
             if (typeof sendWA === 'function' && phone) {
                 const orderId = (order?._id || '').toString();
-                const orderNo = order?.orderNumber || order?.number || orderId.slice(-6);
+                const orderNo = order?.number || orderId.slice(-6);
+                const orderDisplayCode = order?.code || `ORD-${orderNo}`;
                 const link = process.env.APP_PUBLIC_URL ? `${process.env.APP_PUBLIC_URL}/orders/${orderId}` : '';
                 const tpl = process.env.WA_TEMPLATE_SID_STATUS_UPDATED;
-                const txt = `تم تحديث حالة طلبك رقم ${orderNo} إلى: ${order?.status || 'غير محددة'}.${link ? '\n' + link : ''}`;
+                const txt = `تم تحديث حالة طلبك ${orderDisplayCode} إلى: ${order?.status || 'غير محددة'}.${link ? '\n' + link : ''}`;
                 
                 waStatusUpdate = tpl
-                    ? await sendWA(phone, null, { contentSid: tpl, vars: { "1": orderNo, "2": order.status, "3": link || "" } })
+                    ? await sendWA(phone, null, { contentSid: tpl, vars: { "1": orderDisplayCode, "2": order.status, "3": link || "" } })
                     : await sendWA(phone, txt);
                 console.log('WA status update result:', waStatusUpdate);
             }
@@ -582,13 +596,14 @@ router.put('/:orderNumber/status', async (req, res) => {
             const phone = String(order?.customerPhone || order?.customer?.phone || order?.phone || '');
             if (typeof sendWA === 'function' && phone) {
                 const orderId = (order?._id || '').toString();
-                const orderNo = order?.orderNumber || order?.number || orderId.slice(-6);
+                const orderNo = order?.number || orderId.slice(-6);
+                const orderDisplayCode = order?.code || `ORD-${orderNo}`;
                 const link = process.env.APP_PUBLIC_URL ? `${process.env.APP_PUBLIC_URL}/orders/${orderId}` : '';
                 const tpl = process.env.WA_TEMPLATE_SID_STATUS_UPDATED;
-                const txt = `تم تحديث حالة طلبك رقم ${orderNo} إلى: ${order?.status || 'غير محددة'}.${link ? '\n' + link : ''}`;
+                const txt = `تم تحديث حالة طلبك ${orderDisplayCode} إلى: ${order?.status || 'غير محددة'}.${link ? '\n' + link : ''}`;
                 
                 waStatusUpdate = tpl
-                    ? await sendWA(phone, null, { contentSid: tpl, vars: { "1": orderNo, "2": order.status, "3": link || "" } })
+                    ? await sendWA(phone, null, { contentSid: tpl, vars: { "1": orderDisplayCode, "2": order.status, "3": link || "" } })
                     : await sendWA(phone, txt);
                 console.log('WA status update result:', waStatusUpdate);
             }
@@ -822,25 +837,34 @@ router.post('/sell-car', upload.array('images', 10), async (req, res) => {
             return `/uploads/${file.filename || file.originalname}`;
         }) : [];
 
-        // الحصول على رقم متسلسل قصير للطلب
+        // الحصول على رقم متسلسل قصير للطلب (100, 103, 106, ...)
         let sequentialNumber;
+        let orderCode;
         try {
             sequentialNumber = await nextOrderNumber();
-            console.log('✅ رقم طلب بيع السيارة المتسلسل:', sequentialNumber);
+            orderCode = `ORD-${sequentialNumber}`; // تنسيق code للواجهة
+            console.log('✅ رقم طلب بيع السيارة المتسلسل:', sequentialNumber, 'الكود:', orderCode);
         } catch (seqError) {
             console.warn('⚠️ فشل الحصول على رقم متسلسل، استخدام fallback:', seqError?.message);
             sequentialNumber = null;
+            orderCode = null;
         }
 
         // إنشاء رقم طلب فريد - استخدام الرقم المتسلسل فقط
         const orderNumber = sequentialNumber 
             ? sequentialNumber.toString() 
             : 'ORD-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4).toUpperCase();
+        
+        // إنشاء code إن لم يكن موجود
+        if (!orderCode) {
+            orderCode = orderNumber.startsWith('ORD-') ? orderNumber : `ORD-${orderNumber}`;
+        }
 
         // إنشاء طلب بيع سيارة
         const order = new Order({
             orderNumber: orderNumber,
             number: sequentialNumber,  // الرقم المتسلسل القصير
+            code: orderCode,           // كود الطلب بصيغة ORD-<number>
             customerName: fullName,
             customerPhone: phone,
             items: [{
@@ -932,7 +956,8 @@ router.post('/sell-car', upload.array('images', 10), async (req, res) => {
                 const sendWA = req.app?.locals?.sendWhatsApp;
                 const phone = String(order?.customer?.phone || order?.customerPhone || order?.phone || '').trim();
                 if (typeof sendWA === 'function' && phone) {
-                    const msgText = `✅ تم استلام طلب بيع سيارتك رقم ${order.orderNumber}\n\n` +
+                    const orderDisplayCode = order?.code || `ORD-${order?.number || order.orderNumber}`;
+                    const msgText = `✅ تم استلام طلب بيع سيارتك ${orderDisplayCode}\n\n` +
                                    `🚗 ${order.carInfo.make} ${order.carInfo.model} ${order.carInfo.year}\n` +
                                    `📱 سنراجع التفاصيل ونتواصل معك قريباً`;
                     await sendWA(phone, msgText);
@@ -983,7 +1008,8 @@ router.post('/admin/send-to-delivery', async (req, res) => {
 
             const hasImage = !!(order.items?.[0]?.imageUrl || order.items?.[0]?.partImage);
 
-            message += `*${index + 1}. طلب رقم:* ${order.orderNumber}\n`;
+            const orderDisplayCode = order?.code || `ORD-${order?.number || order.orderNumber}`;
+            message += `*${index + 1}. طلب رقم:* ${orderDisplayCode}\n`;
             message += `👤 *العميل:* ${order.customerName}\n`;
             message += `📱 *الجوال:* ${order.customerPhone}\n`;
             message += `🚗 *السيارة:* ${order.carInfo?.fullName || (order.carInfo?.make + ' ' + order.carInfo?.model)} ${order.carInfo?.year || ''}\n`;

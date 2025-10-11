@@ -4,11 +4,24 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
 const fs = require('fs');
+const { v2: cloudinary } = require('cloudinary');
 
 // تحميل المتغيرات البيئية
 dotenv.config();
 
 const app = express();
+
+// Cloudinary configuration for branding
+if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET) {
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+  });
+  console.log('✅ Cloudinary configured for brand uploads');
+} else {
+  console.warn('⚠️ Cloudinary not configured - brand uploads will be stored locally');
+}
 
 // ===== Brand upload (minimal, no new files) =====
 let multer;
@@ -343,12 +356,28 @@ try {
 // 10. HTML Pages & Brand Logo Routes
 // ============================================
 
-// خدمة الشعار بدون امتداد
-app.get('/brand-logo', (req, res) => {
-  const p = findBrandLogoPath();
-  if (!p) return res.status(404).end();
+// خدمة الشعار بدون امتداد - مع دعم Cloudinary
+app.get('/brand-logo', async (req, res) => {
   res.setHeader('Cache-Control', 'no-cache');
-  res.sendFile(p);
+  
+  try {
+    // Try to get from database (Cloudinary URL)
+    const col = mongoose.connection.collection('settings');
+    const doc = await col.findOne({ _id: 'branding' });
+    
+    if (doc?.logoUrl) {
+      // Redirect to Cloudinary URL with version parameter
+      const v = doc.version || Date.now();
+      return res.redirect(302, doc.logoUrl + '?v=' + v);
+    }
+  } catch (err) {
+    console.warn('Error fetching brand from DB:', err.message);
+  }
+  
+  // Fallback to local file
+  const p = findBrandLogoPath();
+  if (p) return res.sendFile(p);
+  res.sendStatus(404);
 });
 
 // صفحة رفع سريعة (admin)
@@ -435,7 +464,7 @@ if (multer) {
     }
   });
 
-  app.post('/admin/brand/upload', upload.single('brand'), (req, res) => {
+  app.post('/admin/brand/upload', upload.single('brand'), async (req, res) => {
     if (!req.file) {
       return res.status(400).send(`
         <html dir="rtl">
@@ -447,17 +476,63 @@ if (multer) {
         </html>
       `);
     }
-    res.send(`
-      <html dir="rtl">
-      <body style="font-family: system-ui; text-align: center; padding: 50px;">
-        <h3 style="color: #00c853;">تم رفع الشعار بنجاح!</h3>
-        <img src="/brand-logo?${Date.now()}" style="max-width: 200px; margin: 20px 0; border: 1px solid #eee; border-radius: 8px; padding: 10px;">
-        <br>
-        <a href="/admin/brand" style="color: #667eea; margin-right: 20px;">رفع شعار آخر</a>
-        <a href="/" style="color: #667eea;">الصفحة الرئيسية</a>
-      </body>
-      </html>
-    `);
+    
+    try {
+      let logoUrl = null;
+      let version = Date.now();
+      
+      // Try to upload to Cloudinary if configured
+      if (process.env.CLOUDINARY_CLOUD_NAME) {
+        try {
+          const uploadResult = await cloudinary.uploader.upload(req.file.path, {
+            folder: 'branding',
+            public_id: 'brand-logo',
+            overwrite: true,
+            resource_type: 'image'
+          });
+          logoUrl = uploadResult.secure_url;
+          
+          // Store in database
+          const col = mongoose.connection.collection('settings');
+          await col.updateOne(
+            { _id: 'branding' },
+            { $set: { logoUrl: logoUrl, version: version } },
+            { upsert: true }
+          );
+          
+          console.log('✅ Brand logo uploaded to Cloudinary:', logoUrl);
+          
+          // Delete temporary file
+          try { fs.unlinkSync(req.file.path); } catch (_) {}
+        } catch (cloudinaryError) {
+          console.error('❌ Cloudinary upload failed:', cloudinaryError.message);
+          // Continue with local storage as fallback
+        }
+      }
+      
+      res.send(`
+        <html dir="rtl">
+        <body style="font-family: system-ui; text-align: center; padding: 50px;">
+          <h3 style="color: #00c853;">تم رفع الشعار بنجاح!</h3>
+          <img src="/brand-logo?v=${version}" style="max-width: 200px; margin: 20px 0; border: 1px solid #eee; border-radius: 8px; padding: 10px;">
+          <br>
+          <a href="/admin/brand" style="color: #667eea; margin-right: 20px;">رفع شعار آخر</a>
+          <a href="/" style="color: #667eea;">الصفحة الرئيسية</a>
+        </body>
+        </html>
+      `);
+    } catch (error) {
+      console.error('❌ Brand upload error:', error.message);
+      res.status(500).send(`
+        <html dir="rtl">
+        <body style="font-family: system-ui; text-align: center; padding: 50px;">
+          <h3 style="color: #d32f2f;">خطأ في رفع الشعار</h3>
+          <p>${error.message}</p>
+          <a href="/admin/brand" style="color: #667eea;">العودة</a>
+        </body>
+        </html>
+      `);
+    }
   });
 } else {
   app.post('/admin/brand/upload', (req, res) => {

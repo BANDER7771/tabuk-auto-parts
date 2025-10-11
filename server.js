@@ -120,6 +120,26 @@ async function sendWhatsApp(toE164, body, opts = {}) {
     }
     
     const msg = await waClient.messages.create(payload);
+    
+    // تخزين الرسالة الصادرة في messages collection
+    try {
+      const messagesCol = mongoose.connection.collection('messages');
+      await messagesCol.insertOne({
+        messageSid: msg.sid,
+        to: msisdn,
+        from: TW_FROM.replace('whatsapp:+', ''),
+        direction: 'outbound',
+        body: body || '[Template Message]',
+        contentSid: opts.contentSid || null,
+        status: 'queued',
+        errorCode: null,
+        timestamp: new Date(),
+        orderNumber: opts.orderNumber || null
+      });
+    } catch (dbErr) {
+      console.error('Failed to store outbound message:', dbErr?.message);
+    }
+    
     return { ok: true, sid: msg.sid };
   } catch (e) {
     console.error('WA send failed:', e?.message);
@@ -297,15 +317,112 @@ app.post('/webhooks/twilio/status', (req, res) => {
 });
 
 // ويبهوك حالة رسائل واتساب (Twilio يرسل x-www-form-urlencoded)
-app.post('/webhooks/wa-status', express.urlencoded({ extended: false }), (req, res) => {
+app.post('/webhooks/wa-status', express.urlencoded({ extended: false }), async (req, res) => {
     try {
         const { MessageSid, MessageStatus, ErrorCode, To, From } = req.body || {};
         console.log('WA STATUS:', { MessageSid, MessageStatus, ErrorCode, To, From });
-    } catch (_) {}
+        
+        // تحديث حالة الرسالة في قاعدة البيانات
+        if (MessageSid && MessageStatus) {
+            const messagesCol = mongoose.connection.collection('messages');
+            await messagesCol.updateOne(
+                { messageSid: MessageSid },
+                { 
+                    $set: { 
+                        status: MessageStatus,
+                        errorCode: ErrorCode || null,
+                        updatedAt: new Date()
+                    }
+                }
+            );
+        }
+    } catch (err) {
+        console.error('Error updating message status:', err?.message);
+    }
+    res.sendStatus(204);
+});
+
+// ويبهوك استقبال رسائل واتساب الواردة
+app.post('/webhooks/wa-incoming', express.urlencoded({ extended: false }), async (req, res) => {
+    try {
+        const { From, To, Body, MessageSid, ProfileName } = req.body || {};
+        console.log('WA INCOMING:', { From, To, Body, MessageSid });
+        
+        if (From && Body) {
+            const messagesCol = mongoose.connection.collection('messages');
+            await messagesCol.insertOne({
+                messageSid: MessageSid || null,
+                from: From.replace('whatsapp:+', ''),
+                to: To?.replace('whatsapp:+', ''),
+                direction: 'inbound',
+                body: Body,
+                profileName: ProfileName || null,
+                status: 'received',
+                timestamp: new Date(),
+                read: false
+            });
+        }
+    } catch (err) {
+        console.error('Error saving incoming message:', err?.message);
+    }
     res.sendStatus(204);
 });
 
 console.log('✅ Webhooks registered');
+
+// ============================================
+// Middleware للحماية البسيطة
+// ============================================
+function simpleAuth(req, res, next) {
+    if (!process.env.ADMIN_BASIC_TOKEN) {
+        return next(); // لا حماية إن لم يوجد توكن
+    }
+    
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).send(`
+            <html dir="rtl">
+            <body style="font-family: system-ui; text-align: center; padding: 50px;">
+                <h3>غير مصرح</h3>
+                <p>هذه الصفحة محمية. يرجى تسجيل الدخول.</p>
+                <form onsubmit="login(event)">
+                    <input type="password" id="token" placeholder="كلمة المرور" style="padding: 10px; margin: 10px;">
+                    <button type="submit" style="padding: 10px 20px;">دخول</button>
+                </form>
+                <script>
+                    function login(e) {
+                        e.preventDefault();
+                        const token = document.getElementById('token').value;
+                        localStorage.setItem('adminToken', token);
+                        window.location.reload();
+                    }
+                    // محاولة استخدام التوكن المحفوظ
+                    const savedToken = localStorage.getItem('adminToken');
+                    if (savedToken) {
+                        fetch(window.location.href, {
+                            headers: { 'Authorization': 'Bearer ' + savedToken }
+                        }).then(r => {
+                            if (r.ok) {
+                                r.text().then(html => {
+                                    document.open();
+                                    document.write(html);
+                                    document.close();
+                                });
+                            }
+                        });
+                    }
+                </script>
+            </body>
+            </html>
+        `);
+    }
+    
+    const token = authHeader.slice(7);
+    if (token !== process.env.ADMIN_BASIC_TOKEN) {
+        return res.status(401).json({ message: 'Invalid token' });
+    }
+    next();
+}
 
 // ============================================
 // 9. API Routes (with error handling)
@@ -353,7 +470,917 @@ try {
 }
 
 // ============================================
-// 10. HTML Pages & Brand Logo Routes
+// 10. Inbox & Broadcast Routes
+// ============================================
+
+// API: جلب قائمة المحادثات
+app.get('/api/inbox/threads', simpleAuth, async (req, res) => {
+    try {
+        const messagesCol = mongoose.connection.collection('messages');
+        const threads = await messagesCol.aggregate([
+            {
+                $group: {
+                    _id: {
+                        $cond: [
+                            { $eq: ['$direction', 'inbound'] },
+                            '$from',
+                            '$to'
+                        ]
+                    },
+                    lastMessage: { $last: '$$ROOT' },
+                    unreadCount: {
+                        $sum: {
+                            $cond: [
+                                { $and: [
+                                    { $eq: ['$direction', 'inbound'] },
+                                    { $eq: ['$read', false] }
+                                ]},
+                                1,
+                                0
+                            ]
+                        }
+                    }
+                }
+            },
+            {
+                $project: {
+                    phone: '$_id',
+                    lastMessageAt: '$lastMessage.timestamp',
+                    lastBody: '$lastMessage.body',
+                    unreadCount: 1
+                }
+            },
+            { $sort: { lastMessageAt: -1 } },
+            { $limit: 100 }
+        ]).toArray();
+        
+        res.json(threads);
+    } catch (err) {
+        console.error('Error fetching threads:', err);
+        res.status(500).json({ error: 'Failed to fetch threads' });
+    }
+});
+
+// API: جلب محادثة محددة
+app.get('/api/inbox/thread', simpleAuth, async (req, res) => {
+    try {
+        const phone = req.query.phone;
+        if (!phone) return res.status(400).json({ error: 'Phone required' });
+        
+        const messagesCol = mongoose.connection.collection('messages');
+        
+        // وضع علامة قراءة على الرسائل الواردة
+        await messagesCol.updateMany(
+            { from: phone, direction: 'inbound', read: false },
+            { $set: { read: true } }
+        );
+        
+        // جلب المحادثة
+        const messages = await messagesCol.find({
+            $or: [
+                { from: phone },
+                { to: phone }
+            ]
+        })
+        .sort({ timestamp: 1 })
+        .limit(200)
+        .toArray();
+        
+        res.json(messages);
+    } catch (err) {
+        console.error('Error fetching thread:', err);
+        res.status(500).json({ error: 'Failed to fetch thread' });
+    }
+});
+
+// API: إرسال رسالة
+app.post('/api/inbox/send', simpleAuth, async (req, res) => {
+    try {
+        const { to, body } = req.body;
+        if (!to || !body) return res.status(400).json({ error: 'Missing to or body' });
+        
+        const result = await app.locals.sendWhatsApp(to, body);
+        res.json(result);
+    } catch (err) {
+        console.error('Error sending message:', err);
+        res.status(500).json({ error: 'Failed to send message' });
+    }
+});
+
+// صفحة صندوق الوارد
+app.get('/admin/inbox', simpleAuth, (req, res) => {
+    const token = process.env.ADMIN_BASIC_TOKEN || '';
+    res.send(`<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>صندوق الوارد - WhatsApp</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f0f2f5;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            background: #075E54;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .header h1 { font-size: 20px; }
+        .container {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            background: white;
+        }
+        .sidebar {
+            width: 350px;
+            border-right: 1px solid #e1e4e8;
+            overflow-y: auto;
+            background: white;
+        }
+        .thread-item {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .thread-item:hover { background: #f5f5f5; }
+        .thread-item.active { background: #e8f5e9; }
+        .thread-phone {
+            font-weight: 600;
+            color: #111;
+            margin-bottom: 5px;
+        }
+        .thread-preview {
+            color: #667781;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .thread-time {
+            font-size: 12px;
+            color: #8696a0;
+            float: left;
+        }
+        .unread-badge {
+            background: #25D366;
+            color: white;
+            border-radius: 10px;
+            padding: 2px 6px;
+            font-size: 11px;
+            float: left;
+            margin-left: 10px;
+        }
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #e5ddd5;
+        }
+        .chat-header {
+            background: white;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e1e4e8;
+            font-weight: 600;
+        }
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .message {
+            max-width: 65%;
+            margin-bottom: 12px;
+            clear: both;
+        }
+        .message-bubble {
+            padding: 8px 12px;
+            border-radius: 7px;
+            position: relative;
+            word-wrap: break-word;
+        }
+        .message.sent {
+            float: right;
+        }
+        .message.sent .message-bubble {
+            background: #dcf8c6;
+        }
+        .message.received {
+            float: left;
+        }
+        .message.received .message-bubble {
+            background: white;
+        }
+        .message-time {
+            font-size: 11px;
+            color: #667781;
+            margin-top: 4px;
+        }
+        .message-status {
+            font-size: 10px;
+            color: #999;
+            margin-left: 5px;
+        }
+        .input-area {
+            background: white;
+            padding: 10px;
+            display: flex;
+            gap: 10px;
+            border-top: 1px solid #e1e4e8;
+        }
+        .input-area textarea {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            resize: none;
+            font-family: inherit;
+            outline: none;
+        }
+        .input-area button {
+            padding: 10px 20px;
+            background: #25D366;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .input-area button:hover { background: #128C7E; }
+        .empty-state {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #8696a0;
+            font-size: 16px;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #8696a0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📱 صندوق وارد WhatsApp</h1>
+        <div>
+            <a href="/admin/broadcast" style="color: white; margin-left: 20px;">📢 البث الجماعي</a>
+            <a href="/admin" style="color: white; margin-left: 20px;">🏠 الرئيسية</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="sidebar" id="sidebar">
+            <div class="loading">جاري التحميل...</div>
+        </div>
+        
+        <div class="chat-area" id="chatArea">
+            <div class="empty-state">اختر محادثة للبدء</div>
+        </div>
+    </div>
+    
+    <script>
+        const authToken = '${token}' || localStorage.getItem('adminToken');
+        let currentPhone = null;
+        let threads = [];
+        
+        async function fetchThreads() {
+            try {
+                const res = await fetch('/api/inbox/threads', {
+                    headers: { 'Authorization': 'Bearer ' + authToken }
+                });
+                if (!res.ok) throw new Error('Failed to fetch');
+                threads = await res.json();
+                renderThreads();
+            } catch (err) {
+                document.getElementById('sidebar').innerHTML = '<div class="loading">خطأ في التحميل</div>';
+            }
+        }
+        
+        function renderThreads() {
+            const sidebar = document.getElementById('sidebar');
+            if (!threads.length) {
+                sidebar.innerHTML = '<div class="loading">لا توجد محادثات</div>';
+                return;
+            }
+            
+            sidebar.innerHTML = threads.map(thread => \`
+                <div class="thread-item" onclick="selectThread('\${thread.phone}')">
+                    <div class="thread-phone">+\${thread.phone}</div>
+                    <div class="thread-preview">
+                        \${thread.lastBody || '...'}
+                        <span class="thread-time">\${formatTime(thread.lastMessageAt)}</span>
+                        \${thread.unreadCount ? \`<span class="unread-badge">\${thread.unreadCount}</span>\` : ''}
+                    </div>
+                </div>
+            \`).join('');
+        }
+        
+        async function selectThread(phone) {
+            currentPhone = phone;
+            document.querySelectorAll('.thread-item').forEach(el => el.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            
+            const chatArea = document.getElementById('chatArea');
+            chatArea.innerHTML = \`
+                <div class="chat-header">+\${phone}</div>
+                <div class="messages-container" id="messages">
+                    <div class="loading">جاري التحميل...</div>
+                </div>
+                <div class="input-area">
+                    <textarea id="messageInput" placeholder="اكتب رسالة..." rows="1"></textarea>
+                    <button onclick="sendMessage()">إرسال</button>
+                </div>
+            \`;
+            
+            try {
+                const res = await fetch('/api/inbox/thread?phone=' + phone, {
+                    headers: { 'Authorization': 'Bearer ' + authToken }
+                });
+                if (!res.ok) throw new Error('Failed to fetch');
+                const messages = await res.json();
+                renderMessages(messages);
+            } catch (err) {
+                document.getElementById('messages').innerHTML = '<div class="loading">خطأ في التحميل</div>';
+            }
+        }
+        
+        function renderMessages(messages) {
+            const container = document.getElementById('messages');
+            container.innerHTML = messages.map(msg => \`
+                <div class="message \${msg.direction === 'outbound' ? 'sent' : 'received'}">
+                    <div class="message-bubble">
+                        \${escapeHtml(msg.body)}
+                        <div class="message-time">
+                            \${formatTime(msg.timestamp)}
+                            \${msg.direction === 'outbound' ? \`<span class="message-status">\${getStatusIcon(msg.status)}</span>\` : ''}
+                        </div>
+                    </div>
+                </div>
+            \`).join('');
+            
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const body = input.value.trim();
+            if (!body || !currentPhone) return;
+            
+            input.value = '';
+            input.disabled = true;
+            
+            try {
+                const res = await fetch('/api/inbox/send', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + authToken,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ to: currentPhone, body })
+                });
+                
+                const result = await res.json();
+                if (result.ok) {
+                    // إعادة تحميل المحادثة
+                    selectThread(currentPhone);
+                } else {
+                    alert('فشل الإرسال: ' + (result.reason || 'خطأ غير معروف'));
+                }
+            } catch (err) {
+                alert('خطأ في الإرسال');
+            } finally {
+                input.disabled = false;
+            }
+        }
+        
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = now - date;
+            
+            if (diff < 60000) return 'الآن';
+            if (diff < 3600000) return Math.floor(diff / 60000) + ' د';
+            if (diff < 86400000) return Math.floor(diff / 3600000) + ' س';
+            
+            return date.toLocaleDateString('ar-SA', { month: 'short', day: 'numeric' });
+        }
+        
+        function getStatusIcon(status) {
+            switch(status) {
+                case 'delivered': return '✓✓';
+                case 'sent': return '✓';
+                case 'read': return '✓✓';
+                case 'failed': return '✗';
+                default: return '🕐';
+            }
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // تحميل المحادثات عند فتح الصفحة
+        fetchThreads();
+        
+        // تحديث المحادثات كل 10 ثواني
+        setInterval(fetchThreads, 10000);
+    </script>
+</body>
+</html>`);
+});
+
+// صفحة البث الجماعي
+app.get('/admin/broadcast', simpleAuth, (req, res) => {
+    const token = process.env.ADMIN_BASIC_TOKEN || '';
+    res.send(`<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>البث الجماعي - WhatsApp</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+        }
+        .header {
+            background: #075E54;
+            color: white;
+            padding: 15px 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: #1f2937;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .info-box {
+            background: #fef3c7;
+            border: 1px solid #fbbf24;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .info-box h4 {
+            color: #92400e;
+            margin-bottom: 8px;
+        }
+        .info-box ul {
+            color: #78350f;
+            margin-right: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #25D366;
+        }
+        .template-info {
+            background: #e0f2fe;
+            border: 1px solid #0284c7;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 20px;
+        }
+        .buttons {
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: #25D366;
+            color: white;
+            flex: 1;
+        }
+        .btn-primary:hover {
+            background: #128C7E;
+        }
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+        .result {
+            display: none;
+            margin-top: 20px;
+        }
+        .result.success {
+            background: #d4edda;
+            border: 1px solid #28a745;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .result.error {
+            background: #f8d7da;
+            border: 1px solid #dc3545;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .stat-item {
+            background: #f9fafb;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1f2937;
+        }
+        .stat-label {
+            color: #6b7280;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        .spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #25D366;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📢 البث الجماعي عبر WhatsApp</h1>
+    </div>
+    
+    <div class="container">
+        <div class="card">
+            <h2>📤 إرسال رسالة جماعية</h2>
+            
+            <div class="info-box">
+                <h4>⚠️ تنبيهات مهمة:</h4>
+                <ul>
+                    <li>سيتم الإرسال فقط للعملاء الذين وافقوا على استقبال الرسائل (whatsappOptIn = true)</li>
+                    <li>يجب استخدام قالب WhatsApp معتمد للبث الجماعي</li>
+                    <li>تأكد من إعداد WA_TEMPLATE_SID_BROADCAST في متغيرات البيئة</li>
+                    <li>الحد الأقصى 1000 رسالة في المرة الواحدة</li>
+                </ul>
+            </div>
+            
+            <form id="broadcastForm">
+                <div class="form-group">
+                    <label>متغيرات القالب (JSON):</label>
+                    <textarea id="templateVars" rows="4" placeholder='{"1": "اسم العميل", "2": "رابط العرض"}'>{"1": "عميلنا العزيز"}</textarea>
+                </div>
+                
+                <div class="template-info">
+                    <strong>📋 معلومات القالب:</strong>
+                    <p>سيتم استخدام القالب المعرّف في WA_TEMPLATE_SID_BROADCAST</p>
+                    <p>تأكد من أن القالب معتمد من WhatsApp Business</p>
+                </div>
+                
+                <div class="buttons">
+                    <button type="submit" class="btn-primary">🚀 بدء البث</button>
+                    <button type="button" class="btn-secondary" onclick="window.location.href='/admin/inbox'">📥 العودة للوارد</button>
+                </div>
+            </form>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>جاري الإرسال... قد يستغرق هذا بعض الوقت</p>
+            </div>
+            
+            <div class="result" id="result"></div>
+        </div>
+    </div>
+    
+    <script>
+        const authToken = '${token}' || localStorage.getItem('adminToken');
+        
+        document.getElementById('broadcastForm').onsubmit = async (e) => {
+            e.preventDefault();
+            
+            const varsText = document.getElementById('templateVars').value;
+            let templateVars = {};
+            
+            try {
+                if (varsText.trim()) {
+                    templateVars = JSON.parse(varsText);
+                }
+            } catch (err) {
+                alert('خطأ في صيغة JSON للمتغيرات');
+                return;
+            }
+            
+            if (!confirm('هل أنت متأكد من إرسال البث الجماعي؟')) return;
+            
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+            const form = document.getElementById('broadcastForm');
+            
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            form.style.opacity = '0.5';
+            form.style.pointerEvents = 'none';
+            
+            try {
+                const res = await fetch('/admin/broadcast', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + authToken,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ templateVars })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    result.className = 'result success';
+                    result.innerHTML = \`
+                        <h3>✅ تم إكمال البث بنجاح!</h3>
+                        <div class="stats">
+                            <div class="stat-item">
+                                <div class="stat-number">\${data.total}</div>
+                                <div class="stat-label">إجمالي المستهدفين</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">\${data.sentOk}</div>
+                                <div class="stat-label">نجح الإرسال</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">\${data.failed}</div>
+                                <div class="stat-label">فشل الإرسال</div>
+                            </div>
+                        </div>
+                        \${data.samples?.length ? \`
+                            <p style="margin-top: 15px;"><strong>عينة من الأرقام المرسل إليها:</strong></p>
+                            <p>\${data.samples.join(', ')}</p>
+                        \` : ''}
+                    \`;
+                } else {
+                    result.className = 'result error';
+                    result.innerHTML = \`
+                        <h3>❌ فشل البث</h3>
+                        <p>\${data.reason || 'خطأ غير معروف'}</p>
+                        \${data.message ? \`<p>\${data.message}</p>\` : ''}
+                    \`;
+                }
+                
+                result.style.display = 'block';
+            } catch (err) {
+                result.className = 'result error';
+                result.innerHTML = \`
+                    <h3>❌ خطأ في الاتصال</h3>
+                    <p>\${err.message}</p>
+                \`;
+                result.style.display = 'block';
+            } finally {
+                loading.style.display = 'none';
+                form.style.opacity = '1';
+                form.style.pointerEvents = 'auto';
+            }
+        };
+    </script>
+</body>
+</html>`);
+});
+
+// معالج البث الجماعي
+app.post('/admin/broadcast', simpleAuth, async (req, res) => {
+    try {
+        const { templateVars = {} } = req.body;
+        
+        // التحقق من وجود قالب البث
+        const templateSid = process.env.WA_TEMPLATE_SID_BROADCAST;
+        if (!templateSid) {
+            return res.json({
+                ok: false,
+                reason: 'no_template',
+                message: 'لم يتم تكوين قالب البث. يرجى إضافة WA_TEMPLATE_SID_BROADCAST في متغيرات البيئة'
+            });
+        }
+        
+        // جلب قائمة العملاء المؤهلين
+        let customers = [];
+        
+        // محاولة 1: من مجموعة users
+        try {
+            const usersCol = mongoose.connection.collection('users');
+            const users = await usersCol.find({
+                whatsappOptIn: true,
+                phone: { $exists: true, $ne: null, $ne: '' }
+            }, { projection: { phone: 1 } }).toArray();
+            
+            customers = users.map(u => u.phone);
+        } catch (err) {
+            console.log('Users collection not found or error:', err.message);
+        }
+        
+        // محاولة 2: من مجموعة customers إن لم نجد users
+        if (!customers.length) {
+            try {
+                const customersCol = mongoose.connection.collection('customers');
+                const custs = await customersCol.find({
+                    whatsappOptIn: true,
+                    phone: { $exists: true, $ne: null, $ne: '' }
+                }, { projection: { phone: 1 } }).toArray();
+                
+                customers = custs.map(c => c.phone);
+            } catch (err) {
+                console.log('Customers collection not found or error:', err.message);
+            }
+        }
+        
+        // محاولة 3: من الطلبات
+        if (!customers.length) {
+            try {
+                const ordersCol = mongoose.connection.collection('orders');
+                const orders = await ordersCol.aggregate([
+                    {
+                        $match: {
+                            $or: [
+                                { 'customer.whatsappOptIn': true },
+                                { whatsappOptIn: true }
+                            ]
+                        }
+                    },
+                    {
+                        $project: {
+                            phone: {
+                                $cond: [
+                                    { $ne: ['$customer.phone', null] },
+                                    '$customer.phone',
+                                    { $cond: [
+                                        { $ne: ['$customerPhone', null] },
+                                        '$customerPhone',
+                                        '$phone'
+                                    ]}
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        $match: {
+                            phone: { $exists: true, $ne: null, $ne: '' }
+                        }
+                    },
+                    {
+                        $group: { _id: '$phone' }
+                    }
+                ]).toArray();
+                
+                customers = orders.map(o => o._id);
+            } catch (err) {
+                console.log('Orders collection error:', err.message);
+            }
+        }
+        
+        // التحقق من وجود عملاء
+        if (!customers.length) {
+            return res.json({
+                ok: false,
+                reason: 'no_opted_in_customers',
+                message: 'لا يوجد عملاء مسجلين للحصول على رسائل WhatsApp'
+            });
+        }
+        
+        // تنظيف وإزالة المكرر
+        const uniquePhones = [...new Set(customers.map(p => normalizeMsisdn(p)).filter(Boolean))];
+        
+        if (!uniquePhones.length) {
+            return res.json({
+                ok: false,
+                reason: 'no_valid_phones',
+                message: 'لا توجد أرقام هاتف صالحة'
+            });
+        }
+        
+        // الحد الأقصى 1000 رقم
+        const targetPhones = uniquePhones.slice(0, 1000);
+        
+        // البث على دفعات
+        const batchSize = 20;
+        const results = { total: targetPhones.length, sentOk: 0, failed: 0, samples: [] };
+        
+        for (let i = 0; i < targetPhones.length; i += batchSize) {
+            const batch = targetPhones.slice(i, i + batchSize);
+            
+            const promises = batch.map(async phone => {
+                try {
+                    const result = await app.locals.sendWhatsApp(phone, '', {
+                        contentSid: templateSid,
+                        vars: templateVars
+                    });
+                    
+                    if (result.ok) {
+                        results.sentOk++;
+                        if (results.samples.length < 5) {
+                            results.samples.push('+' + phone);
+                        }
+                    } else {
+                        results.failed++;
+                    }
+                } catch (err) {
+                    console.error('Broadcast send error:', err);
+                    results.failed++;
+                }
+            });
+            
+            await Promise.all(promises);
+            
+            // انتظار قصير بين الدفعات
+            if (i + batchSize < targetPhones.length) {
+                await new Promise(resolve => setTimeout(resolve, 200));
+            }
+        }
+        
+        res.json({ ok: true, ...results });
+        
+    } catch (err) {
+        console.error('Broadcast error:', err);
+        res.status(500).json({
+            ok: false,
+            reason: 'server_error',
+            message: err.message
+        });
+    }
+});
+
+// ============================================
+// HTML Pages & Brand Logo Routes
 // ============================================
 
 // خدمة الشعار بدون امتداد - مع دعم Cloudinary

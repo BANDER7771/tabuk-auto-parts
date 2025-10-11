@@ -368,7 +368,9 @@ app.get('/brand-logo', async (req, res) => {
     if (doc?.logoUrl) {
       // Redirect to Cloudinary URL with version parameter
       const v = doc.version || Date.now();
-      return res.redirect(302, doc.logoUrl + '?v=' + v);
+      // Check if URL already has query params
+      const separator = doc.logoUrl.includes('?') ? '&' : '?';
+      return res.redirect(302, doc.logoUrl + separator + 'v=' + v);
     }
   } catch (err) {
     console.warn('Error fetching brand from DB:', err.message);

@@ -71,23 +71,29 @@
             background: #000;            /* خلفية سوداء أنيقة */
             border-radius: 10px;         /* يحافظ على نعومة الزوايا */
             overflow: hidden;
-            display: grid;
-            place-items: center;
+            display: block;              /* Changed from grid to block for full image */
             color: white;
             font-size: 1.2rem;
             position: relative;
         }
 
-        .logo-icon img#brandLogo {
+        #brandLogo {
             width: 100%;
             height: 100%;
             object-fit: cover;           /* يملأ المربع بالكامل */
             display: block;              /* عرض مباشر */
+            position: relative;          /* Changed from absolute to relative */
+            z-index: 2;
+        }
+        
+        #defaultIcon {
+            display: none;
             position: absolute;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
         }
 
         /* العلامة تملأ المربع بالكامل */
@@ -1129,8 +1135,8 @@
         <div class="nav-container">
             <div class="logo">
                 <div class="logo-icon" id="logoIcon">
-                    <img id="brandLogo" src="/brand-logo" alt="شعار المنصة" style="display:none;" onerror="this.style.display='none'; document.getElementById('defaultIcon').style.display='block';">
-                    <svg id="defaultIcon" class="brand-svg" viewBox="0 0 24 24" aria-hidden="true">
+                    <img id="brandLogo" src="/brand-logo" alt="شعار المنصة" onerror="this.style.display='none'; var d=document.getElementById('defaultIcon'); if(d) d.style.display='block';">
+                    <svg id="defaultIcon" class="brand-svg" viewBox="0 0 24 24" aria-hidden="true" style="display:none;">
                         <!-- علامة أحادية باللون الأبيض تُناسب قطع الغيار + تحديد الموقع -->
                         <!-- إطار دبوس الموقع ممتد للحواف لملء المربع -->
                         <path d="M12 1.5c-5 0-9 4-9 9 0 6 9 12 9 12s9-6 9-12c0-5-4-9-9-9z"
@@ -1597,12 +1603,16 @@
         // Load brand logo
         async function loadBrandLogo() {
             try {
-                const response = await fetch('/brand-logo');
-                if (response.ok) {
+                const response = await fetch('/brand-logo', { 
+                    method: 'HEAD',
+                    redirect: 'follow' 
+                });
+                if (response.ok || response.redirected) {
                     const brandLogo = document.getElementById('brandLogo');
                     const defaultIcon = document.getElementById('defaultIcon');
                     
                     if (brandLogo) {
+                        // Force reload with timestamp to bypass cache
                         brandLogo.src = '/brand-logo?t=' + Date.now();
                         brandLogo.style.display = 'block';
                         if (defaultIcon) defaultIcon.style.display = 'none';
@@ -1610,6 +1620,10 @@
                 }
             } catch (error) {
                 console.log('Could not load brand logo, using default icon');
+                const brandLogo = document.getElementById('brandLogo');
+                const defaultIcon = document.getElementById('defaultIcon');
+                if (brandLogo) brandLogo.style.display = 'none';
+                if (defaultIcon) defaultIcon.style.display = 'block';
             }
         }
 

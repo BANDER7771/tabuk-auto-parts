@@ -236,32 +236,34 @@ router.post('/', (req, res, next) => {
             const subject = `طلب جديد #${orderNo}`;
             const parts = [
               `طلب جديد #${orderNo}`,
-              `الاسم: ${order?.customerName || order?.fullName || '-'}`,
-              `الجوال: ${order?.customerPhone || order?.phone || '-'}`,
-              `المدينة: ${order?.shippingAddress?.city || '-'}`,
-              `الدفع: ${order?.paymentMethod || '-'}`,
-              `التوصيل: ${order?.deliveryOption || '-'}`,
-              `تفاصيل القطعة: ${order?.items?.[0]?.partName || '-'}`
+              `الاسم: ${order?.customerName || fullName || '-'}`,
+              `الجوال: ${order?.customerPhone || phone || '-'}`,
+              `المدينة: ${order?.shippingAddress?.city || city || '-'}`,
+              `السيارة: ${order?.carInfo?.fullName || carNameCategory || '-'}`,
+              `التوصيل: ${deliveryOption || '-'}`,
+              `تفاصيل القطعة: ${order?.items?.[0]?.partName || partDetails || '-'}`
             ];
             const text = parts.join('\n');
             const link = process.env.APP_PUBLIC_URL ? `${process.env.APP_PUBLIC_URL}/orders/${orderId}` : '';
-            const html = `<div style="font-family:system-ui,sans-serif">
-                <h3>طلب جديد #${orderNo}</h3>
-                <ul>
-                  <li><b>الاسم:</b> ${order?.customerName || order?.fullName || '-'}</li>
-                  <li><b>الجوال:</b> ${order?.customerPhone || order?.phone || '-'}</li>
-                  <li><b>المدينة:</b> ${order?.shippingAddress?.city || '-'}</li>
-                  <li><b>الدفع:</b> ${order?.paymentMethod || '-'}</li>
-                  <li><b>التوصيل:</b> ${order?.deliveryOption || '-'}</li>
-                  <li><b>تفاصيل القطعة:</b> ${order?.items?.[0]?.partName || '-'}</li>
-                </ul>
-                ${link ? `<p><a href="${link}">فتح الطلب</a></p>` : ''}
+            const html = `<div style="font-family:system-ui,sans-serif;direction:rtl;text-align:right;">
+                <h3 style="color:#667eea;">طلب جديد #${orderNo}</h3>
+                <table style="width:100%;border-collapse:collapse;margin:20px 0;">
+                  <tr><td style="padding:8px;border-bottom:1px solid #eee;"><b>الاسم:</b></td><td style="padding:8px;border-bottom:1px solid #eee;">${order?.customerName || fullName || '-'}</td></tr>
+                  <tr><td style="padding:8px;border-bottom:1px solid #eee;"><b>الجوال:</b></td><td style="padding:8px;border-bottom:1px solid #eee;">${order?.customerPhone || phone || '-'}</td></tr>
+                  <tr><td style="padding:8px;border-bottom:1px solid #eee;"><b>المدينة:</b></td><td style="padding:8px;border-bottom:1px solid #eee;">${order?.shippingAddress?.city || city || '-'}</td></tr>
+                  <tr><td style="padding:8px;border-bottom:1px solid #eee;"><b>السيارة:</b></td><td style="padding:8px;border-bottom:1px solid #eee;">${order?.carInfo?.fullName || carNameCategory || '-'}</td></tr>
+                  <tr><td style="padding:8px;border-bottom:1px solid #eee;"><b>التوصيل:</b></td><td style="padding:8px;border-bottom:1px solid #eee;">${deliveryOption || '-'}</td></tr>
+                  <tr><td style="padding:8px;"><b>تفاصيل القطعة:</b></td><td style="padding:8px;">${order?.items?.[0]?.partName || partDetails || '-'}</td></tr>
+                </table>
+                ${link ? `<p style="margin-top:20px;"><a href="${link}" style="background:#667eea;color:white;padding:10px 20px;text-decoration:none;border-radius:5px;display:inline-block;">فتح الطلب</a></p>` : ''}
               </div>`;
             emailNotify = await sendEmail(to, subject, text, html);
-            console.log('Email notify result:', emailNotify);
+            console.log('✅ Email notify sent to admin:', to, emailNotify);
+          } else {
+            console.log('⚠️ Email notify skipped - sendEmail:', typeof sendEmail, 'NOTIFY_EMAIL:', to);
           }
         } catch (e) {
-          console.error('email notify error:', e?.message);
+          console.error('❌ Email notify error:', e?.message);
           emailNotify = { ok: false, reason: 'error', error: e?.message };
         }
 

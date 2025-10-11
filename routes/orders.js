@@ -311,7 +311,7 @@ router.post('/', (req, res, next) => {
                                    `${req.file ? '📷 تم استلام الصورة\n' : ''}` +
                                    `\nسنتواصل معك قريباً لتأكيد التفاصيل`;
                     
-                    await sendWA(phone, msgText);
+                    await sendWA(phone, msgText, { orderNumber: orderNo });
                     console.log('✅ WA sent to customer:', phone);
                 }
             } catch (e) {
@@ -328,7 +328,7 @@ router.post('/', (req, res, next) => {
                                 `👤 ${order?.customerName}\n` +
                                 `📱 ${order?.customerPhone}\n` +
                                 `🚗 ${order?.carInfo?.fullName || carNameCategory}`;
-                    await sendWA(drv, text);
+                    await sendWA(drv, text, { orderNumber: orderNo });
                     console.log('✅ WA sent to driver');
                 }
             } catch (e) {
@@ -486,8 +486,8 @@ router.put('/admin/:id/status', async (req, res) => {
                 const txt = `تم تحديث حالة طلبك ${orderDisplayCode} إلى: ${order?.status || 'غير محددة'}.${link ? '\n' + link : ''}`;
                 
                 waStatusUpdate = tpl
-                    ? await sendWA(phone, null, { contentSid: tpl, vars: { "1": orderDisplayCode, "2": order.status, "3": link || "" } })
-                    : await sendWA(phone, txt);
+                    ? await sendWA(phone, null, { contentSid: tpl, vars: { "1": orderDisplayCode, "2": order.status, "3": link || "" }, orderNumber: orderNo })
+                    : await sendWA(phone, txt, { orderNumber: orderNo });
                 console.log('WA status update result:', waStatusUpdate);
             }
         } catch (e) {
@@ -603,8 +603,8 @@ router.put('/:orderNumber/status', async (req, res) => {
                 const txt = `تم تحديث حالة طلبك ${orderDisplayCode} إلى: ${order?.status || 'غير محددة'}.${link ? '\n' + link : ''}`;
                 
                 waStatusUpdate = tpl
-                    ? await sendWA(phone, null, { contentSid: tpl, vars: { "1": orderDisplayCode, "2": order.status, "3": link || "" } })
-                    : await sendWA(phone, txt);
+                    ? await sendWA(phone, null, { contentSid: tpl, vars: { "1": orderDisplayCode, "2": order.status, "3": link || "" }, orderNumber: orderNo })
+                    : await sendWA(phone, txt, { orderNumber: orderNo });
                 console.log('WA status update result:', waStatusUpdate);
             }
         } catch (e) {
@@ -960,7 +960,7 @@ router.post('/sell-car', upload.array('images', 10), async (req, res) => {
                     const msgText = `✅ تم استلام طلب بيع سيارتك ${orderDisplayCode}\n\n` +
                                    `🚗 ${order.carInfo.make} ${order.carInfo.model} ${order.carInfo.year}\n` +
                                    `📱 سنراجع التفاصيل ونتواصل معك قريباً`;
-                    await sendWA(phone, msgText);
+                    await sendWA(phone, msgText, { orderNumber: order?.number || order?.orderNumber });
                     console.log('✅ WA sent to customer for sell-car request');
                 }
             } catch (whatsappError) {
@@ -1040,7 +1040,7 @@ router.post('/admin/send-to-delivery', async (req, res) => {
         try {
             const sendWA = req.app?.locals?.sendWhatsApp;
             if (typeof sendWA === 'function' && deliveryNumber) {
-                deliveryResult = await sendWA(deliveryNumber, message);
+                deliveryResult = await sendWA(deliveryNumber, message, { orderNumber: order?.number || order?.orderNumber });
                 console.log('WA to delivery result:', deliveryResult);
             } else {
                 console.warn('WA skip (delivery): no sender or phone');

@@ -30,6 +30,42 @@ function findBrandLogoPath() {
   } catch { return null; }
 }
 
+// ===== Email (SMTP via SendGrid) - minimal =====
+const nodemailer = require('nodemailer');
+let mailer = null;
+try {
+  if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+    const secure = String(process.env.SMTP_SECURE || 'false') === 'true';
+    const port = parseInt(process.env.SMTP_PORT || (secure ? 465 : 587), 10);
+    mailer = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port, secure,
+      auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+      pool: true, maxConnections: 3, maxMessages: 50
+    });
+    console.log('✅ Email (SMTP) enabled');
+  } else {
+    console.warn('⚠️ Email disabled: missing SMTP env');
+  }
+} catch (e) {
+  console.error('❌ Email transport error:', e?.message);
+}
+
+async function sendEmail(to, subject, text, html) {
+  if (!mailer) return { ok: false, reason: 'mail_disabled' };
+  try {
+    const from = process.env.MAIL_FROM || 'no-reply@tshleh-tabuk.com';
+    const headers = {};
+    if (process.env.REPLY_TO) headers['Reply-To'] = process.env.REPLY_TO;
+    const info = await mailer.sendMail({ from, to, subject, text, html, headers });
+    return { ok: true, id: info.messageId };
+  } catch (e) {
+    console.error('email send failed:', e?.message);
+    return { ok: false, reason: 'mailer_error', error: e?.message };
+  }
+}
+app.locals.sendEmail = sendEmail;
+
 // ===== WhatsApp (Twilio) bootstrap - minimal =====
 const twilio = require('twilio');
 
@@ -101,7 +137,8 @@ app.get('/health', (req, res) => {
         environment: process.env.NODE_ENV || 'production',
         database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
         port: process.env.PORT || 3000,
-        whatsapp: /^whatsapp:\+/.test(String(process.env.TWILIO_FROM_WHATSAPP || '')) ? 'enabled' : 'disabled'
+        whatsapp: /^whatsapp:\+/.test(String(process.env.TWILIO_FROM_WHATSAPP || '')) ? 'enabled' : 'disabled',
+        email: !!mailer ? 'enabled' : 'disabled'
     });
 });
 
@@ -112,6 +149,17 @@ app.get('/api/test-cors', (req, res) => {
         timestamp: new Date().toISOString()
     });
 });
+
+// dev-only: اختبار سريع للإرسال (لن يعمل في production)
+if (process.env.NODE_ENV !== 'production') {
+  app.get('/dev/email-ping', async (req, res) => {
+    const to = req.query.to || process.env.NOTIFY_EMAIL;
+    const sub = req.query.sub || 'Ping from server';
+    const msg = req.query.msg || 'Email path is working ✅';
+    const r = await (app.locals.sendEmail?.(to, sub, msg, `<p>${msg}</p>`));
+    res.json(r || { ok:false });
+  });
+}
 
 console.log('✅ Health endpoints registered');
 

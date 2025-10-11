@@ -81,8 +81,13 @@
         .logo-icon img#brandLogo {
             width: 100%;
             height: 100%;
-            object-fit: cover;
-            display: none;
+            object-fit: cover;           /* يملأ المربع بالكامل */
+            display: block;              /* عرض مباشر */
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
         }
 
         /* العلامة تملأ المربع بالكامل */
@@ -1124,7 +1129,7 @@
         <div class="nav-container">
             <div class="logo">
                 <div class="logo-icon" id="logoIcon">
-                    <img id="brandLogo" alt="شعار المنصة" style="display:none;" onerror="this.style.display='none'; document.getElementById('defaultIcon').style.display='block';">
+                    <img id="brandLogo" src="/brand-logo" alt="شعار المنصة" style="display:none;" onerror="this.style.display='none'; document.getElementById('defaultIcon').style.display='block';">
                     <svg id="defaultIcon" class="brand-svg" viewBox="0 0 24 24" aria-hidden="true">
                         <!-- علامة أحادية باللون الأبيض تُناسب قطع الغيار + تحديد الموقع -->
                         <!-- إطار دبوس الموقع ممتد للحواف لملء المربع -->

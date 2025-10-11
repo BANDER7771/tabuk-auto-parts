@@ -12,7 +12,7 @@ async function nextOrderNumber() {
         { _id: 'orders' },
         { 
             $inc: { seq: 1 },
-            $setOnInsert: { seq: 99 } // البدء من 99، أول زيادة = 100
+            $setOnInsert: { seq: 100 } // البدء من 100
         },
         { 
             upsert: true,
@@ -130,9 +130,9 @@ router.post('/', (req, res, next) => {
             sequentialNumber = null;
         }
 
-        // إنشاء رقم طلب فريد
+        // إنشاء رقم طلب فريد - استخدام الرقم المتسلسل فقط
         const orderNumber = sequentialNumber 
-            ? `ORD-${sequentialNumber}` 
+            ? sequentialNumber.toString() 
             : 'ORD-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4).toUpperCase();
 
         // حساب رسوم التوصيل
@@ -225,123 +225,7 @@ router.post('/', (req, res, next) => {
             }
         }
 
-        // ===== Email notify (admin inbox) =====
-        let emailNotify = { ok: false, reason: 'no_action' };
-        try {
-          const sendEmail = req.app?.locals?.sendEmail;
-          const to = process.env.NOTIFY_EMAIL;
-          if (typeof sendEmail === 'function' && to) {
-            const orderId = (order?._id || '').toString();
-            const orderNo = order?.number || orderId.slice(-6);
-            const subject = `طلب جديد #${orderNo}`;
-            const parts = [
-              `طلب جديد #${orderNo}`,
-              `الاسم: ${order?.customerName || fullName || '-'}`,
-              `الجوال: ${order?.customerPhone || phone || '-'}`,
-              `المدينة: ${order?.shippingAddress?.city || city || '-'}`,
-              `السيارة: ${order?.carInfo?.fullName || carNameCategory || '-'}`,
-              `التوصيل: ${deliveryOption || '-'}`,
-              `تفاصيل القطعة: ${order?.items?.[0]?.partName || partDetails || '-'}`
-            ];
-            const text = parts.join('\n');
-            const link = process.env.APP_PUBLIC_URL ? `${process.env.APP_PUBLIC_URL}/orders/${orderId}` : '';
-            const html = `<div style="font-family:system-ui,sans-serif;direction:rtl;text-align:right;">
-                <h3 style="color:#667eea;">طلب جديد #${orderNo}</h3>
-                <table style="width:100%;border-collapse:collapse;margin:20px 0;">
-                  <tr><td style="padding:8px;border-bottom:1px solid #eee;"><b>الاسم:</b></td><td style="padding:8px;border-bottom:1px solid #eee;">${order?.customerName || fullName || '-'}</td></tr>
-                  <tr><td style="padding:8px;border-bottom:1px solid #eee;"><b>الجوال:</b></td><td style="padding:8px;border-bottom:1px solid #eee;">${order?.customerPhone || phone || '-'}</td></tr>
-                  <tr><td style="padding:8px;border-bottom:1px solid #eee;"><b>المدينة:</b></td><td style="padding:8px;border-bottom:1px solid #eee;">${order?.shippingAddress?.city || city || '-'}</td></tr>
-                  <tr><td style="padding:8px;border-bottom:1px solid #eee;"><b>السيارة:</b></td><td style="padding:8px;border-bottom:1px solid #eee;">${order?.carInfo?.fullName || carNameCategory || '-'}</td></tr>
-                  <tr><td style="padding:8px;border-bottom:1px solid #eee;"><b>التوصيل:</b></td><td style="padding:8px;border-bottom:1px solid #eee;">${deliveryOption || '-'}</td></tr>
-                  <tr><td style="padding:8px;"><b>تفاصيل القطعة:</b></td><td style="padding:8px;">${order?.items?.[0]?.partName || partDetails || '-'}</td></tr>
-                </table>
-                ${link ? `<p style="margin-top:20px;"><a href="${link}" style="background:#667eea;color:white;padding:10px 20px;text-decoration:none;border-radius:5px;display:inline-block;">فتح الطلب</a></p>` : ''}
-              </div>`;
-            emailNotify = await sendEmail(to, subject, text, html);
-            console.log('✅ Email notify sent to admin:', to, emailNotify);
-          } else {
-            console.log('⚠️ Email notify skipped - sendEmail:', typeof sendEmail, 'NOTIFY_EMAIL:', to);
-          }
-        } catch (e) {
-          console.error('❌ Email notify error:', e?.message);
-          emailNotify = { ok: false, reason: 'error', error: e?.message };
-        }
-
-        // ===== WA: notify delivery and customer on order created =====
-        const sendWA = req.app?.locals?.sendWhatsApp;
-        let waToDriver = { ok: false, reason: 'no_action' };
-        let waToCustomer = { ok: false, reason: 'no_action' };
-        
-        // Send to delivery driver
-        try {
-            const drv = process.env.DELIVERY_WHATSAPP; // e.g., 966545376792
-            if (typeof sendWA === 'function' && drv) {
-                const orderNo = order?.orderNumber || order?.number || (order?._id || '').toString().slice(-6);
-                const text = `تم استلام طلب #${orderNo}. تواصل للتسليم.`;
-                waToDriver = await sendWA(drv, text);
-                console.log('WA to driver result:', waToDriver);
-            }
-        } catch (e) {
-            console.error('WA driver err:', e?.message);
-            waToDriver = { ok: false, reason: 'error', error: e?.message };
-        }
-        
-        // Send to customer (يفضّل القوالب إن توفرت لتجاوز نافذة 24 ساعة)
-        try {
-            const phone = String(order?.customerPhone || order?.customer?.phone || order?.phone || '');
-            if (typeof sendWA === 'function' && phone) {
-                const orderId = (order?._id || '').toString();
-                const orderNo = order?.orderNumber || order?.number || orderId.slice(-6);
-                const link = process.env.APP_PUBLIC_URL ? `${process.env.APP_PUBLIC_URL}/orders/${orderId}` : '';
-                const tpl = process.env.WA_TEMPLATE_SID_ORDER_CREATED;
-                const text = `تم استلام طلبك رقم ${orderNo}. سنوافيك بالتحديثات.${link ? '\n' + link : ''}`;
-                
-                waToCustomer = tpl
-                    ? await sendWA(phone, null, { contentSid: tpl, vars: { "1": orderNo, "2": link || "" } })
-                    : await sendWA(phone, text);
-                console.log('WA to customer result:', waToCustomer);
-            }
-        } catch (e) {
-            console.error('WA customer err:', e?.message);
-            waToCustomer = { ok: false, reason: 'error', error: e?.message };
-        }
-
-        // إرسال إشعار واتساب فقط
-        const deliveryText = deliveryOption === 'express' ? 'مستعجل (1-2 ساعة) - 50 ريال' : 
-                           deliveryOption === 'standard' ? 'سريع (3-5 ساعات) - 25 ريال' : 
-                           'عادي (12-24 ساعة) - مجاني';
-        
-        const notificationData = {
-            orderNumber: order.orderNumber,
-            customerName: order.customerName,
-            customerPhone: order.customerPhone,
-            orderType: 'طلب قطع غيار',
-            carMake: order.carInfo.make,
-            carModel: order.carInfo.model,
-            carYear: order.carInfo.year,
-            carFullName: order.carInfo.fullName,
-            description: `${order.items[0].partName}\nالتوصيل: ${deliveryText}${req.file ? '\n📷 يحتوي على صورة' : ''}`,
-            createdAt: order.createdAt,
-            hasImage: !!req.file
-        };
-
-        // إرسال إشعار واتساب
-        try {
-            const sendWA = req.app?.locals?.sendWhatsApp;
-            const phone = String(order?.customer?.phone || order?.customerPhone || order?.phone || '').trim();
-            if (typeof sendWA === 'function' && phone) {
-                const msgText = notificationData.description
-                    ? `طلبك ${notificationData.orderNumber}\n${notificationData.description}`
-                    : `تم استلام طلبك رقم ${notificationData.orderNumber}.`;
-                await sendWA(phone, msgText);
-            } else {
-                console.warn('WA skip (create): no sender or phone');
-            }
-        } catch (whatsappError) {
-            console.error('خطأ في إرسال إشعار الواتساب:', whatsappError?.message || whatsappError);
-        }
-
-        // Return actual notification status
+        // إرسال الرد للعميل فوراً قبل الإشعارات
         res.status(201).json({
             message: 'تم استلام طلبك بنجاح',
             orderNumber: order.orderNumber,
@@ -352,10 +236,91 @@ router.post('/', (req, res, next) => {
                 customerName: order.customerName,
                 status: order.status,
                 createdAt: order.createdAt
-            },
-            emailNotify: emailNotify,
-            driverNotify: waToDriver,
-            customerNotify: waToCustomer
+            }
+        });
+
+        // إرسال الإشعارات في الخلفية بعد الرد على العميل
+        setImmediate(async () => {
+            // ===== Email notify (admin inbox) =====
+            try {
+                const sendEmail = req.app?.locals?.sendEmail;
+                const to = process.env.NOTIFY_EMAIL;
+                if (typeof sendEmail === 'function' && to) {
+                    const orderId = (order?._id || '').toString();
+                    const orderNo = order?.number || orderId.slice(-6);
+                    const subject = `طلب جديد #${orderNo}`;
+                    const parts = [
+                        `طلب جديد #${orderNo}`,
+                        `الاسم: ${order?.customerName || fullName || '-'}`,
+                        `الجوال: ${order?.customerPhone || phone || '-'}`,
+                        `المدينة: ${order?.shippingAddress?.city || city || '-'}`,
+                        `السيارة: ${order?.carInfo?.fullName || carNameCategory || '-'}`,
+                        `التوصيل: ${deliveryOption || '-'}`,
+                        `تفاصيل القطعة: ${order?.items?.[0]?.partName || partDetails || '-'}`
+                    ];
+                    const text = parts.join('\n');
+                    const link = process.env.APP_PUBLIC_URL ? `${process.env.APP_PUBLIC_URL}/orders/${orderId}` : '';
+                    const html = `<div style="font-family:system-ui,sans-serif;direction:rtl;text-align:right;">
+                        <h3 style="color:#667eea;">طلب جديد #${orderNo}</h3>
+                        <table style="width:100%;border-collapse:collapse;margin:20px 0;">
+                            <tr><td style="padding:8px;border-bottom:1px solid #eee;"><b>الاسم:</b></td><td style="padding:8px;border-bottom:1px solid #eee;">${order?.customerName || fullName || '-'}</td></tr>
+                            <tr><td style="padding:8px;border-bottom:1px solid #eee;"><b>الجوال:</b></td><td style="padding:8px;border-bottom:1px solid #eee;">${order?.customerPhone || phone || '-'}</td></tr>
+                            <tr><td style="padding:8px;border-bottom:1px solid #eee;"><b>المدينة:</b></td><td style="padding:8px;border-bottom:1px solid #eee;">${order?.shippingAddress?.city || city || '-'}</td></tr>
+                            <tr><td style="padding:8px;border-bottom:1px solid #eee;"><b>السيارة:</b></td><td style="padding:8px;border-bottom:1px solid #eee;">${order?.carInfo?.fullName || carNameCategory || '-'}</td></tr>
+                            <tr><td style="padding:8px;border-bottom:1px solid #eee;"><b>التوصيل:</b></td><td style="padding:8px;border-bottom:1px solid #eee;">${deliveryOption || '-'}</td></tr>
+                            <tr><td style="padding:8px;"><b>تفاصيل القطعة:</b></td><td style="padding:8px;">${order?.items?.[0]?.partName || partDetails || '-'}</td></tr>
+                        </table>
+                        ${link ? `<p style="margin-top:20px;"><a href="${link}" style="background:#667eea;color:white;padding:10px 20px;text-decoration:none;border-radius:5px;display:inline-block;">فتح الطلب</a></p>` : ''}
+                    </div>`;
+                    await sendEmail(to, subject, text, html);
+                    console.log('✅ Email notify sent to admin:', to);
+                }
+            } catch (e) {
+                console.error('❌ Email notify error:', e?.message);
+            }
+
+            // ===== WA: notify delivery and customer on order created =====
+            const sendWA = req.app?.locals?.sendWhatsApp;
+            
+            // Send to customer first (أولوية للعميل)
+            try {
+                const phone = String(order?.customerPhone || order?.customer?.phone || order?.phone || '');
+                if (typeof sendWA === 'function' && phone) {
+                    const orderId = (order?._id || '').toString();
+                    const orderNo = order?.orderNumber || order?.number || orderId.slice(-6);
+                    const deliveryText = deliveryOption === 'express' ? 'مستعجل (1-2 ساعة) - 50 ريال' : 
+                                       deliveryOption === 'standard' ? 'سريع (3-5 ساعات) - 25 ريال' : 
+                                       'عادي (12-24 ساعة) - مجاني';
+                    
+                    const msgText = `✅ تم استلام طلبك رقم ${orderNo}\n\n` +
+                                   `🚗 السيارة: ${order?.carInfo?.fullName || carNameCategory}\n` +
+                                   `🔧 القطعة: ${order?.items?.[0]?.partName || partDetails}\n` +
+                                   `🚚 التوصيل: ${deliveryText}\n` +
+                                   `${req.file ? '📷 تم استلام الصورة\n' : ''}` +
+                                   `\nسنتواصل معك قريباً لتأكيد التفاصيل`;
+                    
+                    await sendWA(phone, msgText);
+                    console.log('✅ WA sent to customer:', phone);
+                }
+            } catch (e) {
+                console.error('❌ WA customer error:', e?.message);
+            }
+            
+            // Send to delivery driver
+            try {
+                const drv = process.env.DELIVERY_WHATSAPP;
+                if (typeof sendWA === 'function' && drv) {
+                    const orderNo = order?.orderNumber || order?.number || (order?._id || '').toString().slice(-6);
+                    const text = `📦 طلب جديد #${orderNo}\n` +
+                                `👤 ${order?.customerName}\n` +
+                                `📱 ${order?.customerPhone}\n` +
+                                `🚗 ${order?.carInfo?.fullName || carNameCategory}`;
+                    await sendWA(drv, text);
+                    console.log('✅ WA sent to driver');
+                }
+            } catch (e) {
+                console.error('❌ WA driver error:', e?.message);
+            }
         });
     } catch (error) {
         console.error('❌ خطأ في إنشاء الطلب:', error);
@@ -867,9 +832,9 @@ router.post('/sell-car', upload.array('images', 10), async (req, res) => {
             sequentialNumber = null;
         }
 
-        // إنشاء رقم طلب فريد
+        // إنشاء رقم طلب فريد - استخدام الرقم المتسلسل فقط
         const orderNumber = sequentialNumber 
-            ? `ORD-${sequentialNumber}` 
+            ? sequentialNumber.toString() 
             : 'ORD-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4).toUpperCase();
 
         // إنشاء طلب بيع سيارة
@@ -949,20 +914,7 @@ router.post('/sell-car', upload.array('images', 10), async (req, res) => {
             createdAt: order.createdAt
         };
 
-        // إرسال إشعار واتساب
-        try {
-            const sendWA = req.app?.locals?.sendWhatsApp;
-            const phone = String(order?.customer?.phone || order?.customerPhone || order?.phone || '').trim();
-            if (typeof sendWA === 'function' && phone) {
-                const msgText = `تم استلام طلب بيع سيارتك رقم ${order.orderNumber}. سنراجع التفاصيل ونتواصل معك.`;
-                await sendWA(phone, msgText);
-            } else {
-                console.warn('WA skip (sell-car): no sender or phone');
-            }
-        } catch (whatsappError) {
-            console.error('خطأ في إرسال إشعار الواتساب:', whatsappError?.message || whatsappError);
-        }
-
+        // إرسال الرد للعميل فوراً
         res.status(201).json({
             message: 'تم استلام طلب بيع السيارة بنجاح',
             orderNumber: order.orderNumber,
@@ -971,6 +923,23 @@ router.post('/sell-car', upload.array('images', 10), async (req, res) => {
                 customerName: order.customerName,
                 status: order.status,
                 createdAt: order.createdAt
+            }
+        });
+
+        // إرسال إشعار واتساب في الخلفية
+        setImmediate(async () => {
+            try {
+                const sendWA = req.app?.locals?.sendWhatsApp;
+                const phone = String(order?.customer?.phone || order?.customerPhone || order?.phone || '').trim();
+                if (typeof sendWA === 'function' && phone) {
+                    const msgText = `✅ تم استلام طلب بيع سيارتك رقم ${order.orderNumber}\n\n` +
+                                   `🚗 ${order.carInfo.make} ${order.carInfo.model} ${order.carInfo.year}\n` +
+                                   `📱 سنراجع التفاصيل ونتواصل معك قريباً`;
+                    await sendWA(phone, msgText);
+                    console.log('✅ WA sent to customer for sell-car request');
+                }
+            } catch (whatsappError) {
+                console.error('❌ خطأ في إرسال إشعار الواتساب:', whatsappError?.message || whatsappError);
             }
         });
     } catch (error) {
